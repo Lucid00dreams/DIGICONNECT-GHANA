@@ -1,0 +1,359 @@
+{
+  "applications": [
+    {
+      "id": "app-101",
+      "fullName": "Emanuel Osei",
+      "email": "emanuel.osei@gmail.com",
+      "phone": "+233 24 555 1234",
+      "age": "22",
+      "location": "Accra",
+      "programOfInterest": "coding-technology",
+      "educationLevel": "undergraduate",
+      "digitalExperience": "basic",
+      "motivation": "I want to become a full-stack software engineer and build digital solutions for local logistics in Ghana.",
+      "status": "pending",
+      "date": "2025-03-01"
+    },
+    {
+      "id": "app-102",
+      "fullName": "Akosua Frimpong",
+      "email": "akosua.f@yahoo.com",
+      "phone": "+233 50 123 9876",
+      "age": "19",
+      "location": "Kumasi",
+      "programOfInterest": "digital-literacy",
+      "educationLevel": "high-school",
+      "digitalExperience": "beginner",
+      "motivation": "I just completed SHS and want to gain essential computer literacy skills before applying to tertiary education.",
+      "status": "accepted",
+      "date": "2025-02-28"
+    },
+    {
+      "id": "app-103",
+      "fullName": "Mohammed Salifu",
+      "email": "salifu.m@outlook.com",
+      "phone": "+233 27 888 4321",
+      "age": "25",
+      "location": "Tamale",
+      "programOfInterest": "career-employability",
+      "educationLevel": "undergraduate",
+      "digitalExperience": "intermediate",
+      "motivation": "Looking to build a competitive CV, optimize my LinkedIn profile, and break into remote freelance digital jobs.",
+      "status": "under_review",
+      "date": "2025-02-26"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "msg-1790951046857-48",
+      "name": "Security Audit Bot",
+      "email": "audit@test.security.org",
+      "phone": "",
+      "organization": "",
+      "subject": "Automated Health Verification",
+      "message": "Verifying security defense in depth compliance.",
+      "status": "unread",
+      "date": "2026-10-02"
+    },
+    {
+      "id": "msg-201",
+      "name": "Dr. Kwesi Appiah",
+      "email": "kappiah@ug.edu.gh",
+      "phone": "+233 20 444 9900",
+      "organization": "University of Ghana CS Dept",
+      "subject": "Partnership Inquiry: Student Mentorship & Hackathons",
+      "message": "We would like to explore institutional collaboration with DigiConnect Ghana for our upcoming undergraduate digital skills symposium.",
+      "status": "unread",
+      "date": "2025-03-01"
+    },
+    {
+      "id": "msg-202",
+      "name": "Abena Mensah",
+      "email": "abena.m@africatechhub.org",
+      "phone": "+233 24 999 1122",
+      "organization": "Africa Tech Hub",
+      "subject": "Sponsorship & Co-hosting Coding Bootcamps",
+      "message": "We have reviewed your curriculum and would love to sponsor 50 female participants for the Q3 cohort.",
+      "status": "read",
+      "date": "2025-02-27"
+    }
+  ],
+  "involvements": [
+    {
+      "id": "inv-301",
+      "type": "volunteer",
+      "fullName": "Grace Addo",
+      "email": "grace.addo@devmail.io",
+      "phone": "+233 54 876 5432",
+      "organization": "Fintech Labs Accra",
+      "category": "Technical Mentor (Python/React)",
+      "message": "I am a frontend developer with 4 years experience. I'd love to mentor 5 young people on weekends in web development.",
+      "status": "new",
+      "date": "2025-03-02"
+    },
+    {
+      "id": "inv-302",
+      "type": "partner",
+      "fullName": "Kofi Owusu",
+      "email": "kofi.o@telcogh.com",
+      "phone": "+233 26 112 3344",
+      "organization": "National Youth Authority",
+      "category": "Regional Community Center Access",
+      "message": "We want to partner to grant DigiConnect Ghana access to our youth resource centers in Kumasi, Takoradi, and Tamale.",
+      "status": "in_progress",
+      "date": "2025-02-25"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "gal-1",
+      "src": "/images/gallery/gallery-1.jpg",
+      "alt": "Students actively engaged in hands-on coding workshop",
+      "category": "Workshops",
+      "caption": "Hands-on web development bootcamp in Accra",
+      "dateAdded": "2025-02-15"
+    },
+    {
+      "id": "gal-2",
+      "src": "/images/gallery/gallery-2.jpg",
+      "alt": "Mentorship session with industry professionals",
+      "category": "Mentorship",
+      "caption": "1-on-1 career coaching with tech professionals",
+      "dateAdded": "2025-02-15"
+    },
+    {
+      "id": "gal-3",
+      "src": "/images/gallery/gallery-3.jpg",
+      "alt": "Community digital outreach in rural schools",
+      "category": "Outreach",
+      "caption": "Bringing digital literacy tools to peri-urban schools",
+      "dateAdded": "2025-02-15"
+    },
+    {
+      "id": "gal-4",
+      "src": "/images/gallery/gallery-4.jpg",
+      "alt": "Women in Tech cohort graduation",
+      "category": "Community",
+      "caption": "Celebrating our 2024 Girls-in-Tech graduating cohort",
+      "dateAdded": "2025-02-15"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-1",
+      "slug": "tech-for-youth-summit-2025",
+      "title": "Tech For Youth Annual Summit 2025",
+      "date": "2025-04-18",
+      "endDate": "2025-04-19",
+      "time": "09:00 AM - 04:30 PM GMT",
+      "location": "Accra Digital Centre, Circle, Accra",
+      "description": "Our flagship annual summit gathering 1,000+ young tech enthusiasts, changemakers, mentors, and industry pioneers for panels, hackathons, and demo days.",
+      "image": "/images/events/bootcamp.jpg",
+      "category": "conference",
+      "status": "upcoming",
+      "registrationUrl": "/events#register"
+    },
+    {
+      "id": "event-2",
+      "slug": "ai-prompt-engineering-masterclass",
+      "title": "AI & Modern Tools for Career Accelerators",
+      "date": "2025-05-10",
+      "time": "10:00 AM - 01:00 PM GMT",
+      "location": "Online / Virtual (Google Meet)",
+      "description": "Learn how to use modern generative AI tools ethically and productively to supercharge your career, research, and technical productivity.",
+      "image": "/images/events/workshop.jpg",
+      "category": "workshop",
+      "status": "upcoming",
+      "registrationUrl": "/events#register"
+    },
+    {
+      "id": "event-3",
+      "slug": "girls-in-tech-weekend-meetup",
+      "title": "Girls-in-Tech Community Meetup & Pitch Session",
+      "date": "2025-06-07",
+      "time": "02:00 PM - 05:00 PM GMT",
+      "location": "Impact Hub Accra, Osu",
+      "description": "A community space for female software engineers, designers, and students to network, present portfolio projects, and receive feedback.",
+      "image": "/images/events/meetup.jpg",
+      "category": "meetup",
+      "status": "upcoming",
+      "registrationUrl": "/events#register"
+    }
+  ],
+  "news": [
+    {
+      "id": "news-1",
+      "slug": "digiconnect-expands-to-tamale",
+      "title": "DigiConnect Ghana Expands Free Youth Digital Literacy to Northern Region",
+      "excerpt": "Over 500 young people in Tamale and surrounding districts will receive free hands-on computer training this quarter.",
+      "content": "DigiConnect Ghana is proud to announce the official launch of our Northern Regional digital empowerment hub in Tamale. This initiative marks a crucial milestone in our mission to bridge the digital divide across Ghana's underserved communities...",
+      "category": "Expansion",
+      "author": "DigiConnect Editorial",
+      "date": "2025-02-20",
+      "readTime": "4 min read",
+      "image": "/images/about/about.jpg"
+    },
+    {
+      "id": "news-2",
+      "slug": "partnership-tech-empowerment",
+      "title": "New Corporate Partnerships Unlocked to Provide 100 Laptops to High School Innovators",
+      "excerpt": "In partnership with leading tech companies, DigiConnect Ghana delivers brand-new laptops to top-performing students.",
+      "content": "Hardware access remains one of the largest obstacles to learning digital skills in Ghana. Today, we are thrilled to announce a new partnership securing 100 laptops for students in our upcoming coding cohort...",
+      "category": "Partnership",
+      "author": "DigiConnect Editorial",
+      "date": "2025-01-15",
+      "readTime": "3 min read",
+      "image": "/images/events/workshop.jpg"
+    }
+  ],
+  "programs": [
+    {
+      "slug": "digital-literacy",
+      "number": "01",
+      "title": "Digital Literacy & Everyday Tech",
+      "shortTitle": "Digital Literacy",
+      "description": "Foundational computer skills, internet safety, cloud software, and productivity tools designed for complete beginners and students.",
+      "accent": "blue",
+      "icon": "Monitor",
+      "image": "/images/programs/digital-literacy.jpg",
+      "audience": "Ages 14–25, complete beginners, high school leavers",
+      "duration": "6 Weeks (Weekend cohorts)",
+      "skills": [
+        "Computer Fundamentals",
+        "Google Workspace / Office 365",
+        "Internet Safety & Security",
+        "Digital Communication"
+      ],
+      "outcomes": [
+        "Certified Digital Literacy Certificate",
+        "Proficient in day-to-day office computing",
+        "Equipped for entry-level administrative roles"
+      ]
+    },
+    {
+      "slug": "coding-technology",
+      "number": "02",
+      "title": "Coding, Web & Software Development",
+      "shortTitle": "Coding & Tech",
+      "description": "Intensive, practical programming training in modern web technologies, HTML, CSS, JavaScript, React, and software engineering foundations.",
+      "accent": "green",
+      "icon": "Code",
+      "image": "/images/programs/coding-technology.jpg",
+      "audience": "Ages 16–30, students, aspiring software engineers",
+      "duration": "12 Weeks (Intensive Bootcamp)",
+      "skills": [
+        "Frontend Development (HTML/CSS/JS)",
+        "React & Modern Web",
+        "Git & GitHub Version Control",
+        "API Integration & Databases"
+      ],
+      "outcomes": [
+        "Portfolio of 3 production-grade web projects",
+        "GitHub active profile",
+        "Direct internship matching opportunities"
+      ]
+    },
+    {
+      "slug": "career-employability",
+      "number": "03",
+      "title": "Career Readiness & Remote Employability",
+      "shortTitle": "Career & Work",
+      "description": "Connecting digital skills to income: resume optimization, portfolio reviews, freelancing strategies, interview prep, and soft skills.",
+      "accent": "yellow",
+      "icon": "Briefcase",
+      "image": "/images/programs/career-employability.jpg",
+      "audience": "Tertiary students, recent graduates, freelance job-seekers",
+      "duration": "4 Weeks (Interactive workshops)",
+      "skills": [
+        "LinkedIn & Professional Branding",
+        "Freelance Platforms (Upwork/Fiverr)",
+        "Global Remote Work Etiquette",
+        "Technical Interview Prep"
+      ],
+      "outcomes": [
+        "Polished resume & portfolio review",
+        "Active freelancing profile with bid strategies",
+        "Direct access to DCG hiring partner network"
+      ]
+    },
+    {
+      "slug": "community-innovation",
+      "number": "04",
+      "title": "Community Innovation & Social Impact Hackathons",
+      "shortTitle": "Social Innovation",
+      "description": "Empowering youth to build technology solutions solving community problems in education, agriculture, sanitation, and health.",
+      "accent": "red",
+      "icon": "Sparkles",
+      "image": "/images/programs/community-innovation.jpg",
+      "audience": "Youth innovators, problem-solvers, community leaders",
+      "duration": "Quarterly Hackathons & Incubation",
+      "skills": [
+        "Human-Centered Design",
+        "Agile Prototyping",
+        "Pitching & Presentation",
+        "Impact Measurement"
+      ],
+      "outcomes": [
+        "Seed grant funding opportunities",
+        "Mentorship from experienced tech founders",
+        "Incubation space at partner tech hubs"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-1",
+      "slug": "complete-guide-to-digital-literacy-2025",
+      "title": "The Ultimate Guide to Digital Skills in Ghana (2025 Edition)",
+      "description": "A free downloadable handbook covering essential digital literacy competencies for students and job-seekers in Ghana.",
+      "category": "Digital Literacy",
+      "type": "guide",
+      "image": "/images/resources/digital-literacy-guide.jpg",
+      "date": "2025-01-10",
+      "readTime": "12 min read"
+    },
+    {
+      "id": "res-2",
+      "slug": "modern-cv-template-for-tech-careers",
+      "title": "Tech CV & LinkedIn Optimization Toolkit",
+      "description": "Download ATS-compliant resume templates and step-by-step guides crafted by Ghanaian tech recruiters.",
+      "category": "Career",
+      "type": "pdf",
+      "image": "/images/resources/cv-guide.jpg",
+      "date": "2025-01-20",
+      "readTime": "8 min read"
+    }
+  ],
+  "impactStats": [
+    {
+      "value": 5000,
+      "suffix": "+",
+      "label": "Youth Empowered",
+      "accent": "blue"
+    },
+    {
+      "value": 16,
+      "suffix": "",
+      "label": "Regions Reached",
+      "accent": "red"
+    },
+    {
+      "value": 78,
+      "suffix": "%",
+      "label": "Employment & Internship Rate",
+      "accent": "green"
+    },
+    {
+      "value": 65,
+      "suffix": "%",
+      "label": "Women in Tech Participation",
+      "accent": "yellow"
+    }
+  ],
+  "contactInfo": {
+    "email": "info@digiconnectghana.org",
+    "phone": "+233 24 000 0000 / +233 50 000 0000",
+    "location": "Accra, Ghana (Operating nationwide across 16 regions)",
+    "hours": "Monday – Friday: 8:30 AM – 5:00 PM GMT"
+  }
+}

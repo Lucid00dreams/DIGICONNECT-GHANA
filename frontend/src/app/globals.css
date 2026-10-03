@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-blue: #2196D3;
+  --color-brand-blue-light: #E3F2FD;
+  --color-brand-blue-dark: #1565A8;
+  --color-brand-red: #E02629;
+  --color-brand-red-light: #FFEBEE;
+  --color-brand-yellow: #FFD600;
+  --color-brand-yellow-light: #FFFDE7;
+  --color-brand-green: #006B3F;
+  --color-brand-green-light: #E8F5E9;
+  --color-brand-dark: #1E1E1E;
+}
+
+/* ─── Base ─────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  color: #1E1E1E;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Focus states & Accessibility ──────────────────── */
+
+:focus-visible {
+  outline: 2px solid #2196D3;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Accessible skip to main content */
+.skip-to-content:focus {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background-color: #2196D3;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  width: auto;
+  height: auto;
+  clip: auto;
+  clip-path: none;
+  overflow: visible;
+  white-space: normal;
+}
+
+/* ─── Selection ────────────────────────────────────── */
+
+::selection {
+  background: #2196D3;
+  color: white;
+}
+
+/* ─── Scroll reveal utility ────────────────────────── */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ─── Smooth image hover ───────────────────────────── */
+
+.img-hover {
+  overflow: hidden;
+}
+
+.img-hover img {
+  transition: transform 0.5s ease;
+}
+
+.img-hover:hover img {
+  transform: scale(1.04);
+}
+
+/* ─── Card elevation ───────────────────────────────── */
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Hamburger animation ──────────────────────────── */
+
+.hamburger-line {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* ─── Lightbox overlay ─────────────────────────────── */
+
+.lightbox-overlay {
+  animation: fadeIn 0.3s ease both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes counterGrow {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ─── Hide Next.js development badges & indicators ──── */
+[data-nextjs-toast],
+[data-nextjs-indicator],
+[data-nextjs-dev-tools],
+[data-next-badge],
+nextjs-portal,
+#next-dev-indicator {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
