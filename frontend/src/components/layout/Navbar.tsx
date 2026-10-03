@@ -158,11 +158,11 @@ export function Navbar() {
             className="h-9 w-9 lg:h-10 lg:w-10 object-contain"
             priority
           />
-          <div className="hidden sm:block">
-            <span className="text-[15px] font-bold leading-tight text-brand-dark block tracking-tight">
+          <div className="flex flex-col">
+            <span className="text-[14px] sm:text-[15px] font-bold leading-tight text-brand-dark block tracking-tight">
               DigiConnect
             </span>
-            <span className="text-[11px] font-medium text-neutral-500 block -mt-0.5">
+            <span className="text-[10px] sm:text-[11px] font-medium text-neutral-500 block -mt-0.5">
               Ghana
             </span>
           </div>
