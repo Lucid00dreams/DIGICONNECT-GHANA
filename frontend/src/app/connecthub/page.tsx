@@ -327,6 +327,18 @@ export default function ConnectHubPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
+  // Prevent background scrolling when mobile sidebar drawer is open
+  useEffect(() => {
+    if (isMobileNavOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileNavOpen]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -1297,7 +1309,7 @@ export default function ConnectHubPage() {
   const newInqCount = store.inquiries.filter((i) => i.status === "new").length;
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col lg:flex-row text-neutral-800 font-sans selection:bg-brand-blue selection:text-white">
+    <div className="min-h-screen bg-neutral-100 flex flex-col lg:flex-row text-neutral-800 font-sans selection:bg-brand-blue selection:text-white w-full max-w-full overflow-x-hidden">
 
       {/* ─── MOBILE TOP NAVBAR ──────────────────────────── */}
       <header className="lg:hidden sticky top-0 z-40 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between px-4 py-3 shrink-0">
@@ -1349,9 +1361,13 @@ export default function ConnectHubPage() {
       )}
 
       {/* ─── SIDEBAR ────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-neutral-950 text-white flex flex-col shrink-0 border-r border-neutral-800 relative overflow-hidden transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
-        isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-neutral-950 text-white flex flex-col shrink-0 border-r border-neutral-800 overflow-hidden transform transition-all duration-300 ease-in-out shadow-2xl lg:shadow-none lg:static lg:relative lg:translate-x-0 lg:z-auto ${
+          isMobileNavOpen
+            ? "translate-x-0 pointer-events-auto visible opacity-100"
+            : "-translate-x-full pointer-events-none invisible opacity-0 lg:visible lg:opacity-100 lg:pointer-events-auto"
+        }`}
+      >
         {/* Decorative Background Pattern Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
           {/* Subtle Ambient Tech Dot Grid */}
@@ -1409,7 +1425,7 @@ export default function ConnectHubPage() {
         </div>
 
         {/* Brand Header */}
-        <div className="relative z-10 p-6 border-b border-neutral-850 flex items-center justify-between">
+        <div className="relative z-10 p-5 lg:p-6 border-b border-neutral-850 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
               src="/logo.png"
@@ -1427,7 +1443,16 @@ export default function ConnectHubPage() {
               </span>
             </div>
           </div>
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" title="Online" />
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" title="Online" />
+            <button
+              onClick={() => setIsMobileNavOpen(false)}
+              className="lg:hidden p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors ml-1"
+              aria-label="Close navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation links */}
@@ -1753,9 +1778,9 @@ export default function ConnectHubPage() {
       </aside>
 
       {/* ─── MAIN CONTENT AREA ────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto p-6 lg:p-10 max-w-7xl mx-auto w-full">
+      <main className="flex-1 min-w-0 w-full overflow-x-hidden p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
         {/* TOP BAR */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-neutral-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-5 sm:pb-6 border-b border-neutral-200">
           <div>
             <div className="flex items-center gap-2 text-xs text-neutral-500 mb-1">
               <span>ConnectHub</span>
@@ -1772,7 +1797,7 @@ export default function ConnectHubPage() {
                 {activeTab === "settings" && "Organization profile"}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
               {activeTab === "overview" && "Operational Briefing"}
               {activeTab === "applications" && "Cohort Admissions and Intake"}
               {activeTab === "messages" && "Public Inquiries"}
@@ -1808,9 +1833,9 @@ export default function ConnectHubPage() {
 
         {/* ─── TAB 1: OVERVIEW ────────────────────────────── */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Operational Briefing Banner */}
-            <div className="rounded-3xl bg-neutral-900 text-white p-6 sm:p-8 border border-neutral-800 shadow-sm relative overflow-hidden">
+            <div className="rounded-3xl bg-neutral-900 text-white p-5 sm:p-8 border border-neutral-800 shadow-sm relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
               
               <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
@@ -1819,7 +1844,7 @@ export default function ConnectHubPage() {
                     <span className="w-2 h-2 rounded-full bg-brand-yellow animate-pulse" />
                     <span>Active intake cycle: Cohort 2026-B</span>
                   </div>
-                  <h2 className="text-2xl font-bold tracking-tight text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                     Youth Digital Skills & Software Foundations
                   </h2>
                   <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
@@ -1827,20 +1852,20 @@ export default function ConnectHubPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto">
                   <button
                     onClick={() => {
                       setAppFilter("pending");
                       setActiveTab("applications");
                     }}
-                    className="px-4 py-2.5 rounded-xl bg-brand-yellow text-neutral-950 hover:bg-yellow-400 font-bold text-xs flex items-center gap-2 shadow-xs transition-colors"
+                    className="px-4 py-2.5 rounded-xl bg-brand-yellow text-neutral-950 hover:bg-yellow-400 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
                   >
                     <Clock className="w-4 h-4 text-neutral-950" />
                     <span>Triage {pendingAppsCount} pending applicants</span>
                   </button>
                   <button
                     onClick={() => setShowAddAppModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center gap-2 border border-white/10 transition-colors"
+                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center justify-center gap-2 border border-white/10 transition-colors"
                   >
                     <UserPlus className="w-4 h-4 text-neutral-300" />
                     <span>Register walk-in candidate</span>
@@ -1850,7 +1875,7 @@ export default function ConnectHubPage() {
             </div>
 
             {/* Scannable Operational Metrics Bar */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div
                 onClick={() => {
                   setAppFilter("all");

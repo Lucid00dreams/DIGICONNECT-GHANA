@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowUp } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +30,7 @@ export function BackToTop() {
     });
   };
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith("/connecthub")) return null;
 
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
