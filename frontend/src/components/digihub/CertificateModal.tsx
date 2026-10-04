@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Award, CheckCircle2, Printer, Download, Sparkles, Shield, Share2 } from "lucide-react";
+import { X, Award, CheckCircle2, Printer } from "lucide-react";
 import { LearnerProgress } from "@/lib/lmsStore";
 
 interface CertificateModalProps {
@@ -22,7 +22,7 @@ export function CertificateModal({
 
   if (!isOpen) return null;
 
-  const certificateId = `DCG-CERT-${Math.abs(progress.xp * 73 + 1042).toString(16).toUpperCase()}`;
+  const certificateId = `DCG-CERT-${Math.abs((progress.xp || 100) * 73 + 1042).toString(16).toUpperCase()}`;
   const issueDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -41,12 +41,12 @@ export function CertificateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden p-6 md:p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-3xl bg-white border border-neutral-200 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+          className="absolute top-5 right-5 p-2 text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition"
           aria-label="Close certificate"
         >
           <X className="w-5 h-5" />
@@ -55,35 +55,28 @@ export function CertificateModal({
         {/* Certificate Container (print-friendly) */}
         <div
           id="digihub-certificate"
-          className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 p-8 md:p-12 rounded-2xl border-4 border-double border-amber-500/40 text-center shadow-inner overflow-hidden"
+          className="relative bg-[#FCFAF7] p-8 sm:p-12 rounded-2xl border-4 border-double border-neutral-300 text-center shadow-inner overflow-hidden"
         >
-          {/* Subtle Background Seal */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-            <Award className="w-96 h-96 text-amber-400" />
-          </div>
-
-          {/* Top Crest */}
+          {/* Institutional Crest */}
           <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 p-0.5 shadow-lg shadow-amber-500/20 mb-3">
-              <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center">
-                <Award className="w-8 h-8 text-amber-400" />
-              </div>
+            <div className="w-14 h-14 rounded-full bg-brand-blue-light text-brand-blue flex items-center justify-center mb-3 border border-brand-blue/30 shadow-2xs">
+              <Award className="w-7 h-7" />
             </div>
-            <span className="text-xs uppercase tracking-[0.3em] font-bold text-amber-400/90">
-              Digiconnect Ghana • DIGIHub Academy
+            <span className="text-xs uppercase tracking-widest font-semibold text-neutral-500">
+              DigiConnect Ghana • DIGIHub
             </span>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white mt-1">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-neutral-900 mt-1">
               Certificate of Achievement
             </h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-md">
-              This credential certifies the successful mastery of self-directed technical curriculum and applied hands-on laboratories.
+            <p className="text-xs text-neutral-500 mt-1 max-w-md">
+              This credential certifies the successful completion of practical technical curriculum and hands-on laboratory exercises.
             </p>
           </div>
 
           {/* Student Name */}
-          <div className="relative z-10 my-8 py-4 border-y border-amber-500/20 max-w-lg mx-auto">
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-mono">
-              Awarded Proudly To
+          <div className="relative z-10 my-8 py-5 border-y border-neutral-200 max-w-lg mx-auto">
+            <p className="text-xs text-neutral-400 uppercase tracking-widest font-medium">
+              Conferred Upon
             </p>
             {isEditing ? (
               <div className="flex items-center justify-center gap-2 mt-2">
@@ -91,12 +84,12 @@ export function CertificateModal({
                   type="text"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  className="text-xl md:text-2xl font-serif font-bold text-center bg-slate-800 border border-amber-500/50 rounded-lg px-3 py-1 text-amber-200 focus:outline-none"
+                  className="text-xl sm:text-2xl font-serif font-bold text-center bg-white border border-neutral-300 rounded-xl px-3 py-1 text-neutral-900 focus:outline-none focus:border-brand-blue"
                   autoFocus
                 />
                 <button
                   onClick={handleSaveName}
-                  className="px-3 py-1 bg-amber-500 text-slate-950 font-bold text-xs rounded-lg hover:bg-amber-400"
+                  className="px-3 py-1 bg-brand-blue text-white font-semibold text-xs rounded-lg hover:bg-brand-blue-dark"
                 >
                   Save
                 </button>
@@ -105,55 +98,55 @@ export function CertificateModal({
               <h2
                 onClick={() => setIsEditing(true)}
                 title="Click to edit name"
-                className="text-2xl md:text-4xl font-serif font-bold text-amber-200 mt-2 cursor-pointer hover:underline decoration-amber-400/40 decoration-dashed transition"
+                className="text-2xl sm:text-3xl font-serif font-bold text-neutral-900 mt-2 cursor-pointer hover:underline decoration-neutral-300 decoration-dashed transition"
               >
                 {studentName}
               </h2>
             )}
-            <p className="text-xs text-slate-300 mt-3">
-              for completing the <span className="font-semibold text-blue-400">Foundations of Modern Web Coding</span> &{" "}
-              <span className="font-semibold text-emerald-400">Applied Cybersecurity Defense</span> tracks.
+            <p className="text-xs text-neutral-600 mt-3 leading-relaxed">
+              for completing the <span className="font-semibold text-neutral-900">Foundations of Web Coding</span> and{" "}
+              <span className="font-semibold text-neutral-900">Applied Cybersecurity Defense</span> tracks.
             </p>
           </div>
 
           {/* Signatures & Credentials Grid */}
-          <div className="relative z-10 grid grid-cols-3 gap-4 pt-4 text-xs border-t border-slate-800/80">
+          <div className="relative z-10 grid grid-cols-3 gap-4 pt-4 text-xs border-t border-neutral-200">
             <div className="text-left">
-              <span className="text-slate-500 block uppercase text-[10px] tracking-wider">Date Issued</span>
-              <span className="font-medium text-slate-300">{issueDate}</span>
+              <span className="text-neutral-400 block text-[10px] uppercase tracking-wider">Date Conferred</span>
+              <span className="font-medium text-neutral-700">{issueDate}</span>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+              <div className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Verified Credential
+                <span>Verified Credential</span>
               </div>
-              <span className="text-[10px] text-slate-500 block font-mono">{certificateId}</span>
+              <span className="text-[10px] text-neutral-400 block font-mono mt-0.5">{certificateId}</span>
             </div>
             <div className="text-right">
-              <span className="text-slate-500 block uppercase text-[10px] tracking-wider">Director of Education</span>
-              <span className="font-serif italic text-amber-300/90 text-sm">Digiconnect Ghana</span>
+              <span className="text-neutral-400 block text-[10px] uppercase tracking-wider">Academic Lead</span>
+              <span className="font-serif italic text-neutral-800 text-sm">DigiConnect Ghana</span>
             </div>
           </div>
         </div>
 
         {/* Modal Controls */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <span className="text-slate-400">
-            Tip: Click on the name in the certificate to customize it before printing.
+          <span className="text-neutral-500">
+            Click the student name to personalize before printing.
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium transition shadow-2xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              Print / Save as PDF
+              <span>Print or Save PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold transition shadow-2xs"
             >
-              Close
+              Done
             </button>
           </div>
         </div>

@@ -3395,8 +3395,8 @@ export default function ConnectHubPage() {
                           </div>
                         </div>
 
-                        <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
-                          +{l.xpAward} XP
+                        <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2.5 py-0.5 rounded-md">
+                          {l.level} Level
                         </span>
                       </div>
 

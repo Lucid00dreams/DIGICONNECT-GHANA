@@ -11,10 +11,9 @@ import {
   HelpCircle,
   Eye,
   Lock,
-  Unlock,
   RefreshCw,
   Search,
-  Sparkles,
+  Shield,
 } from "lucide-react";
 import { CyberLabConfig } from "@/lib/lmsStore";
 
@@ -28,349 +27,395 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
   const [discoveredFlags, setDiscoveredFlags] = useState<number[]>([]);
 
   // Password Auditor state
-  const [testPassword, setTestPassword] = useState("kumasi2026");
-  const [showPassword, setShowPassword] = useState(true);
+  const [testPassword, setTestPassword] = useState("Ghana@2026Secure!");
+  const [showPassword, setShowPassword] = useState(false);
 
   // SQLi Defender state
-  const [userInput, setUserInput] = useState("admin' OR '1'='1");
-  const [defenseMode, setDefenseMode] = useState<"vulnerable" | "parameterized">("vulnerable");
+  const [sqliInput, setSqliInput] = useState("' OR '1'='1");
+  const [queryMode, setQueryMode] = useState<"vulnerable" | "parameterized">("vulnerable");
 
-  // Toggle discovered red flag
-  const toggleFlag = (idx: number) => {
-    if (!discoveredFlags.includes(idx)) {
-      const next = [...discoveredFlags, idx];
-      setDiscoveredFlags(next);
-      if (next.length === (config.targetData?.redFlags?.length || 4) && onLabCompleted) {
+  // Hint toggle
+  const [showHint, setShowHint] = useState(false);
+
+  // Phishing flags handler
+  const handleToggleFlag = (index: number) => {
+    if (!discoveredFlags.includes(index)) {
+      const updated = [...discoveredFlags, index];
+      setDiscoveredFlags(updated);
+      if (updated.length >= 3 && onLabCompleted) {
         onLabCompleted();
       }
     }
   };
 
-  // Calculate password strength & entropy
-  const calcPasswordStats = (pwd: string) => {
-    let pool = 0;
-    if (/[a-z]/.test(pwd)) pool += 26;
-    if (/[A-Z]/.test(pwd)) pool += 26;
-    if (/[0-9]/.test(pwd)) pool += 10;
-    if (/[^a-zA-Z0-9]/.test(pwd)) pool += 32;
+  // Password Entropy Calculator
+  const calculateEntropy = (pwd: string) => {
+    let poolSize = 0;
+    if (/[a-z]/.test(pwd)) poolSize += 26;
+    if (/[A-Z]/.test(pwd)) poolSize += 26;
+    if (/[0-9]/.test(pwd)) poolSize += 10;
+    if (/[^a-zA-Z0-9]/.test(pwd)) poolSize += 32;
 
-    const length = pwd.length;
-    const entropy = length > 0 && pool > 0 ? Math.round(length * Math.log2(pool)) : 0;
-
-    let strength: "Very Weak" | "Weak" | "Moderate" | "Strong" | "Military Grade" = "Very Weak";
-    let crackTime = "Instant (< 1 millisecond)";
-    let barColor = "bg-red-500";
-
-    if (entropy < 28) {
-      strength = "Very Weak";
-      crackTime = "A few milliseconds";
-      barColor = "bg-red-500";
-    } else if (entropy < 45) {
-      strength = "Weak";
-      crackTime = "A few minutes to hours";
-      barColor = "bg-amber-500";
-    } else if (entropy < 65) {
-      strength = "Moderate";
-      crackTime = "Several weeks to months";
-      barColor = "bg-yellow-500";
-    } else if (entropy < 85) {
-      strength = "Strong";
-      crackTime = "Centuries (100+ years)";
-      barColor = "bg-emerald-500";
-    } else {
-      strength = "Military Grade";
-      crackTime = "Billions of years";
-      barColor = "bg-emerald-400";
+    if (poolSize === 0 || pwd.length === 0) {
+      return { bits: 0, crackTime: "Instant", strength: "Very Weak", percent: 5 };
     }
 
-    return { entropy, strength, crackTime, barColor, pool, length };
+    const bits = Math.round(pwd.length * (Math.log2(poolSize) || 0));
+    let crackTime = "Instant";
+    let strength = "Very Weak";
+    let percent = 10;
+
+    if (bits >= 80) {
+      crackTime = "Over 1,000,000 centuries";
+      strength = "Excellent (Resistant to Brute Force)";
+      percent = 100;
+    } else if (bits >= 60) {
+      crackTime = "~300 years";
+      strength = "Strong";
+      percent = 80;
+    } else if (bits >= 40) {
+      crackTime = "~3 weeks";
+      strength = "Moderate (Vulnerable to GPU cluster)";
+      percent = 50;
+    } else if (bits >= 25) {
+      crackTime = "~2 minutes";
+      strength = "Weak";
+      percent = 25;
+    }
+
+    return { bits, crackTime, strength, percent };
   };
 
-  const pwdStats = calcPasswordStats(testPassword);
+  const entropy = calculateEntropy(testPassword);
 
   return (
-    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-5 lg:p-6 text-white shadow-xl flex flex-col justify-between">
-      {/* Lab Header */}
-      <div>
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-800 mb-4">
-          <div className="flex items-center gap-2">
-            {config.type === "phishing-detector" && <ShieldAlert className="w-5 h-5 text-rose-500" />}
-            {config.type === "password-auditor" && <KeyRound className="w-5 h-5 text-amber-400" />}
-            {config.type === "sqli-defender" && <Database className="w-5 h-5 text-brand-blue" />}
-            <h3 className="font-extrabold text-sm sm:text-base text-white">{config.title}</h3>
+    <div className="bg-white border border-neutral-200 rounded-3xl shadow-xs overflow-hidden flex flex-col flex-1">
+      {/* Top Header */}
+      <div className="bg-neutral-50 border-b border-neutral-200 px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue flex items-center justify-center">
+            {config.type === "phishing-detector" && <ShieldAlert className="w-4 h-4" />}
+            {config.type === "password-auditor" && <KeyRound className="w-4 h-4" />}
+            {config.type === "sqli-defender" && <Database className="w-4 h-4" />}
           </div>
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-            Interactive Security Lab
-          </span>
+          <div>
+            <h3 className="text-sm font-bold text-neutral-900">{config.title}</h3>
+            <span className="text-[11px] text-neutral-500">{config.scenario}</span>
+          </div>
         </div>
 
-        <p className="text-xs text-neutral-400 mb-4 leading-relaxed">{config.scenario}</p>
+        <button
+          onClick={() => setShowHint(!showHint)}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+            showHint
+              ? "bg-amber-50 text-amber-800 border-amber-300"
+              : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+          }`}
+        >
+          <HelpCircle className="w-3.5 h-3.5" />
+          <span>{showHint ? "Hide Guidance" : "Show Guidance"}</span>
+        </button>
+      </div>
 
-        {/* ─── LAB TYPE 1: PHISHING DETECTOR ─── */}
-        {config.type === "phishing-detector" && config.targetData && (
-          <div className="space-y-4">
-            {/* Suspicious Email Card */}
-            <div className="bg-neutral-950 rounded-xl border border-neutral-800 p-4 font-mono text-xs space-y-2.5">
-              <div className="flex items-start justify-between border-b border-neutral-800 pb-2">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">From:</span>
-                  <span className="text-rose-400 font-bold">{config.targetData.sender}</span>
+      {/* Guidance Alert */}
+      {showHint && (
+        <div className="bg-amber-50/70 border-b border-amber-200/80 p-4 text-xs text-amber-900 flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-semibold text-amber-950">Security Rule: </span>
+            {config.hint}
+          </div>
+        </div>
+      )}
+
+      {/* Main Lab Workspace */}
+      <div className="p-5 sm:p-7 flex-1 space-y-6">
+        {/* LAB 1: PHISHING DETECTOR */}
+        {config.type === "phishing-detector" && (
+          <div className="space-y-6">
+            <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-700">
+              <span className="font-semibold text-neutral-900">Task: </span>
+              {config.prompt}
+            </div>
+
+            {/* Email UI Simulation */}
+            <div className="bg-white rounded-2xl border border-neutral-300 shadow-2xs overflow-hidden">
+              {/* Fake Email Header */}
+              <div className="bg-neutral-100/90 border-b border-neutral-200 p-4 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-500 font-medium">From:</span>
+                  <button
+                    onClick={() => handleToggleFlag(0)}
+                    className={`text-left font-mono px-2 py-1 rounded-md transition ${
+                      discoveredFlags.includes(0)
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold"
+                        : "bg-neutral-200/70 text-neutral-800 hover:bg-neutral-200"
+                    }`}
+                    title="Inspect sender email"
+                  >
+                    Gh-Revenue-Authority &lt;security-alert@gh-gov-taxes-portal.net&gt;
+                    {discoveredFlags.includes(0) && " ✓ Spoofed Domain Identified"}
+                  </button>
                 </div>
-                <button
-                  onClick={() => toggleFlag(0)}
-                  className={`text-[10px] px-2 py-0.5 rounded font-sans transition-colors ${
-                    discoveredFlags.includes(0)
-                      ? "bg-rose-500 text-white font-bold"
-                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
-                >
-                  {discoveredFlags.includes(0) ? "Flagged: Fake Domain" : "Inspect Sender Domain"}
-                </button>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-500 font-medium">To:</span>
+                  <span className="text-neutral-700 font-mono">student.account@digiconnect.org</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-500 font-medium">Subject:</span>
+                  <button
+                    onClick={() => handleToggleFlag(1)}
+                    className={`font-semibold px-2 py-0.5 rounded-md transition ${
+                      discoveredFlags.includes(1)
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "text-neutral-900 hover:bg-neutral-200/60"
+                    }`}
+                  >
+                    URGENT: Outstanding Tax Clearance Required Within 2 Hours!
+                    {discoveredFlags.includes(1) && " ✓ Urgency Cue"}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-start justify-between border-b border-neutral-800 pb-2">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Subject:</span>
-                  <span className="text-amber-300 font-bold">{config.targetData.subject}</span>
-                </div>
-                <button
-                  onClick={() => toggleFlag(1)}
-                  className={`text-[10px] px-2 py-0.5 rounded font-sans transition-colors ${
-                    discoveredFlags.includes(1)
-                      ? "bg-rose-500 text-white font-bold"
-                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
-                >
-                  {discoveredFlags.includes(1) ? "Flagged: Panic Urgency" : "Analyze Urgency"}
-                </button>
-              </div>
+              {/* Email Body */}
+              <div className="p-6 space-y-4 text-xs sm:text-sm text-neutral-800 leading-relaxed">
+                <p>Dear Valued Citizen,</p>
+                <p>
+                  Our automated audit system identified an unpaid registration penalty of <strong>GH₵ 420.00</strong> on your national profile.
+                  Failure to authenticate your identity immediately will result in police warrant execution and bank account suspension.
+                </p>
 
-              <div className="text-neutral-300 leading-relaxed font-sans text-xs pt-1">
-                {config.targetData.body}
-              </div>
-
-              {/* Malicious CTA Link */}
-              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Hidden Link Destination:</span>
-                  <code className="text-rose-400 text-[11px] underline">{config.targetData.ctaUrl}</code>
+                <div className="py-2 text-center">
+                  <button
+                    onClick={() => handleToggleFlag(2)}
+                    className={`inline-block px-5 py-2.5 rounded-xl font-semibold text-xs transition border ${
+                      discoveredFlags.includes(2)
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-400"
+                        : "bg-neutral-900 text-white hover:bg-neutral-800 border-neutral-900"
+                    }`}
+                  >
+                    {discoveredFlags.includes(2)
+                      ? "✓ Identified Raw IP Destination (http://185.220.101.5/verify)"
+                      : "Click Here to Clear Fine & Authenticate ID"}
+                  </button>
+                  <div className="text-[11px] text-neutral-400 font-mono mt-1.5">
+                    Target URL: http://185.220.101.5/verify-account?token=9281
+                  </div>
                 </div>
-                <button
-                  onClick={() => toggleFlag(2)}
-                  className={`text-[10px] px-2 py-0.5 rounded font-sans transition-colors ${
-                    discoveredFlags.includes(2)
-                      ? "bg-rose-500 text-white font-bold"
-                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
-                >
-                  {discoveredFlags.includes(2) ? "Flagged: Raw IP & HTTP" : "Examine Link Target"}
-                </button>
+
+                <p className="text-xs text-neutral-500 pt-2 border-t border-neutral-100">
+                  Compliance Division, Tax Enforcement Services.
+                </p>
               </div>
             </div>
 
-            {/* Red Flags Discovered Checklist */}
-            <div className="p-3 bg-neutral-950/60 rounded-xl border border-neutral-800">
-              <div className="flex items-center justify-between text-xs font-bold mb-2">
-                <span>Threat Indicators Discovered:</span>
-                <span className="text-rose-400">
-                  {discoveredFlags.length} of {config.targetData.redFlags.length}
+            {/* Flags Checklist */}
+            <div className="bg-neutral-50 rounded-2xl border border-neutral-200 p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-neutral-800">
+                  Deceptive Indicators Discovered ({discoveredFlags.length} of 3)
                 </span>
+                <span className="text-neutral-500">Click suspicious elements in the email to analyze</span>
               </div>
-              <div className="space-y-1.5">
-                {config.targetData.redFlags.map((flag: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className={`flex items-center gap-2 text-xs p-1.5 rounded-lg transition-colors ${
-                      discoveredFlags.includes(idx)
-                        ? "bg-rose-500/10 text-rose-300 border border-rose-500/20"
-                        : "text-neutral-500"
-                    }`}
-                  >
-                    {discoveredFlags.includes(idx) ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                    ) : (
-                      <div className="w-3.5 h-3.5 rounded-full border border-neutral-700 shrink-0" />
-                    )}
-                    <span>{flag}</span>
-                  </div>
-                ))}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-2 ${
+                    discoveredFlags.includes(0)
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : "bg-white text-neutral-500 border-neutral-200"
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Lookalike sender domain (.net vs .gov.gh)</span>
+                </div>
+
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-2 ${
+                    discoveredFlags.includes(1)
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : "bg-white text-neutral-500 border-neutral-200"
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Artificial urgency & panic pressure</span>
+                </div>
+
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-2 ${
+                    discoveredFlags.includes(2)
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : "bg-white text-neutral-500 border-neutral-200"
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Direct IP address destination</span>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ─── LAB TYPE 2: PASSWORD AUDITOR ─── */}
+        {/* LAB 2: PASSWORD ENTROPY AUDITOR */}
         {config.type === "password-auditor" && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-neutral-300 mb-1.5">
-                Test a Password or Passphrase:
+          <div className="space-y-6">
+            <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-700">
+              <span className="font-semibold text-neutral-900">Task: </span>
+              {config.prompt}
+            </div>
+
+            {/* Input area */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-neutral-700">
+                Test Password String
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={testPassword}
-                  onChange={(e) => setTestPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-sm font-mono text-white focus:border-brand-yellow focus:outline-none pr-10"
+                  onChange={(e) => {
+                    setTestPassword(e.target.value);
+                    if (e.target.value.length > 12 && onLabCompleted) {
+                      onLabCompleted();
+                    }
+                  }}
+                  className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm text-neutral-900 font-mono focus:outline-none focus:border-brand-blue shadow-2xs"
+                  placeholder="Type any password to test entropy..."
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-3 text-neutral-400 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-neutral-400 hover:text-neutral-700 text-xs"
                 >
-                  <Eye className="w-4 h-4" />
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
 
-            {/* Quick Demo Templates */}
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="text-neutral-500">Quick test:</span>
-              <button
-                type="button"
-                onClick={() => setTestPassword("123456")}
-                className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-              >
-                123456
-              </button>
-              <button
-                type="button"
-                onClick={() => setTestPassword("accra2025")}
-                className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-              >
-                accra2025
-              </button>
-              <button
-                type="button"
-                onClick={() => setTestPassword("P@ssw0rd!#")}
-                className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-              >
-                P@ssw0rd!#
-              </button>
-              <button
-                type="button"
-                onClick={() => setTestPassword("kumasi-solar-coffee-beacon")}
-                className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-              >
-                4-Word Passphrase
-              </button>
-            </div>
-
-            {/* Strength Analysis Meter */}
-            <div className="p-4 bg-neutral-950 rounded-xl border border-neutral-800 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-neutral-400">Mathematical Entropy:</span>
-                <span className="font-mono font-bold text-white">{pwdStats.entropy} bits</span>
-              </div>
-
-              {/* Progress bar */}
-              <div className="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
-                <div
-                  className={`h-full ${pwdStats.barColor} transition-all duration-300`}
-                  style={{ width: `${Math.min(100, (pwdStats.entropy / 90) * 100)}%` }}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-neutral-800">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Strength Rating:</span>
-                  <span className="font-bold text-white">{pwdStats.strength}</span>
+            {/* Entropy Metrics */}
+            <div className="bg-neutral-50 rounded-2xl border border-neutral-200 p-5 space-y-4">
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="font-semibold text-neutral-800">Entropy Strength: {entropy.strength}</span>
+                  <span className="font-mono text-neutral-600 font-semibold">{entropy.bits} bits</span>
                 </div>
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Estimated Crack Time (GPU Cluster):</span>
-                  <span className="font-bold text-amber-300">{pwdStats.crackTime}</span>
+                <div className="w-full h-2.5 bg-neutral-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      entropy.percent >= 80
+                        ? "bg-emerald-600"
+                        : entropy.percent >= 50
+                        ? "bg-brand-blue"
+                        : "bg-amber-500"
+                    }`}
+                    style={{ width: `${entropy.percent}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
+                <div className="p-3 bg-white rounded-xl border border-neutral-200">
+                  <span className="text-neutral-500 block text-[11px]">Character Length</span>
+                  <span className="font-bold text-neutral-900 text-sm mt-0.5 block">{testPassword.length} characters</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-neutral-200">
+                  <span className="text-neutral-500 block text-[11px]">Estimated Brute-Force Time</span>
+                  <span className="font-bold text-neutral-900 text-sm mt-0.5 block">{entropy.crackTime}</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ─── LAB TYPE 3: SQL INJECTION DEFENDER ─── */}
+        {/* LAB 3: SQL INJECTION DEFENDER */}
         {config.type === "sqli-defender" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-neutral-300">Simulated Login Input:</label>
-              <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800 text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => setDefenseMode("vulnerable")}
-                  className={`px-2 py-0.5 rounded font-bold transition-colors ${
-                    defenseMode === "vulnerable"
-                      ? "bg-rose-600 text-white"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Vulnerable SQL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDefenseMode("parameterized")}
-                  className={`px-2 py-0.5 rounded font-bold transition-colors ${
-                    defenseMode === "parameterized"
-                      ? "bg-emerald-600 text-white"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Parameterized Defense
-                </button>
-              </div>
+          <div className="space-y-6">
+            <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-700">
+              <span className="font-semibold text-neutral-900">Task: </span>
+              {config.prompt}
             </div>
 
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-brand-blue"
-            />
+            {/* Mode Toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setQueryMode("vulnerable")}
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition ${
+                  queryMode === "vulnerable"
+                    ? "bg-rose-50 text-rose-800 border-rose-300"
+                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+                }`}
+              >
+                Vulnerable String Concatenation
+              </button>
+              <button
+                onClick={() => {
+                  setQueryMode("parameterized");
+                  if (onLabCompleted) onLabCompleted();
+                }}
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition ${
+                  queryMode === "parameterized"
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+                }`}
+              >
+                Parameterized Query (Prepared Statement)
+              </button>
+            </div>
 
-            {/* Generated SQL Query */}
-            <div className="p-3 bg-neutral-950 rounded-xl border border-neutral-800 font-mono text-xs">
-              <span className="text-[10px] text-neutral-500 block mb-1">Generated Database Query:</span>
-              {defenseMode === "vulnerable" ? (
-                <code className="text-rose-400 break-all">
-                  SELECT * FROM users WHERE email = &apos;<span className="bg-rose-500/20 px-1 rounded text-white">{userInput}</span>&apos;;
-                </code>
+            {/* Input Simulation */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-neutral-700">
+                User Input Field (Username)
+              </label>
+              <input
+                type="text"
+                value={sqliInput}
+                onChange={(e) => setSqliInput(e.target.value)}
+                className="w-full bg-white border border-neutral-300 rounded-xl px-4 py-2.5 text-xs text-neutral-900 font-mono focus:outline-none focus:border-brand-blue"
+              />
+            </div>
+
+            {/* Query Viewer */}
+            <div className="bg-neutral-900 text-neutral-100 rounded-2xl p-4 font-mono text-xs space-y-2">
+              <div className="text-[11px] text-neutral-400">Database Engine Query Interpretation:</div>
+              {queryMode === "vulnerable" ? (
+                <div className="text-rose-300 break-all leading-relaxed">
+                  SELECT * FROM users WHERE username = &apos;<span className="bg-rose-900/60 px-1 py-0.5 rounded text-white font-bold">{sqliInput}</span>&apos; AND status = &apos;active&apos;;
+                </div>
               ) : (
-                <code className="text-emerald-400 break-all">
-                  SELECT * FROM users WHERE email = $1;
-                  <br />
-                  <span className="text-neutral-400 text-[11px]">// Parameter 1 is treated strictly as literal data: &quot;{userInput}&quot;</span>
-                </code>
+                <div className="text-emerald-300 break-all leading-relaxed">
+                  SELECT * FROM users WHERE username = <span className="bg-emerald-900/60 px-1 py-0.5 rounded text-white font-bold">$1</span> AND status = &apos;active&apos;;
+                  <div className="text-[11px] text-neutral-400 mt-2">
+                    Bound Parameter $1: &ldquo;{sqliInput}&rdquo; (treated as literal text, never executable SQL)
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Result Outcome */}
-            <div className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 ${
-              defenseMode === "vulnerable"
-                ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
-                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-            }`}>
-              {defenseMode === "vulnerable" ? (
-                <>
-                  <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
-                  <div>
-                    <strong>VULNERABILITY EXPLOITED!</strong> The string broke outside the quotes. &apos;1&apos;=&apos;1&apos; is always true, bypassing authentication and dumping user accounts.
-                  </div>
-                </>
+            {/* Query Result Status */}
+            <div
+              className={`p-4 rounded-2xl border text-xs leading-relaxed ${
+                queryMode === "vulnerable"
+                  ? "bg-rose-50 border-rose-200 text-rose-900"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-900"
+              }`}
+            >
+              {queryMode === "vulnerable" ? (
+                <div>
+                  <span className="font-bold block mb-1">Security Vulnerability Active:</span>
+                  The injected tautology <code>&apos; OR &apos;1&apos;=&apos;1</code> evaluates to TRUE for every single record, dumping the entire database credentials table to an unauthenticated attacker.
+                </div>
               ) : (
-                <>
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <strong>DEFENSE SUCCESSFUL!</strong> Parameterized query safely treated the input as a single literal string. Injection was neutralized.
-                  </div>
-                </>
+                <div>
+                  <span className="font-bold block mb-1">Defense Confirmed:</span>
+                  The prepared statement enforces strict separation between SQL logic and user data. The database safely searches for a user whose literal name is <code>&apos; OR &apos;1&apos;=&apos;1</code> and returns 0 records.
+                </div>
               )}
             </div>
           </div>
         )}
-      </div>
-
-      {/* Footer Hint */}
-      <div className="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-[11px] text-neutral-400">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-brand-yellow" />
-          <span>{config.hint}</span>
-        </div>
       </div>
     </div>
   );

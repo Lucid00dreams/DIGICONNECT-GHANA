@@ -8,14 +8,10 @@ import {
   BookOpen,
   Code2,
   Shield,
-  Zap,
   CheckCircle2,
   Clock,
-  Sparkles,
   ChevronRight,
-  Award,
-  Video,
-  ExternalLink,
+  GraduationCap,
 } from "lucide-react";
 import {
   getLessonById,
@@ -36,7 +32,7 @@ export default function DIGIHubLessonPage() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [activePaneTab, setActivePaneTab] = useState<"content" | "quiz">("content");
-  const [earnedXpToast, setEarnedXpToast] = useState(false);
+  const [completionToast, setCompletionToast] = useState(false);
 
   useEffect(() => {
     if (!lessonId) return;
@@ -50,19 +46,19 @@ export default function DIGIHubLessonPage() {
 
   if (!lesson) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-        <div className="text-center max-w-md p-8 bg-slate-900 border border-slate-800 rounded-3xl">
-          <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white">Lesson Not Found</h2>
-          <p className="text-xs text-slate-400 mt-2">
-            The requested module could not be found or has not been unlocked yet.
+      <div className="min-h-screen bg-neutral-50 text-neutral-900 flex items-center justify-center p-6">
+        <div className="text-center max-w-md p-8 bg-white border border-neutral-200 rounded-3xl shadow-xs">
+          <BookOpen className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-neutral-900">Module Not Found</h2>
+          <p className="text-xs text-neutral-500 mt-2">
+            The requested module could not be found or has not been published yet.
           </p>
           <Link
             href="/digihub"
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs transition shadow-2xs"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to DIGIHub
+            <span>Return to DIGIHub</span>
           </Link>
         </div>
       </div>
@@ -74,64 +70,64 @@ export default function DIGIHubLessonPage() {
   const nextLesson = currentIndex >= 0 && currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
   const handleMarkComplete = () => {
-    const updated = markLessonCompleted(lesson.id, lesson.xpAward);
+    markLessonCompleted(lesson.id, lesson.xpAward);
     setIsCompleted(true);
-    setEarnedXpToast(true);
-    setTimeout(() => setEarnedXpToast(false), 3500);
+    setCompletionToast(true);
+    setTimeout(() => setCompletionToast(false), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pt-16">
-      {/* Top Sticky Header */}
-      <header className="sticky top-16 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-6 py-3">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col pt-16">
+      {/* Top Header */}
+      <header className="sticky top-16 z-40 bg-white border-b border-neutral-200 px-4 sm:px-6 py-3.5 shadow-2xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/digihub"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition shrink-0"
-              title="Return to DIGIHub Dashboard"
+              className="p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition shrink-0"
+              title="Return to DIGIHub Overview"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <span className="font-semibold text-blue-400 uppercase tracking-wider">
-                  Module 0{lesson.moduleNumber}: {lesson.moduleTitle}
+              <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+                <span className="font-semibold text-brand-blue">
+                  Module {lesson.moduleNumber}: {lesson.moduleTitle}
                 </span>
                 <span>•</span>
                 <span>Lesson {lesson.lessonNumber}</span>
               </div>
-              <h1 className="text-base sm:text-lg font-bold text-white truncate">{lesson.title}</h1>
+              <h1 className="text-base sm:text-lg font-bold text-neutral-900 truncate">{lesson.title}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              +{lesson.xpAward} XP
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
+              <Clock className="w-3.5 h-3.5 text-neutral-400" />
+              <span>{lesson.durationMinutes} mins</span>
             </div>
 
             {isCompleted ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
                 <CheckCircle2 className="w-4 h-4" />
-                Completed
+                <span>Completed</span>
               </span>
             ) : (
               <button
                 onClick={handleMarkComplete}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/30 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs shadow-2xs transition"
               >
-                Mark Finished
+                Mark Complete
               </button>
             )}
 
             {nextLesson && (
               <Link
                 href={`/digihub/lesson/${nextLesson.id}`}
-                className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
+                className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-xs transition"
               >
-                Next Lab
+                <span>Next Module</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             )}
@@ -139,72 +135,72 @@ export default function DIGIHubLessonPage() {
         </div>
       </header>
 
-      {/* Floating XP Toast */}
-      {earnedXpToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-amber-500 text-slate-950 font-bold shadow-2xl animate-in slide-in-from-bottom duration-300">
-          <Sparkles className="w-5 h-5 text-slate-950" />
-          <span>+{lesson.xpAward} XP Earned! Great job!</span>
+      {/* Completion Toast Notification */}
+      {completionToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-neutral-900 text-white font-medium text-xs shadow-xl animate-in slide-in-from-bottom duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>Module marked as completed!</span>
         </div>
       )}
 
-      {/* Main Split-Pane Workspace */}
+      {/* Split-Pane Workspace */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT PANE: Theory, Key Takeaways & Quiz (5 cols on lg) */}
-        <div className="lg:col-span-5 flex flex-col space-y-6">
+        <div className="lg:col-span-5 flex flex-col space-y-4">
           {/* Sub Navigation */}
-          <div className="flex items-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs">
             <button
               onClick={() => setActivePaneTab("content")}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${
                 activePaneTab === "content"
-                  ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-neutral-100 text-neutral-900 font-bold"
+                  : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              📖 Lesson Concept
+              Lesson Guide
             </button>
             <button
               onClick={() => setActivePaneTab("quiz")}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
                 activePaneTab === "quiz"
-                  ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-neutral-100 text-neutral-900 font-bold"
+                  : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              🎯 Knowledge Check
-              <span className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 text-[10px] flex items-center justify-center">
+              Knowledge Check
+              <span className="w-4 h-4 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-bold flex items-center justify-center">
                 {lesson.quiz.length}
               </span>
             </button>
           </div>
 
           {activePaneTab === "content" ? (
-            <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6 flex-1">
+            <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-7 space-y-6 flex-1 shadow-xs">
               {/* Summary card */}
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80">
-                <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                  <span className="font-semibold text-blue-400">Concept Overview</span>
+              <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
+                  <span className="font-semibold text-brand-blue">Module Overview</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
-                    {lesson.durationMinutes} min read & lab
+                    {lesson.durationMinutes} min reading & lab
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{lesson.summary}</p>
+                <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed">{lesson.summary}</p>
               </div>
 
-              {/* Core Content Markdown-style renderer */}
-              <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              {/* Core Content Markdown renderer */}
+              <div className="space-y-4 text-xs sm:text-sm text-neutral-700 leading-relaxed">
                 {lesson.markdownContent.split("\n\n").map((para, i) => {
                   if (para.startsWith("### ")) {
                     return (
-                      <h3 key={i} className="text-base font-bold text-white pt-2">
+                      <h3 key={i} className="text-base font-bold text-neutral-900 pt-2">
                         {para.replace("### ", "")}
                       </h3>
                     );
                   }
                   if (para.startsWith("## ")) {
                     return (
-                      <h2 key={i} className="text-lg font-bold text-white pt-3 border-b border-slate-800 pb-1">
+                      <h2 key={i} className="text-lg font-bold text-neutral-900 pt-3 border-b border-neutral-100 pb-1">
                         {para.replace("## ", "")}
                       </h2>
                     );
@@ -212,7 +208,7 @@ export default function DIGIHubLessonPage() {
                   if (para.startsWith("- ") || para.startsWith("* ")) {
                     const bullets = para.split("\n");
                     return (
-                      <ul key={i} className="list-disc list-inside space-y-1 text-slate-300 pl-1">
+                      <ul key={i} className="list-disc list-inside space-y-1 text-neutral-700 pl-1">
                         {bullets.map((b, bi) => (
                           <li key={bi}>{b.replace(/^[-*]\s+/, "")}</li>
                         ))}
@@ -224,15 +220,15 @@ export default function DIGIHubLessonPage() {
               </div>
 
               {/* Key Takeaways */}
-              <div className="p-5 rounded-2xl bg-blue-950/20 border border-blue-500/20 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="p-5 rounded-2xl bg-brand-blue-light/40 border border-brand-blue/20 space-y-3">
+                <h4 className="text-xs font-bold text-brand-blue-dark flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-brand-blue" />
                   Key Takeaways
                 </h4>
                 <ul className="space-y-2">
                   {lesson.keyTakeaways.map((point, index) => (
-                    <li key={index} className="flex items-start gap-2 text-xs text-slate-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
+                    <li key={index} className="flex items-start gap-2 text-xs text-neutral-700">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-blue mt-1.5 shrink-0" />
                       <span>{point}</span>
                     </li>
                   ))}
@@ -243,9 +239,9 @@ export default function DIGIHubLessonPage() {
               <div className="pt-2">
                 <button
                   onClick={() => setActivePaneTab("quiz")}
-                  className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-2xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-xs transition flex items-center justify-center gap-2"
                 >
-                  Ready for the Quiz? Test Knowledge ({lesson.quiz.length} Questions)
+                  <span>Test Knowledge ({lesson.quiz.length} Questions)</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -270,7 +266,7 @@ export default function DIGIHubLessonPage() {
             <CodeSandbox
               config={lesson.sandboxConfig}
               onCodeRun={() => {
-                // Auto mark complete or encourage progress
+                // Handled in sandbox
               }}
             />
           )}
