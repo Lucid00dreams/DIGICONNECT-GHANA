@@ -28,7 +28,8 @@ import {
   Calendar,
   Gift,
   BookOpen,
-  Info
+  Info,
+  Shield,
 } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/data";
 import { NavDropdownItem } from "@/lib/types";
@@ -73,6 +74,8 @@ function getDropdownIcon(iconName: string) {
       return Gift;
     case "BookOpen":
       return BookOpen;
+    case "Shield":
+      return Shield;
     default:
       return Info;
   }
@@ -203,6 +206,11 @@ export function Navbar() {
                       aria-expanded={isDropdownOpen}
                     >
                       <span>{item.label}</span>
+                      {item.label === "DIGIHub" && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full shadow-xs">
+                          LMS
+                        </span>
+                      )}
                       <ChevronDown
                         className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
                           isDropdownOpen ? "rotate-180 text-brand-blue" : "group-hover:text-neutral-700"
@@ -409,7 +417,14 @@ export function Navbar() {
                             : "text-neutral-800 hover:text-brand-dark"
                         }`}
                       >
-                        {item.label}
+                        <span className="flex items-center gap-2">
+                          <span>{item.label}</span>
+                          {item.label === "DIGIHub" && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+                              LMS
+                            </span>
+                          )}
+                        </span>
                       </Link>
                       <button
                         type="button"

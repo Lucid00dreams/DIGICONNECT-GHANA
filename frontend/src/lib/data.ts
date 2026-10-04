@@ -92,6 +92,36 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: 'DIGIHub',
+    href: '/digihub',
+    children: [
+      {
+        title: 'DIGIHub Academy',
+        href: '/digihub',
+        description: 'Interactive self-teaching LMS & live hands-on labs.',
+        icon: 'GraduationCap',
+      },
+      {
+        title: 'Basic Coding Track',
+        href: '/digihub/lesson/code-101',
+        description: 'Interactive HTML5, CSS3, and JavaScript live sandboxes.',
+        icon: 'Code',
+      },
+      {
+        title: 'Cybersecurity Defense',
+        href: '/digihub/lesson/cyber-101',
+        description: 'Phishing detection, password entropy, and SQL injection labs.',
+        icon: 'Shield',
+      },
+      {
+        title: '1-on-1 Mentorship',
+        href: '/digihub',
+        description: 'Book 1-on-1 coaching with Ghanaian tech industry mentors.',
+        icon: 'Users',
+      },
+    ],
+  },
+  {
     label: 'Impact',
     href: '/impact',
     children: [

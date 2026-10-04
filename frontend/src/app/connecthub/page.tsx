@@ -104,7 +104,17 @@ import {
   History,
   Bookmark,
   Quote,
+  Video,
+  Shield,
+  Code2,
 } from "lucide-react";
+import {
+  getAllLessons,
+  getBookedSessions,
+  updateSessionStatus,
+  INITIAL_MENTORS,
+  MentorshipSession,
+} from "@/lib/lmsStore";
 
 export default function ConnectHubPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -127,7 +137,12 @@ export default function ConnectHubPage() {
     | "stories"
     | "impact"
     | "settings"
+    | "digihub"
   >("overview");
+
+  // DIGIHub LMS & Mentorship state
+  const [lmsSessions, setLmsSessions] = useState<MentorshipSession[]>(() => getBookedSessions());
+  const [lmsStatusFilter, setLmsStatusFilter] = useState<"all" | "confirmed" | "completed" | "cancelled">("all");
 
   // Central store state
   const [store, setStoreState] = useState<AppStore>(getStore());
@@ -315,11 +330,17 @@ export default function ConnectHubPage() {
 
     const syncStore = () => {
       setStoreState(getStore());
+      setLmsSessions(getBookedSessions());
+    };
+    const syncSessions = () => {
+      setLmsSessions(getBookedSessions());
     };
     window.addEventListener("digiconnect_store_updated", syncStore);
+    window.addEventListener("digihub_sessions_updated", syncSessions);
     window.addEventListener("storage", syncStore);
     return () => {
       window.removeEventListener("digiconnect_store_updated", syncStore);
+      window.removeEventListener("digihub_sessions_updated", syncSessions);
       window.removeEventListener("storage", syncStore);
     };
   }, []);
@@ -1558,6 +1579,23 @@ export default function ConnectHubPage() {
             </div>
 
             <button
+              onClick={() => { setActiveTab("digihub"); setIsMobileNavOpen(false); }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === "digihub"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm ring-1 ring-white/15"
+                  : "text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <GraduationCap className="w-4 h-4 text-blue-400" />
+                <span>DIGIHub</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-blue-300 bg-blue-500/20 border border-blue-500/30 px-2 py-0.5 rounded-md">
+                LMS
+              </span>
+            </button>
+
+            <button
               onClick={() => { setActiveTab("programs"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "programs"
@@ -1811,6 +1849,7 @@ export default function ConnectHubPage() {
                 {activeTab === "events" && "Workshops and bootcamps"}
                 {activeTab === "impact" && "Operational impact metrics"}
                 {activeTab === "settings" && "Organization profile"}
+                {activeTab === "digihub" && "Self-teaching LMS & 1-on-1 mentorship"}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
@@ -1823,6 +1862,7 @@ export default function ConnectHubPage() {
               {activeTab === "events" && "Bootcamps and Event Calendar"}
               {activeTab === "impact" && "Verified Impact Metrics"}
               {activeTab === "settings" && "Organization and Contact Settings"}
+              {activeTab === "digihub" && "DIGIHub LMS & Mentorship Management"}
             </h1>
           </div>
 
@@ -3090,6 +3130,348 @@ export default function ConnectHubPage() {
             </div>
           </div>
         )}
+
+        {/* ─── TAB: DIGIHUB LMS & MENTORSHIP MANAGER ────────── */}
+        {activeTab === "digihub" && (() => {
+          const allLessons = getAllLessons();
+          const codingLessons = allLessons.filter((l) => l.trackId === "coding");
+          const cyberLessons = allLessons.filter((l) => l.trackId === "cybersecurity");
+          const filteredSessions = lmsSessions.filter(
+            (s) => lmsStatusFilter === "all" || s.status === lmsStatusFilter
+          );
+
+          const handleStatusChange = (id: string, newStatus: MentorshipSession["status"]) => {
+            updateSessionStatus(id, newStatus);
+            setLmsSessions(getBookedSessions());
+            triggerToast(`Mentorship session marked as ${newStatus}`);
+          };
+
+          return (
+            <div className="space-y-8">
+              {/* Executive Stat Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Active Learners
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                      <Users className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-neutral-900 mt-2">148</div>
+                  <div className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                    <span>↑ 24%</span>
+                    <span className="text-neutral-400 font-normal">intake this month</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Mentorship Bookings
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <Video className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-neutral-900 mt-2">{lmsSessions.length}</div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {lmsSessions.filter((s) => s.status === "confirmed").length} confirmed upcoming
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Interactive Labs
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <Code2 className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-neutral-900 mt-2">{allLessons.length} Modules</div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {codingLessons.length} Coding • {cyberLessons.length} Cyber
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Student Portal
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Link
+                      href="/digihub"
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 w-full justify-center px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs transition shadow-2xs"
+                    >
+                      <span>Open Student Portal</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* 1-on-1 Mentorship Sessions Administration */}
+              <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-2xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-100">
+                  <div>
+                    <h3 className="font-bold text-lg text-neutral-900 flex items-center gap-2">
+                      <Video className="w-5 h-5 text-brand-blue" />
+                      1-on-1 Mentorship Sessions ({lmsSessions.length})
+                    </h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Review live booking requests, track session status, and monitor encrypted video links.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs">
+                      {(["all", "confirmed", "completed", "cancelled"] as const).map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setLmsStatusFilter(filter)}
+                          className={`px-3 py-1.5 rounded-lg capitalize font-medium transition ${
+                            lmsStatusFilter === filter
+                              ? "bg-white text-neutral-900 shadow-2xs"
+                              : "text-neutral-500 hover:text-neutral-900"
+                          }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {filteredSessions.length === 0 ? (
+                  <div className="py-12 text-center text-neutral-400 text-xs">
+                    No sessions match the selected filter.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-neutral-100 text-neutral-400 uppercase text-[10px] tracking-wider">
+                          <th className="pb-3 font-semibold">Student</th>
+                          <th className="pb-3 font-semibold">Mentor & Track</th>
+                          <th className="pb-3 font-semibold">Date & Slot</th>
+                          <th className="pb-3 font-semibold">Encrypted Room</th>
+                          <th className="pb-3 font-semibold">Status</th>
+                          <th className="pb-3 font-semibold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {filteredSessions.map((session) => (
+                          <tr key={session.id} className="hover:bg-neutral-50/80 transition">
+                            <td className="py-4 pr-3">
+                              <div className="font-bold text-neutral-900">{session.studentName}</div>
+                              <div className="text-[11px] text-neutral-500">{session.studentEmail}</div>
+                              {session.studentPhone && (
+                                <div className="text-[11px] text-neutral-400">{session.studentPhone}</div>
+                              )}
+                            </td>
+
+                            <td className="py-4 pr-3">
+                              <div className="font-medium text-neutral-900">{session.mentorName}</div>
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase mt-0.5 ${
+                                  session.trackTopic === "coding"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "bg-emerald-50 text-emerald-700"
+                                }`}
+                              >
+                                {session.trackTopic === "coding" ? "Web Coding" : "Cybersecurity"}
+                              </span>
+                            </td>
+
+                            <td className="py-4 pr-3">
+                              <div className="font-medium text-neutral-800">{session.date}</div>
+                              <div className="text-neutral-500 text-[11px]">{session.timeSlot}</div>
+                            </td>
+
+                            <td className="py-4 pr-3">
+                              <a
+                                href={session.meetingLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-blue-600 hover:underline font-mono text-[11px]"
+                              >
+                                <span>Join Room</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </td>
+
+                            <td className="py-4 pr-3">
+                              <span
+                                className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  session.status === "confirmed"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : session.status === "completed"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {session.status}
+                              </span>
+                            </td>
+
+                            <td className="py-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {session.status !== "completed" && (
+                                  <button
+                                    onClick={() => handleStatusChange(session.id, "completed")}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-[11px] transition"
+                                  >
+                                    Mark Done
+                                  </button>
+                                )}
+                                {session.status !== "cancelled" && (
+                                  <button
+                                    onClick={() => handleStatusChange(session.id, "cancelled")}
+                                    className="px-2.5 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 font-semibold text-[11px] transition"
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
+                                {session.status !== "confirmed" && (
+                                  <button
+                                    onClick={() => handleStatusChange(session.id, "confirmed")}
+                                    className="px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 font-semibold text-[11px] transition"
+                                  >
+                                    Reactivate
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Curricula Modules Preview Grid */}
+              <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-2xs space-y-6">
+                <div>
+                  <h3 className="font-bold text-lg text-neutral-900 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-brand-blue" />
+                    DIGIHub Active Curricula ({allLessons.length} Modules)
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Self-teaching lessons equip learners with in-browser code sandboxes and threat simulators.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {allLessons.map((l) => (
+                    <div
+                      key={l.id}
+                      className="p-5 rounded-2xl border border-neutral-200 hover:border-blue-400 transition bg-neutral-50/50 flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                              l.trackId === "coding"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {l.trackId === "coding" ? <Code2 className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-neutral-400">
+                              Module 0{l.moduleNumber} • {l.trackId === "coding" ? "Web Dev" : "Cybersecurity"}
+                            </span>
+                            <h4 className="font-bold text-neutral-900 text-sm">{l.title}</h4>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
+                          +{l.xpAward} XP
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-neutral-600 line-clamp-2">{l.summary}</p>
+
+                      <div className="pt-2 flex items-center justify-between border-t border-neutral-200/60 text-xs">
+                        <span className="text-neutral-500 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {l.durationMinutes} mins
+                        </span>
+
+                        <Link
+                          href={`/digihub/lesson/${l.id}`}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:underline font-semibold"
+                        >
+                          <span>Test Lesson Lab</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Faculty Mentors Section */}
+              <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-2xs space-y-6">
+                <div>
+                  <h3 className="font-bold text-lg text-neutral-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-brand-blue" />
+                    Faculty Mentors Directory ({INITIAL_MENTORS.length})
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Available Ghanaian tech leaders facilitating 1-on-1 career coaching and technical code reviews.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {INITIAL_MENTORS.map((m) => (
+                    <div
+                      key={m.id}
+                      className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col justify-between"
+                    >
+                      <div>
+                        <img
+                          src={m.avatar}
+                          alt={m.name}
+                          className="w-full h-32 rounded-xl object-cover mb-3"
+                        />
+                        <h4 className="font-bold text-neutral-900 text-sm">{m.name}</h4>
+                        <p className="text-xs text-blue-600 font-medium">{m.title}</p>
+                        <div className="flex items-center gap-2 text-[11px] text-neutral-500 mt-1">
+                          <span className="text-amber-500 font-bold">★ {m.rating}</span>
+                          <span>•</span>
+                          <span>{m.totalSessions} sessions</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-3 border-t border-neutral-100 flex flex-wrap gap-1">
+                        {(m.specialties || [m.specialty]).map((s: string) => (
+                          <span
+                            key={s}
+                            className="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-600"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ─── TAB 7: EVENTS MANAGER ──────────────────────── */}
         {activeTab === "events" && (
