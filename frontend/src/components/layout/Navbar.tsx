@@ -145,12 +145,12 @@ export function Navbar() {
           : "bg-white border-b border-neutral-100 py-3"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-3.5 sm:px-5 lg:px-3 xl:px-6 2xl:px-8">
         {/* Brand Logo */}
         <Link
           href="/"
           prefetch={true}
-          className="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-brand-blue rounded-lg"
+          className="flex items-center gap-2 xl:gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-brand-blue rounded-lg"
           aria-label="DigiConnect Ghana Home"
         >
           <Image
@@ -158,21 +158,21 @@ export function Navbar() {
             alt="DigiConnect Ghana"
             width={40}
             height={40}
-            className="h-9 w-9 lg:h-10 lg:w-10 object-contain"
+            className="h-8 w-8 sm:h-9 sm:w-9 lg:h-8.5 lg:w-8.5 xl:h-10 xl:w-10 object-contain shrink-0"
             priority
           />
           <div className="flex flex-col">
-            <span className="text-[14px] sm:text-[15px] font-bold leading-tight text-brand-dark block tracking-tight">
+            <span className="text-[13.5px] sm:text-[14.5px] xl:text-[15px] font-bold leading-tight text-brand-dark block tracking-tight">
               DigiConnect
             </span>
-            <span className="text-[10px] sm:text-[11px] font-medium text-neutral-500 block -mt-0.5">
+            <span className="text-[9.5px] sm:text-[10.5px] xl:text-[11px] font-medium text-neutral-500 block -mt-0.5">
               Ghana
             </span>
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <ul className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+        <ul className="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 shrink min-w-0">
           {desktopNavItems.map((item, itemIdx) => {
             const hasChildren = Boolean(item.children && item.children.length > 0);
             const isDropdownOpen = activeDropdown === item.label;
@@ -189,7 +189,7 @@ export function Navbar() {
               return (
                 <li
                   key={item.label}
-                  className="relative group"
+                  className="relative group shrink-0"
                   onMouseEnter={() => handleMouseEnter(item.label)}
                   onMouseLeave={handleMouseLeave}
                 >
@@ -197,7 +197,7 @@ export function Navbar() {
                     <Link
                       href={item.href}
                       prefetch={true}
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-[13.5px] font-medium rounded-lg transition-colors ${
+                      className={`inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2.5 2xl:px-3 py-1.5 text-[12px] xl:text-[13px] 2xl:text-[13.5px] font-medium rounded-lg transition-colors whitespace-nowrap ${
                         isActive
                           ? "text-brand-blue font-semibold bg-brand-blue-light/50"
                           : "text-neutral-600 hover:text-brand-dark hover:bg-neutral-50"
@@ -207,17 +207,17 @@ export function Navbar() {
                     >
                       <span>{item.label}</span>
                       {item.label === "DIGIHub" && (
-                        <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full shadow-xs">
+                        <span className="text-[7.5px] xl:text-[8.5px] 2xl:text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1 xl:px-1.5 py-0.2 xl:py-0.5 rounded-full shadow-2xs shrink-0">
                           LMS
                         </span>
                       )}
                       <ChevronDown
-                        className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                        className={`w-3 h-3 xl:w-3.5 xl:h-3.5 text-neutral-400 transition-transform duration-200 shrink-0 ${
                           isDropdownOpen ? "rotate-180 text-brand-blue" : "group-hover:text-neutral-700"
                         }`}
                       />
                       {isActive && (
-                        <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-brand-blue rounded-full" />
+                        <span className="absolute bottom-0 left-1.5 right-1.5 xl:left-2.5 xl:right-2.5 2xl:left-3 2xl:right-3 h-[2px] bg-brand-blue rounded-full" />
                       )}
                     </Link>
                   </div>
@@ -298,11 +298,11 @@ export function Navbar() {
             }
 
             return (
-              <li key={item.href}>
+              <li key={item.href} className="shrink-0">
                 <Link
                   href={item.href}
                   prefetch={true}
-                  className={`relative px-3 py-1.5 text-[13.5px] font-medium rounded-lg transition-colors ${
+                  className={`relative px-1.5 xl:px-2.5 2xl:px-3 py-1.5 text-[12px] xl:text-[13px] 2xl:text-[13.5px] font-medium rounded-lg transition-colors whitespace-nowrap block ${
                     isActive
                       ? "text-brand-blue font-semibold bg-brand-blue-light/50"
                       : "text-neutral-600 hover:text-brand-dark hover:bg-neutral-50"
@@ -310,7 +310,7 @@ export function Navbar() {
                 >
                   {item.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-brand-blue rounded-full" />
+                    <span className="absolute bottom-0 left-1.5 right-1.5 xl:left-2.5 xl:right-2.5 2xl:left-3 2xl:right-3 h-[2px] bg-brand-blue rounded-full" />
                   )}
                 </Link>
               </li>
@@ -319,15 +319,15 @@ export function Navbar() {
         </ul>
 
         {/* Desktop Controls & CTA */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 2xl:gap-3 shrink-0">
           {/* Donate Button */}
           <Link
             href="/donate"
             prefetch={true}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/90 bg-rose-50/80 hover:bg-rose-100 text-rose-700 px-3.5 py-2 text-[13px] font-semibold shadow-2xs transition-all hover:border-rose-300 shrink-0"
+            className="inline-flex items-center gap-1 xl:gap-1.5 rounded-xl border border-rose-200/90 bg-rose-50/80 hover:bg-rose-100 text-rose-700 px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-[11.5px] xl:text-[13px] font-semibold shadow-2xs transition-all hover:border-rose-300 shrink-0"
             aria-label="Donate to DigiConnect Ghana"
           >
-            <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+            <Heart className="w-3 h-3 xl:w-3.5 xl:h-3.5 fill-rose-500 text-rose-500 shrink-0" />
             <span>Donate</span>
           </Link>
 
@@ -335,67 +335,69 @@ export function Navbar() {
           <Link
             href="/join"
             prefetch={true}
-            className="inline-flex items-center justify-center rounded-xl bg-brand-blue px-4 py-2 text-[13px] font-semibold text-white shadow-2xs hover:bg-brand-blue-dark transition-all shrink-0"
+            className="inline-flex items-center justify-center rounded-xl bg-brand-blue px-2.5 xl:px-4 py-1.5 xl:py-2 text-[11.5px] xl:text-[13px] font-semibold text-white shadow-2xs hover:bg-brand-blue-dark transition-all shrink-0"
           >
-            Join DigiConnect
+            <span>
+              Join <span className="hidden xl:inline">DigiConnect</span>
+            </span>
           </Link>
         </div>
 
         {/* Mobile controls */}
-        <div className="lg:hidden flex items-center gap-2 -mr-2">
+        <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 -mr-1">
           {/* Mobile Donate Button */}
           <Link
             href="/donate"
             prefetch={true}
-            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors shrink-0"
             aria-label="Donate to DigiConnect Ghana"
           >
-            <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+            <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
             <span>Donate</span>
           </Link>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 text-neutral-700 hover:text-brand-dark"
+            className="p-1.5 sm:p-2 rounded-lg text-neutral-700 hover:text-brand-dark hover:bg-neutral-100 transition-colors focus-visible:outline-2 focus-visible:outline-brand-blue shrink-0"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
         </div>
       </nav>
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`lg:hidden fixed inset-0 top-[57px] z-40 transition-all duration-300 ${
-          mobileOpen ? "visible opacity-100" : "invisible opacity-0"
+        className={`lg:hidden fixed inset-0 top-[54px] sm:top-[60px] z-40 transition-all duration-300 ${
+          mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/20 backdrop-blur-xs"
+          className="absolute inset-0 bg-black/25 backdrop-blur-xs"
           onClick={() => setMobileOpen(false)}
         />
         {/* Panel */}
         <div
-          className={`relative bg-white shadow-xl max-h-[calc(100vh-57px)] overflow-y-auto transition-transform duration-300 ${
-            mobileOpen ? "translate-y-0" : "-translate-y-4"
+          className={`relative bg-white shadow-xl max-h-[calc(100dvh-54px)] sm:max-h-[calc(100dvh-60px)] overflow-y-auto overscroll-contain transition-transform duration-300 ${
+            mobileOpen ? "translate-y-0" : "-translate-y-3"
           }`}
         >
           {/* Mobile Donate Highlight */}
-          <div className="px-5 pt-4 pb-2">
+          <div className="px-3.5 sm:px-5 pt-3.5 pb-2">
             <Link
               href="/donate"
               prefetch={true}
               onClick={() => setMobileOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-sm font-semibold hover:bg-rose-100 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs sm:text-sm font-semibold hover:bg-rose-100 transition-colors"
             >
               <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
               <span>Donate to Support Learners</span>
             </Link>
           </div>
 
-          <ul className="px-5 py-2 space-y-1">
+          <ul className="px-3.5 sm:px-5 py-2 space-y-1">
             {NAV_ITEMS.map((item) => {
               const hasChildren = Boolean(item.children && item.children.length > 0);
               const isActive =
@@ -405,13 +407,13 @@ export function Navbar() {
 
               if (hasChildren) {
                 return (
-                  <li key={item.label} className="border-b border-neutral-100/60 pb-1">
+                  <li key={item.label} className="border-b border-neutral-100/80 pb-1">
                     <div className="flex items-center justify-between">
                       <Link
                         href={item.href}
                         prefetch={true}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex-1 py-3 px-3 text-[15px] font-semibold transition-colors rounded-lg ${
+                        className={`flex-1 py-2.5 sm:py-3 px-3 text-[14.5px] sm:text-[15px] font-semibold transition-colors rounded-xl ${
                           isActive
                             ? "text-brand-blue"
                             : "text-neutral-800 hover:text-brand-dark"
@@ -420,7 +422,7 @@ export function Navbar() {
                         <span className="flex items-center gap-2">
                           <span>{item.label}</span>
                           {item.label === "DIGIHub" && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+                            <span className="text-[8.5px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full shadow-2xs">
                               LMS
                             </span>
                           )}
@@ -429,7 +431,7 @@ export function Navbar() {
                       <button
                         type="button"
                         onClick={() => toggleMobileSubmenu(item.label)}
-                        className="p-3 text-neutral-400 hover:text-brand-blue transition-colors"
+                        className="p-2.5 text-neutral-400 hover:text-brand-blue transition-colors rounded-lg"
                         aria-label={`Toggle ${item.label} sub-navigation`}
                         aria-expanded={isExpanded}
                       >
@@ -443,7 +445,16 @@ export function Navbar() {
 
                     {/* Submenu Accordion */}
                     {isExpanded && (
-                      <div className="pl-3 pr-2 pb-2 space-y-1">
+                      <div className="pl-2 pr-1 pb-2 space-y-1">
+                        <Link
+                          href={item.href}
+                          prefetch={true}
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-brand-blue bg-brand-blue-50/70 border border-brand-blue/15 hover:bg-brand-blue-100/60 transition-colors"
+                        >
+                          <span>Explore {item.label} Overview</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
                         {item.children?.map((child: NavDropdownItem) => {
                           const IconComponent = getDropdownIcon(child.icon);
                           const isChildActive = pathname === child.href;
@@ -454,14 +465,21 @@ export function Navbar() {
                               href={child.href}
                               prefetch={true}
                               onClick={() => setMobileOpen(false)}
-                              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                              className={`flex items-start gap-2.5 px-3 py-2 rounded-xl text-xs transition-colors ${
                                 isChildActive
-                                  ? "bg-brand-blue-50 text-brand-blue font-semibold"
+                                  ? "bg-brand-blue-50 text-brand-blue font-semibold border border-brand-blue/10"
                                   : "text-neutral-600 hover:text-brand-dark hover:bg-neutral-50"
                               }`}
                             >
-                              <IconComponent className="w-4 h-4 text-brand-blue shrink-0" />
-                              <span>{child.title}</span>
+                              <IconComponent className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-[13px] text-neutral-900 leading-tight">
+                                  {child.title}
+                                </div>
+                                <div className="text-[11.5px] text-neutral-500 line-clamp-1 mt-0.5">
+                                  {child.description}
+                                </div>
+                              </div>
                             </Link>
                           );
                         })}
@@ -477,9 +495,9 @@ export function Navbar() {
                     href={item.href}
                     prefetch={true}
                     onClick={() => setMobileOpen(false)}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
+                    className={`block px-3.5 py-2.5 sm:py-3 rounded-xl text-[14.5px] sm:text-[15px] font-medium transition-colors ${
                       isActive
-                        ? "bg-brand-blue-light text-brand-blue font-semibold"
+                        ? "bg-brand-blue-light/70 text-brand-blue font-semibold border border-brand-blue/15"
                         : "text-neutral-700 hover:bg-neutral-50"
                     }`}
                   >
@@ -490,12 +508,12 @@ export function Navbar() {
             })}
           </ul>
 
-          <div className="px-5 pb-6 pt-3 space-y-3 border-t border-neutral-100">
+          <div className="px-3.5 sm:px-5 pb-8 pt-3 space-y-2.5 border-t border-neutral-100">
             <Link
               href="/join"
               prefetch={true}
               onClick={() => setMobileOpen(false)}
-              className="block w-full text-center rounded-xl bg-brand-blue px-5 py-3 text-[14px] font-semibold text-white hover:bg-brand-blue-dark transition-colors"
+              className="block w-full text-center rounded-xl bg-brand-blue px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-brand-blue-dark transition-colors shadow-2xs"
             >
               Join DigiConnect
             </Link>
@@ -503,7 +521,7 @@ export function Navbar() {
               href="/get-involved"
               prefetch={true}
               onClick={() => setMobileOpen(false)}
-              className="block w-full text-center rounded-xl border border-neutral-200 px-5 py-3 text-[14px] font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
+              className="block w-full text-center rounded-xl border border-neutral-200 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               Partner & Get Involved
             </Link>

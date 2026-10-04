@@ -325,21 +325,21 @@ export default function DIGIHubPage() {
         </section>
 
         {/* Top Coursera-Like Navigation Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-200 pb-4 mb-6 sm:mb-8 gap-3 sm:gap-4">
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-200 pb-3 sm:pb-4 mb-6 sm:mb-8 gap-3 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1 -mx-1 px-1 shrink-0">
             <button
               onClick={() => setActiveTab("my-learning")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 activeTab === "my-learning"
                   ? "bg-brand-blue text-white shadow-xs"
                   : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-100"
               }`}
             >
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>My Learning</span>
               {enrolledCourses.length > 0 && (
                 <span
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center shrink-0 ${
                     activeTab === "my-learning" ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-700"
                   }`}
                 >
@@ -350,29 +350,35 @@ export default function DIGIHubPage() {
 
             <button
               onClick={() => setActiveTab("catalog")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 activeTab === "catalog"
                   ? "bg-brand-blue text-white shadow-xs"
                   : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-100"
               }`}
             >
-              <Compass className="w-4 h-4 shrink-0" />
-              <span>Explore Courses</span>
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>
+                <span className="sm:hidden">Courses</span>
+                <span className="hidden sm:inline">Explore Courses</span>
+              </span>
             </button>
 
             <button
               onClick={() => setActiveTab("certificates")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 activeTab === "certificates"
                   ? "bg-brand-blue text-white shadow-xs"
                   : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-100"
               }`}
             >
-              <Award className="w-4 h-4 shrink-0" />
-              <span>Certificates & Credentials</span>
+              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>
+                <span className="sm:hidden">Certificates</span>
+                <span className="hidden sm:inline">Certificates & Credentials</span>
+              </span>
               {studentCerts.length > 0 && (
                 <span
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center shrink-0 ${
                     activeTab === "certificates" ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-700"
                   }`}
                 >
@@ -383,17 +389,20 @@ export default function DIGIHubPage() {
 
             <button
               onClick={() => setActiveTab("mentorship")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 activeTab === "mentorship"
                   ? "bg-brand-blue text-white shadow-xs"
                   : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-100"
               }`}
             >
-              <Video className="w-4 h-4 shrink-0" />
-              <span>1-on-1 Mentorship</span>
+              <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>
+                <span className="sm:hidden">Mentorship</span>
+                <span className="hidden sm:inline">1-on-1 Mentorship</span>
+              </span>
               {sessions.length > 0 && (
                 <span
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center justify-center shrink-0 ${
                     activeTab === "mentorship" ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-700"
                   }`}
                 >

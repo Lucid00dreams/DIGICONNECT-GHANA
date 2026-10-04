@@ -3694,7 +3694,7 @@ export default function ConnectHubPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto">
+                  <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto no-scrollbar shrink-0">
                     {[
                       { id: "all", label: `All (${allCertificates.length})` },
                       { id: "pending_approval", label: `Pending Approval (${pendingCerts.length})` },
@@ -3878,7 +3878,7 @@ export default function ConnectHubPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto">
+                  <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto no-scrollbar shrink-0">
                     {[
                       { id: "all", label: `All (${lmsUsers.length})` },
                       {
@@ -4107,7 +4107,7 @@ export default function ConnectHubPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs">
+                    <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto no-scrollbar shrink-0">
                       {(["all", "confirmed", "completed", "cancelled"] as const).map((filter) => (
                         <button
                           key={filter}
