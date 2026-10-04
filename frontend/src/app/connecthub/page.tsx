@@ -72,6 +72,7 @@ import {
   ArrowRight,
   RefreshCw,
   X,
+  Menu,
   Send,
   Sparkles,
   Phone,
@@ -324,6 +325,7 @@ export default function ConnectHubPage() {
   };
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1296,6 +1298,48 @@ export default function ConnectHubPage() {
 
   return (
     <div className="min-h-screen bg-neutral-100 flex flex-col lg:flex-row text-neutral-800 font-sans selection:bg-brand-blue selection:text-white">
+
+      {/* ─── MOBILE TOP NAVBAR ──────────────────────────── */}
+      <header className="lg:hidden sticky top-0 z-40 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between px-4 py-3 shrink-0">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="DCG"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+          />
+          <div>
+            <span className="font-extrabold text-sm tracking-tight text-white block leading-tight">
+              ConnectHub
+            </span>
+            <span className="text-[9px] text-brand-blue font-bold tracking-wider uppercase block">
+              DigiConnect Ghana
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {(pendingAppsCount + unreadMsgCount + newInqCount) > 0 && (
+            <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse" />
+          )}
+          <button
+            onClick={() => setIsMobileNavOpen((v) => !v)}
+            aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
+            className="p-2 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </header>
+
+      {/* ─── MOBILE NAV BACKDROP ────────────────────────── */}
+      {isMobileNavOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {/* Toast Notification */}
       {saveToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-neutral-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-neutral-700 flex items-center gap-3 text-sm animate-fade-in">
@@ -1305,7 +1349,9 @@ export default function ConnectHubPage() {
       )}
 
       {/* ─── SIDEBAR ────────────────────────────────────── */}
-      <aside className="w-full lg:w-72 bg-neutral-950 text-white flex flex-col shrink-0 border-r border-neutral-800 relative overflow-hidden">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-neutral-950 text-white flex flex-col shrink-0 border-r border-neutral-800 relative overflow-hidden transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
         {/* Decorative Background Pattern Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
           {/* Subtle Ambient Tech Dot Grid */}
@@ -1393,7 +1439,7 @@ export default function ConnectHubPage() {
             </div>
 
             <button
-              onClick={() => setActiveTab("overview")}
+              onClick={() => { setActiveTab("overview"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "overview"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1407,7 +1453,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("applications")}
+              onClick={() => { setActiveTab("applications"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "applications"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1426,7 +1472,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("messages")}
+              onClick={() => { setActiveTab("messages"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "messages"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1445,7 +1491,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("inquiries")}
+              onClick={() => { setActiveTab("inquiries"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "inquiries"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1471,7 +1517,7 @@ export default function ConnectHubPage() {
             </div>
 
             <button
-              onClick={() => setActiveTab("programs")}
+              onClick={() => { setActiveTab("programs"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "programs"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1488,7 +1534,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("resources")}
+              onClick={() => { setActiveTab("resources"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "resources"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1505,7 +1551,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("events")}
+              onClick={() => { setActiveTab("events"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "events"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1529,7 +1575,7 @@ export default function ConnectHubPage() {
             </div>
 
             <button
-              onClick={() => setActiveTab("team")}
+              onClick={() => { setActiveTab("team"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "team"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1546,7 +1592,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("partners")}
+              onClick={() => { setActiveTab("partners"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "partners"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1563,7 +1609,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("history")}
+              onClick={() => { setActiveTab("history"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "history"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1587,7 +1633,7 @@ export default function ConnectHubPage() {
             </div>
 
             <button
-              onClick={() => setActiveTab("gallery")}
+              onClick={() => { setActiveTab("gallery"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "gallery"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1604,7 +1650,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("news")}
+              onClick={() => { setActiveTab("news"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "news"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1621,7 +1667,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("stories")}
+              onClick={() => { setActiveTab("stories"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "stories"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1638,7 +1684,7 @@ export default function ConnectHubPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("impact")}
+              onClick={() => { setActiveTab("impact"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "impact"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
@@ -1659,7 +1705,7 @@ export default function ConnectHubPage() {
             </div>
 
             <button
-              onClick={() => setActiveTab("settings")}
+              onClick={() => { setActiveTab("settings"); setIsMobileNavOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "settings"
                   ? "bg-brand-blue text-white shadow-sm ring-1 ring-white/15"
