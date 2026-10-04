@@ -14,14 +14,30 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Whitelist of strictly safe raster image extensions (NO SVG, NO HTML, NO EXECUTABLES)
-const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
+// Whitelist of strictly safe raster image and standard web video extensions
+const ALLOWED_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".mp4",
+  ".webm",
+  ".mov",
+  ".ogg",
+  ".m4v",
+]);
 const ALLOWED_MIMES = new Set([
   "image/jpeg",
   "image/pjpeg",
   "image/png",
   "image/webp",
   "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/ogg",
+  "video/x-m4v",
 ]);
 
 const storage = multer.diskStorage({
@@ -39,7 +55,7 @@ const storage = multer.diskStorage({
 export const multerUpload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB strict limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit to support mobile photo & video recordings
     files: 1,
   },
   fileFilter: (_req, file, cb) => {
@@ -49,7 +65,7 @@ export const multerUpload = multer({
     if (!ALLOWED_EXTENSIONS.has(ext)) {
       return cb(
         new Error(
-          "Invalid file type. Only standard raster images (.jpg, .jpeg, .png, .webp, .gif) are permitted."
+          "Invalid file type. Only standard images (.jpg, .jpeg, .png, .webp, .gif) and videos (.mp4, .webm, .mov, .ogg) are permitted."
         )
       );
     }
@@ -57,7 +73,7 @@ export const multerUpload = multer({
     // Check MIME type reported by browser
     if (!ALLOWED_MIMES.has(file.mimetype.toLowerCase())) {
       return cb(
-        new Error("Invalid MIME type. Uploaded file does not appear to be an image.")
+        new Error("Invalid MIME type. Uploaded file does not appear to be a supported image or video.")
       );
     }
 
@@ -116,6 +132,28 @@ export function validateImageSignature(
     ) {
       isValid = true;
     }
+    // MP4 / MOV: bytes 4..7 === 'ftyp' or 'moov' or 'mdat' or 'wide'
+    else if (
+      buffer.toString("ascii", 4, 8) === "ftyp" ||
+      buffer.toString("ascii", 4, 8) === "moov" ||
+      buffer.toString("ascii", 4, 8) === "mdat" ||
+      buffer.toString("ascii", 4, 8) === "wide"
+    ) {
+      isValid = true;
+    }
+    // WebM / Matroska: 1A 45 DF A3
+    else if (
+      buffer[0] === 0x1a &&
+      buffer[1] === 0x45 &&
+      buffer[2] === 0xdf &&
+      buffer[3] === 0xa3
+    ) {
+      isValid = true;
+    }
+    // Ogg: OggS (4F 67 67 53)
+    else if (buffer.toString("ascii", 0, 4) === "OggS") {
+      isValid = true;
+    }
 
     if (!isValid) {
       // Signature mismatch - potential polyglot or executable disguise!
@@ -128,7 +166,7 @@ export function validateImageSignature(
       return res.status(400).json({
         success: false,
         error:
-          "Security rejection: Uploaded file contents do not match genuine image format signatures.",
+          "Security rejection: Uploaded file contents do not match genuine image or video format signatures.",
       });
     }
 

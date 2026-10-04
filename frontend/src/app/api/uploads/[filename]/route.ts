@@ -9,6 +9,11 @@ const MIME_TYPES: Record<string, string> = {
   ".webp": "image/webp",
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".ogg": "video/ogg",
+  ".mov": "video/quicktime",
+  ".m4v": "video/mp4",
 };
 
 export async function GET(
@@ -23,15 +28,16 @@ export async function GET(
 
     const buffer = await fs.readFile(filePath);
     const ext = path.extname(safeFilename).toLowerCase();
-    const contentType = MIME_TYPES[ext] || "image/jpeg";
+    const contentType = MIME_TYPES[ext] || (ext === ".mp4" ? "video/mp4" : "image/jpeg");
 
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
+        "Accept-Ranges": "bytes",
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
   } catch {
-    return new NextResponse("Image not found", { status: 404 });
+    return new NextResponse("File not found", { status: 404 });
   }
 }

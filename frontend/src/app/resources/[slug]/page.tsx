@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { RESOURCES } from "@/lib/data";
 import { ResourceCard } from "@/components/ui/ResourceCard";
+import { isVideoMedia } from "@/lib/media";
 import {
   Calendar,
   Clock,
@@ -107,15 +108,24 @@ export default async function ResourceDetailPage({
       <section className="py-12 lg:py-16 bg-white">
         <div className="mx-auto max-w-4xl px-5 lg:px-8">
           {/* Hero Media */}
-          <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-lg mb-10 border border-neutral-200">
-            <Image
-              src={resource.image}
-              alt={resource.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 896px"
-              priority
-            />
+          <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-lg mb-10 border border-neutral-200 bg-neutral-900">
+            {isVideoMedia(resource.image) ? (
+              <video
+                src={resource.image}
+                controls
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={resource.image}
+                alt={resource.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 896px"
+                priority
+              />
+            )}
           </div>
 
           {/* Social Share Bar */}

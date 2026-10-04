@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { DeviceMediaUploader, isVideoMedia } from "@/components/ui/DeviceMediaUploader";
 import {
   getStore,
   saveStore,
@@ -206,6 +207,7 @@ export default function ConnectHubPage() {
     time: "10:00 AM – 3:00 PM GMT",
     location: "Accra Digital Centre & Online",
     description: "",
+    image: "",
     status: "upcoming" as "upcoming" | "past",
     ctaText: "Register Free",
     ctaLink: "/join",
@@ -234,6 +236,7 @@ export default function ConnectHubPage() {
     category: "Tech",
     location: "Accra, Ghana",
     website: "https://digiconnectghana.org",
+    logo: "",
   });
 
   // History Milestone modal state
@@ -258,6 +261,7 @@ export default function ConnectHubPage() {
     readTime: "10 min read",
     level: "Beginner" as "Beginner" | "Intermediate" | "All Levels",
     downloadUrl: "/resources",
+    image: "",
   });
 
   // Testimonial modal state
@@ -287,6 +291,7 @@ export default function ConnectHubPage() {
     color: "blue",
     highlightsText: "Hands-on projects, Industry mentorship, Certificate",
     prerequisites: "Basic literacy & passion to learn",
+    image: "",
   });
 
   useEffect(() => {
@@ -371,10 +376,12 @@ export default function ConnectHubPage() {
     setIsAuthenticated(false);
   };
 
-  // Process image selected from device gallery
+  // Process photo or video selected from device gallery
   const handleProcessFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      alert("Please choose a valid photo from your device (JPEG, PNG, WebP, GIF).");
+    const isImg = file.type.startsWith("image/");
+    const isVid = file.type.startsWith("video/") || /\.(mp4|webm|ogg|mov|m4v)$/i.test(file.name);
+    if (!isImg && !isVid) {
+      alert("Please choose a valid photo or video from your device (JPEG, PNG, WebP, MP4, WebM, MOV, etc.).");
       return;
     }
 
@@ -751,6 +758,7 @@ export default function ConnectHubPage() {
       time: newEventForm.time.trim(),
       location: newEventForm.location.trim(),
       description: newEventForm.description.trim() || "Join DigiConnect Ghana for this empowering digital session.",
+      image: newEventForm.image.trim() || undefined,
       status: newEventForm.status,
       registrationUrl: newEventForm.ctaLink.trim() || "/join",
     });
@@ -763,6 +771,7 @@ export default function ConnectHubPage() {
       time: "10:00 AM – 3:00 PM GMT",
       location: "Accra Digital Centre & Online",
       description: "",
+      image: "",
       status: "upcoming",
       ctaText: "Register Free",
       ctaLink: "/join",
@@ -875,6 +884,7 @@ export default function ConnectHubPage() {
       category: "Tech",
       location: "Accra, Ghana",
       website: "https://digiconnectghana.org",
+      logo: "",
     });
     setShowPartnerModal(true);
   };
@@ -887,6 +897,7 @@ export default function ConnectHubPage() {
       category: p.category || "Tech",
       location: p.location || "Accra, Ghana",
       website: p.website || "https://digiconnectghana.org",
+      logo: p.logo || "",
     });
     setShowPartnerModal(true);
   };
@@ -904,6 +915,7 @@ export default function ConnectHubPage() {
         category: partnerForm.category,
         location: partnerForm.location.trim(),
         website: partnerForm.website.trim(),
+        logo: partnerForm.logo.trim() || editingPartner.logo || "/images/partners/default.svg",
       });
       triggerToast("Partner updated live!");
     } else {
@@ -913,7 +925,7 @@ export default function ConnectHubPage() {
         category: partnerForm.category,
         location: partnerForm.location.trim(),
         website: partnerForm.website.trim(),
-        logo: "/images/partners/default.svg",
+        logo: partnerForm.logo.trim() || "/images/partners/default.svg",
       });
       triggerToast("New partner added live!");
     }
@@ -1007,6 +1019,7 @@ export default function ConnectHubPage() {
       readTime: "10 min read",
       level: "Beginner",
       downloadUrl: "/resources",
+      image: "",
     });
     setShowResourceModal(true);
   };
@@ -1021,6 +1034,7 @@ export default function ConnectHubPage() {
       readTime: r.readTime || "10 min read",
       level: (r.level as any) || "Beginner",
       downloadUrl: r.downloadUrl || "/resources",
+      image: r.image || "",
     });
     setShowResourceModal(true);
   };
@@ -1040,6 +1054,7 @@ export default function ConnectHubPage() {
         readTime: resourceForm.readTime.trim(),
         level: resourceForm.level,
         downloadUrl: resourceForm.downloadUrl.trim(),
+        image: resourceForm.image.trim() || editingResource.image,
       });
       triggerToast("Resource toolkit updated live!");
     } else {
@@ -1051,7 +1066,7 @@ export default function ConnectHubPage() {
         readTime: resourceForm.readTime.trim() || "10 min read",
         level: resourceForm.level,
         downloadUrl: resourceForm.downloadUrl.trim() || "/resources",
-        image: "/images/resources/default.jpg",
+        image: resourceForm.image.trim() || "/images/resources/default.jpg",
         date: new Date().toISOString().split("T")[0],
         slug: resourceForm.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       });
@@ -1172,7 +1187,7 @@ export default function ConnectHubPage() {
       color: newProgramForm.color || "blue",
       accent: (newProgramForm.color as any) || "blue",
       icon: "Code",
-      image: "/images/programs/program-coding.jpg",
+      image: newProgramForm.image.trim() || "/images/programs/program-coding.jpg",
       outcomes: highlights.length > 0 ? highlights : ["Hands-on Curriculum"],
       highlights: highlights.length > 0 ? highlights : ["Hands-on Curriculum"],
       prerequisites: newProgramForm.prerequisites.trim() || "Basic interest in tech",
@@ -1191,6 +1206,7 @@ export default function ConnectHubPage() {
       color: "blue",
       highlightsText: "Hands-on projects, Industry mentorship, Certificate",
       prerequisites: "Basic literacy & passion to learn",
+      image: "",
     });
     triggerToast("New program added to curriculum catalog!");
   };
@@ -2812,7 +2828,7 @@ export default function ConnectHubPage() {
               <input
                 type="file"
                 ref={quickFileInputRef}
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={handleQuickUploadSelect}
                 className="hidden"
               />
@@ -2822,10 +2838,10 @@ export default function ConnectHubPage() {
                 </div>
                 <div className="text-center sm:text-left">
                   <h4 className="text-sm font-bold text-neutral-800">
-                    Tap to Choose Photo from Device Gallery or Drag & Drop Here
+                    Tap to Choose Photo or Video from Device or Drag & Drop Here
                   </h4>
                   <p className="text-xs text-neutral-500 mt-0.5">
-                    Opens your mobile photo library or computer files. JPEG, PNG, WebP supported.
+                    Opens your mobile library or computer files. Photos & Videos (MP4, WebM, MOV) supported.
                   </p>
                 </div>
                 <span className="sm:ml-auto px-3.5 py-1.5 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-bold hover:bg-neutral-200">
@@ -2841,17 +2857,32 @@ export default function ConnectHubPage() {
                   key={img.id}
                   className="group bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-xs relative flex flex-col"
                 >
-                  <div className="relative aspect-[4/3] w-full bg-neutral-100">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute top-2 left-2">
+                  <div className="relative aspect-[4/3] w-full bg-neutral-900 overflow-hidden">
+                    {isVideoMedia(img.src) ? (
+                      <video
+                        src={img.src}
+                        className="w-full h-full object-cover"
+                        controls
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        fill
+                        className="object-cover"
+                      />
+                    )}
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 pointer-events-none">
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-black/60 text-white backdrop-blur-xs">
                         {img.category}
                       </span>
+                      {isVideoMedia(img.src) && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-600/90 text-white backdrop-blur-xs">
+                          Video
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
@@ -3686,7 +3717,7 @@ export default function ConnectHubPage() {
                 </span>
                 <h3 className="font-extrabold text-lg text-neutral-900 flex items-center gap-2">
                   <Camera className="w-5 h-5 text-brand-blue" />
-                  Select image from device gallery
+                  Select photo or video from device
                 </h3>
               </div>
               <button
@@ -3703,113 +3734,17 @@ export default function ConnectHubPage() {
             </div>
 
             <form onSubmit={handleAddImage} className="space-y-4">
-              {/* Hidden device input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                onChange={handleDeviceFileChange}
-                className="hidden"
+              <DeviceMediaUploader
+                label="Device photo or video"
+                value={newImageForm.src || deviceImagePreview}
+                onChange={(url) => {
+                  setNewImageForm((prev) => ({ ...prev, src: url }));
+                  setDeviceImagePreview(url);
+                }}
+                previewAspect="video"
+                required
+                helperText="Select a photo or video directly from your device, camera, or files"
               />
-
-              {/* Photo Upload / Preview Zone */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                  Device photo *
-                </label>
-
-                {deviceImagePreview || newImageForm.src ? (
-                  <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-900 group">
-                    <Image
-                      src={deviceImagePreview || newImageForm.src}
-                      alt="Selected from device"
-                      fill
-                      className="object-cover"
-                    />
-                    {/* Top status */}
-                    <div className="absolute top-2.5 left-2.5 flex items-center gap-2">
-                      {isUploadingImage ? (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500 text-white flex items-center gap-1.5 shadow-xs">
-                          <Loader2 className="w-3 h-3 animate-spin" /> Uploading to server...
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-600 text-white flex items-center gap-1.5 shadow-xs">
-                          <Check className="w-3 h-3" /> Ready from device
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Top right actions */}
-                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 rounded-lg bg-black/75 hover:bg-black text-white text-xs font-semibold backdrop-blur-xs flex items-center gap-1 transition-colors"
-                      >
-                        <Camera className="w-3 h-3" /> Change
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDeviceImagePreview("");
-                          setNewImageForm((p) => ({ ...p, src: "" }));
-                          setSelectedFileName("");
-                          setSelectedFileSize("");
-                        }}
-                        className="p-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-colors"
-                        title="Remove photo"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Bottom file info */}
-                    {selectedFileName && (
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white text-xs">
-                        <p className="font-semibold truncate">{selectedFileName}</p>
-                        <span className="text-xs text-neutral-300">{selectedFileSize}</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragOver(false);
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleProcessFile(file);
-                    }}
-                    className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
-                      isDragOver
-                        ? "border-brand-blue bg-brand-blue/10 scale-[1.01]"
-                        : "border-brand-blue/40 hover:border-brand-blue bg-brand-blue/5 hover:bg-brand-blue/10"
-                    }`}
-                  >
-                    <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 text-brand-blue mx-auto mb-3 flex items-center justify-center">
-                      <Camera className="w-6 h-6" />
-                    </div>
-                    <h4 className="text-sm font-extrabold text-neutral-900 mb-1">
-                      Choose photo from device gallery
-                    </h4>
-                    <p className="text-xs text-neutral-500 max-w-xs mx-auto mb-4">
-                      Tap to open your phone gallery, camera roll, or choose an image file from your computer.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      className="px-5 py-2.5 rounded-xl bg-brand-blue text-white font-semibold text-xs inline-flex items-center gap-2 shadow-xs hover:bg-brand-blue-dark transition-colors"
-                    >
-                      <Upload className="w-3.5 h-3.5" /> Open device gallery
-                    </button>
-                  </div>
-                )}
-              </div>
 
               {/* Mode toggle / preset fallback */}
               <div className="pt-1">
@@ -3821,7 +3756,7 @@ export default function ConnectHubPage() {
                   className="text-xs font-semibold text-brand-blue hover:underline"
                 >
                   {imageSourceMode === "device"
-                    ? "Or choose from demo presets / enter image URL instead →"
+                    ? "Or choose from demo presets / enter media URL instead →"
                     : "← Return to device gallery upload"}
                 </button>
 
@@ -3884,7 +3819,7 @@ export default function ConnectHubPage() {
               {/* Photo Caption */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Photo caption and context *
+                  Media caption and context *
                 </label>
                 <textarea
                   rows={3}
@@ -3898,18 +3833,10 @@ export default function ConnectHubPage() {
 
               <button
                 type="submit"
-                disabled={(!newImageForm.src && !deviceImagePreview) || isUploadingImage}
+                disabled={!newImageForm.src && !deviceImagePreview}
                 className="w-full py-3.5 rounded-xl font-semibold bg-brand-blue text-white hover:bg-brand-blue-dark disabled:bg-neutral-300 disabled:cursor-not-allowed text-xs flex items-center justify-center gap-2 shadow-xs transition-all"
               >
-                {isUploadingImage ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Uploading image...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4" /> Publish image to public gallery
-                  </>
-                )}
+                <Plus className="w-4 h-4" /> Publish media to public gallery
               </button>
             </form>
           </div>
@@ -4460,65 +4387,15 @@ export default function ConnectHubPage() {
                 />
               </div>
 
-              {/* Image from device gallery / presets */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Cover photo (select from device) *
-                </label>
-                <input
-                  ref={newsFileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleProcessNewsFile(file);
-                  }}
-                />
-
-                {newsImagePreview ? (
-                  <div className="relative rounded-2xl overflow-hidden aspect-[16/9] border border-neutral-200 bg-neutral-100 group">
-                    <Image
-                      src={newsImagePreview}
-                      alt="News preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => newsFileInputRef.current?.click()}
-                        className="px-3 py-1.5 rounded-lg bg-white text-neutral-900 text-xs font-semibold shadow-md"
-                      >
-                        Change photo
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewsImagePreview("");
-                          setNewNewsForm((prev) => ({ ...prev, image: "" }));
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-semibold shadow-md"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => newsFileInputRef.current?.click()}
-                    className="border-2 border-dashed border-neutral-300 hover:border-brand-blue rounded-2xl p-5 text-center cursor-pointer bg-neutral-50 hover:bg-neutral-100 transition-colors"
-                  >
-                    <UploadCloud className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                    <span className="text-xs font-semibold text-neutral-800 block">
-                      Choose photo from device gallery
-                    </span>
-                    <span className="text-xs text-neutral-500 block mt-0.5">
-                      Tap or click to browse photos on your phone or computer
-                    </span>
-                  </div>
-                )}
-              </div>
+              {/* Image or Video from device */}
+              <DeviceMediaUploader
+                label="Cover photo or video (select from device)"
+                value={newNewsForm.image}
+                onChange={(url) => setNewNewsForm((prev) => ({ ...prev, image: url }))}
+                previewAspect="video"
+                required
+                helperText="Upload article cover photo or feature video directly from your device"
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
@@ -4679,6 +4556,14 @@ export default function ConnectHubPage() {
                 />
               </div>
 
+              <DeviceMediaUploader
+                label="Event banner photo or promo video (from device)"
+                value={newEventForm.image}
+                onChange={(url) => setNewEventForm({ ...newEventForm, image: url })}
+                previewAspect="banner"
+                helperText="Upload an event flyer, poster, or teaser video from your device"
+              />
+
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Event description and agenda
@@ -4825,18 +4710,13 @@ export default function ConnectHubPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Profile Photo URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="/images/testimonials/participant-1.jpg"
-                  value={teamForm.image}
-                  onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                />
-              </div>
+              <DeviceMediaUploader
+                label="Profile photo or video (from device)"
+                value={teamForm.image}
+                onChange={(url) => setTeamForm({ ...teamForm, image: url })}
+                previewAspect="square"
+                helperText="Upload instructor/mentor portrait photo or brief video greeting"
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -4955,6 +4835,14 @@ export default function ConnectHubPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
+
+              <DeviceMediaUploader
+                label="Partner brand logo or media (from device)"
+                value={partnerForm.logo}
+                onChange={(url) => setPartnerForm({ ...partnerForm, logo: url })}
+                previewAspect="square"
+                helperText="Upload partner emblem, brand badge, or intro video from your device"
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
@@ -5197,6 +5085,14 @@ export default function ConnectHubPage() {
                 />
               </div>
 
+              <DeviceMediaUploader
+                label="Toolkit cover photo or walkthrough video (from device)"
+                value={resourceForm.image}
+                onChange={(url) => setResourceForm({ ...resourceForm, image: url })}
+                previewAspect="banner"
+                helperText="Upload toolkit banner image or overview video from your device"
+              />
+
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Download / Access Link
@@ -5314,18 +5210,13 @@ export default function ConnectHubPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Avatar / Photo URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="/images/testimonials/participant-1.jpg"
-                  value={storyForm.image}
-                  onChange={(e) => setStoryForm({ ...storyForm, image: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                />
-              </div>
+              <DeviceMediaUploader
+                label="Alumni photo or video testimonial (from device)"
+                value={storyForm.image}
+                onChange={(url) => setStoryForm({ ...storyForm, image: url })}
+                previewAspect="square"
+                helperText="Upload graduate headshot or short video testimony from your device"
+              />
 
               <button
                 type="submit"
@@ -5458,6 +5349,14 @@ export default function ConnectHubPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs focus:ring-2 focus:ring-brand-blue focus:outline-none font-mono"
                 />
               </div>
+
+              <DeviceMediaUploader
+                label="Curriculum cover photo or track video (from device)"
+                value={newProgramForm.image}
+                onChange={(url) => setNewProgramForm({ ...newProgramForm, image: url })}
+                previewAspect="video"
+                helperText="Upload curriculum cover image or intro track preview video from your device"
+              />
 
               <button
                 type="submit"

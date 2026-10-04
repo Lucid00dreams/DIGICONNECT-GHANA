@@ -13,7 +13,9 @@ import {
   Tag,
   Sparkles,
   ArrowRight,
+  Film,
 } from "lucide-react";
+import { isVideoMedia } from "@/components/ui/DeviceMediaUploader";
 
 export default function GalleryPage() {
   const { store } = useStore();
@@ -144,18 +146,35 @@ export default function GalleryPage() {
                   onClick={() => openLightbox(index)}
                   className="group relative rounded-2xl overflow-hidden bg-white border border-neutral-200 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-[4/3]"
                 >
-                  <Image
-                    src={item.src}
-                    alt={item.alt || "DigiConnect Ghana"}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
+                  {isVideoMedia(item.src) ? (
+                    <video
+                      src={item.src}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    <Image
+                      src={item.src}
+                      alt={item.alt || "DigiConnect Ghana"}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  )}
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-blue text-white self-start mb-2">
-                      {item.category || "Community"}
-                    </span>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-blue text-white self-start">
+                        {item.category || "Community"}
+                      </span>
+                      {isVideoMedia(item.src) && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-600 text-white self-start">
+                          <Film className="w-3 h-3" /> Video
+                        </span>
+                      )}
+                    </div>
                     <h3 className="text-white text-sm font-bold line-clamp-2">
                       {item.caption || item.alt}
                     </h3>
@@ -260,15 +279,25 @@ export default function GalleryPage() {
               <ChevronLeft className="w-6 h-6" />
             </button>
 
-            <div className="relative w-full h-full max-w-4xl max-h-[75vh]">
-              <Image
-                src={filteredItems[lightboxIndex].src}
-                alt={filteredItems[lightboxIndex].alt}
-                fill
-                className="object-contain"
-                sizes="(max-width: 1024px) 100vw, 80vw"
-                priority
-              />
+            <div className="relative w-full h-full max-w-4xl max-h-[75vh] flex items-center justify-center">
+              {isVideoMedia(filteredItems[lightboxIndex].src) ? (
+                <video
+                  src={filteredItems[lightboxIndex].src}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-w-full max-h-[75vh] rounded-2xl object-contain shadow-2xl"
+                />
+              ) : (
+                <Image
+                  src={filteredItems[lightboxIndex].src}
+                  alt={filteredItems[lightboxIndex].alt}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 100vw, 80vw"
+                  priority
+                />
+              )}
             </div>
 
             <button

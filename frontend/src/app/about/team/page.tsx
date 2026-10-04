@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { isVideoMedia } from "@/components/ui/DeviceMediaUploader";
 import {
   Users,
   ArrowRight,
@@ -82,13 +83,23 @@ export default function TeamPage() {
                 <div className="group h-full bg-neutral-50/80 rounded-3xl p-6 border border-neutral-200/80 hover:border-brand-blue/40 transition-all hover:shadow-xl flex flex-col justify-between">
                   <div>
                     <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-5 bg-neutral-200 border border-neutral-200">
-                      <Image
-                        src={member.image || "/images/testimonials/participant-1.jpg"}
-                        alt={member.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
+                      {isVideoMedia(member.image) ? (
+                        <video
+                          src={member.image}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <Image
+                          src={member.image || "/images/testimonials/participant-1.jpg"}
+                          alt={member.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        />
+                      )}
                     </div>
                     {member.department && (
                       <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue inline-block mb-2">

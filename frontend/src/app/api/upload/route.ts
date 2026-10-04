@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
     await fs.mkdir(uploadsDir, { recursive: true });
 
     // Clean filename
-    const ext = path.extname(file.name) || ".jpg";
+    const isVideo = file.type.startsWith("video/");
+    const ext = path.extname(file.name) || (isVideo ? ".mp4" : ".jpg");
     const baseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
     const uniqueName = `${baseName}-${Date.now()}${ext}`;
     const filePath = path.join(uploadsDir, uniqueName);
@@ -32,11 +33,12 @@ export async function POST(request: NextRequest) {
       success: true,
       url: publicUrl,
       filename: uniqueName,
+      mediaType: isVideo ? "video" : "image",
     });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload image" },
+      { error: "Failed to upload media file" },
       { status: 500 }
     );
   }
