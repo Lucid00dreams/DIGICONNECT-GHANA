@@ -11,6 +11,7 @@ interface CodeSandboxProps {
 
 export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
   const [activeTab, setActiveTab] = useState<"html" | "css" | "js">("html");
+  const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
   const [html, setHtml] = useState(config.initialHtml);
   const [css, setCss] = useState(config.initialCss);
   const [js, setJs] = useState(config.initialJs);
@@ -41,6 +42,8 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
 
   const handleRun = () => {
     setRunKey((k) => k + 1);
+    // On mobile, automatically show the preview when running code
+    setMobileView("preview");
     if (onCodeRun) {
       onCodeRun();
     }
@@ -88,14 +91,44 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
   `;
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-3xl shadow-xs overflow-hidden flex flex-col flex-1">
+    <div className="bg-white border border-neutral-200 rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden flex flex-col flex-1">
+      {/* Mobile View Switcher (Editor vs Output Preview) */}
+      <div className="md:hidden flex items-center border-b border-neutral-200 bg-neutral-100 p-1 text-xs">
+        <button
+          type="button"
+          onClick={() => setMobileView("editor")}
+          className={`flex-1 py-1.5 rounded-lg font-semibold transition text-center ${
+            mobileView === "editor"
+              ? "bg-white text-neutral-900 shadow-2xs font-bold"
+              : "text-neutral-500 hover:text-neutral-900"
+          }`}
+        >
+          Code Editor ({activeTab.toUpperCase()})
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView("preview")}
+          className={`flex-1 py-1.5 rounded-lg font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+            mobileView === "preview"
+              ? "bg-white text-neutral-900 shadow-2xs font-bold"
+              : "text-neutral-500 hover:text-neutral-900"
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>Live Preview</span>
+        </button>
+      </div>
+
       {/* Top Controls Toolbar */}
-      <div className="bg-neutral-50 border-b border-neutral-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-neutral-50 border-b border-neutral-200 px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         {/* Editor Tab Selectors */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5">
           <button
-            onClick={() => setActiveTab("html")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
+            onClick={() => {
+              setActiveTab("html");
+              setMobileView("editor");
+            }}
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg sm:rounded-xl transition ${
               activeTab === "html"
                 ? "bg-white text-neutral-900 border border-neutral-200 shadow-2xs"
                 : "text-neutral-500 hover:text-neutral-900"
@@ -105,8 +138,11 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
           </button>
 
           <button
-            onClick={() => setActiveTab("css")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
+            onClick={() => {
+              setActiveTab("css");
+              setMobileView("editor");
+            }}
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg sm:rounded-xl transition ${
               activeTab === "css"
                 ? "bg-white text-neutral-900 border border-neutral-200 shadow-2xs"
                 : "text-neutral-500 hover:text-neutral-900"
@@ -116,40 +152,43 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
           </button>
 
           <button
-            onClick={() => setActiveTab("js")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
+            onClick={() => {
+              setActiveTab("js");
+              setMobileView("editor");
+            }}
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg sm:rounded-xl transition ${
               activeTab === "js"
                 ? "bg-white text-neutral-900 border border-neutral-200 shadow-2xs"
                 : "text-neutral-500 hover:text-neutral-900"
             }`}
           >
-            JavaScript
+            JS
           </button>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={handleCopy}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-medium transition shadow-2xs"
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-medium transition shadow-2xs"
             title="Copy all code"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? "Copied" : "Copy"}</span>
+            <span className="hidden xs:inline">{copied ? "Copied" : "Copy"}</span>
           </button>
 
           <button
             onClick={handleReset}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-medium transition shadow-2xs"
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-medium transition shadow-2xs"
             title="Reset code"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
+            <span className="hidden xs:inline">Reset</span>
           </button>
 
           <button
             onClick={handleRun}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-semibold transition shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-lg sm:rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-semibold transition shadow-2xs active:scale-[0.98]"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>Run Code</span>
@@ -159,7 +198,7 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
 
       {/* Challenge Instructions */}
       {config.challengeInstructions && (
-        <div className="bg-brand-blue-light/30 border-b border-brand-blue/15 px-5 py-3 text-xs text-neutral-800 flex items-start gap-2.5">
+        <div className="bg-brand-blue-light/30 border-b border-brand-blue/15 px-4 sm:px-5 py-2.5 sm:py-3 text-xs text-neutral-800 flex items-start gap-2.5">
           <Code2 className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <span className="font-semibold text-neutral-900">Lab Challenge: </span>
@@ -169,21 +208,25 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
       )}
 
       {/* Editor & Preview Split Workspace */}
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-200 flex-1 min-h-[460px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-200 flex-1 min-h-[360px] sm:min-h-[460px]">
         {/* Code Editor Window */}
-        <div className="flex flex-col bg-neutral-900 text-neutral-100">
-          <div className="bg-neutral-950 px-4 py-2 border-b border-neutral-800 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+        <div
+          className={`${
+            mobileView === "editor" ? "flex" : "hidden"
+          } md:flex flex-col bg-neutral-900 text-neutral-100 flex-1`}
+        >
+          <div className="bg-neutral-950 px-3.5 sm:px-4 py-2 border-b border-neutral-800 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
             <span>Editor • {activeTab.toUpperCase()}</span>
             <span>UTF-8</span>
           </div>
 
-          <div className="relative flex-1 p-3">
+          <div className="relative flex-1 p-2 sm:p-3">
             {activeTab === "html" && (
               <textarea
                 value={html}
                 onChange={(e) => setHtml(e.target.value)}
                 spellCheck={false}
-                className="w-full h-full min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
+                className="w-full h-full min-h-[300px] sm:min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
                 placeholder="Write your HTML here..."
               />
             )}
@@ -192,7 +235,7 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
                 value={css}
                 onChange={(e) => setCss(e.target.value)}
                 spellCheck={false}
-                className="w-full h-full min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
+                className="w-full h-full min-h-[300px] sm:min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
                 placeholder="Write your CSS styling here..."
               />
             )}
@@ -201,7 +244,7 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
                 value={js}
                 onChange={(e) => setJs(e.target.value)}
                 spellCheck={false}
-                className="w-full h-full min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
+                className="w-full h-full min-h-[300px] sm:min-h-[360px] bg-transparent text-neutral-100 font-mono text-xs leading-relaxed resize-none focus:outline-none focus:ring-0 select-text p-2"
                 placeholder="Write your JavaScript logic here..."
               />
             )}
@@ -209,8 +252,12 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
         </div>
 
         {/* Live Output Preview */}
-        <div className="flex flex-col bg-white">
-          <div className="bg-neutral-50 px-4 py-2 border-b border-neutral-200 flex items-center justify-between text-[11px] text-neutral-500 font-medium">
+        <div
+          className={`${
+            mobileView === "preview" ? "flex" : "hidden"
+          } md:flex flex-col bg-white flex-1`}
+        >
+          <div className="bg-neutral-50 px-3.5 sm:px-4 py-2 border-b border-neutral-200 flex items-center justify-between text-[11px] text-neutral-500 font-medium">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
               Browser Output Preview
@@ -218,13 +265,13 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
             <span>Sandboxed</span>
           </div>
 
-          <div className="flex-1 bg-white relative">
+          <div className="flex-1 bg-white relative min-h-[320px] sm:min-h-[380px]">
             <iframe
               key={runKey}
               srcDoc={combinedSrcDoc}
               title="Code Preview Sandbox"
               sandbox="allow-scripts allow-modals"
-              className="w-full h-full min-h-[380px] border-0"
+              className="w-full h-full border-0 absolute inset-0"
             />
           </div>
         </div>
@@ -232,3 +279,5 @@ export function CodeSandbox({ config, onCodeRun }: CodeSandboxProps) {
     </div>
   );
 }
+
+

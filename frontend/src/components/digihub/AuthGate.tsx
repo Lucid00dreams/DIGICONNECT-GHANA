@@ -93,15 +93,15 @@ export function AuthGate({
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-white border border-neutral-200/90 rounded-3xl p-6 sm:p-8 shadow-md">
+    <div className="min-h-[80vh] flex items-center justify-center p-3 sm:p-6">
+      <div className="w-full max-w-md bg-white border border-neutral-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-md">
         {/* DigiConnect Ghana Header */}
         <div className="text-center space-y-2 mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue-light text-brand-blue">
             <GraduationCap className="w-4 h-4" />
             DIGIHub Student Access
           </div>
-          <h2 className="text-2xl font-extrabold text-neutral-900 tracking-tight">{title}</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-neutral-900 tracking-tight">{title}</h2>
           <p className="text-xs text-neutral-600 leading-relaxed max-w-sm mx-auto">{subtitle}</p>
         </div>
 
@@ -240,7 +240,7 @@ export function AuthGate({
               <label className="block font-semibold text-neutral-700 mb-1.5">
                 Select Your Primary Learning Track
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setSelectedTrack("coding")}
@@ -252,7 +252,7 @@ export function AuthGate({
                 >
                   <Code2 className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
-                    <div className="font-semibold text-neutral-900 text-[11px]">Basic Web Coding</div>
+                    <div className="font-semibold text-neutral-900 text-xs sm:text-[11px]">Basic Web Coding</div>
                     <div className="text-[10px] text-neutral-500">HTML & CSS</div>
                   </div>
                 </button>
@@ -268,7 +268,7 @@ export function AuthGate({
                 >
                   <Shield className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
-                    <div className="font-semibold text-neutral-900 text-[11px]">Cyber Defense</div>
+                    <div className="font-semibold text-neutral-900 text-xs sm:text-[11px]">Cyber Defense</div>
                     <div className="text-[10px] text-neutral-500">Threat Labs</div>
                   </div>
                 </button>

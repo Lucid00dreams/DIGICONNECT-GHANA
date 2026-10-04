@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   Code2,
   Shield,
@@ -37,6 +38,7 @@ export default function DIGIHubLessonPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [activePaneTab, setActivePaneTab] = useState<"content" | "quiz">("content");
+  const [mobileActiveView, setMobileActiveView] = useState<"guide" | "lab">("guide");
   const [completionToast, setCompletionToast] = useState(false);
 
   useEffect(() => {
@@ -102,9 +104,9 @@ export default function DIGIHubLessonPage() {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col pt-16">
       {/* Top Header */}
-      <header className="sticky top-16 z-40 bg-white border-b border-neutral-200 px-4 sm:px-6 py-3.5 shadow-2xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+      <header className="sticky top-16 z-40 bg-white border-b border-neutral-200 px-3.5 sm:px-6 py-2.5 sm:py-3.5 shadow-2xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <Link
               href="/digihub"
               className="p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition shrink-0"
@@ -113,35 +115,35 @@ export default function DIGIHubLessonPage() {
               <ArrowLeft className="w-4 h-4" />
             </Link>
 
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-[11px] text-neutral-500">
-                <span className="font-semibold text-brand-blue">
-                  Module {lesson.moduleNumber}: {lesson.moduleTitle}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-neutral-500 truncate">
+                <span className="font-semibold text-brand-blue shrink-0">
+                  Mod 0{lesson.moduleNumber}
                 </span>
                 <span>•</span>
-                <span>Lesson {lesson.lessonNumber}</span>
+                <span className="truncate">{lesson.moduleTitle}</span>
               </div>
-              <h1 className="text-base sm:text-lg font-bold text-neutral-900 truncate">{lesson.title}</h1>
+              <h1 className="text-xs sm:text-base font-bold text-neutral-900 truncate">{lesson.title}</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
               <Clock className="w-3.5 h-3.5 text-neutral-400" />
               <span>{lesson.durationMinutes} mins</span>
             </div>
 
             {isCompleted ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Completed</span>
+              <span className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden xs:inline">Completed</span>
               </span>
             ) : (
               <button
                 onClick={handleMarkComplete}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs shadow-2xs transition"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs shadow-2xs transition active:scale-[0.98]"
               >
-                Mark Complete
+                <span>Mark Complete</span>
               </button>
             )}
 
@@ -150,13 +152,44 @@ export default function DIGIHubLessonPage() {
                 href={`/digihub/lesson/${nextLesson.id}`}
                 className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-xs transition"
               >
-                <span>Next Module</span>
+                <span>Next</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             )}
           </div>
         </div>
       </header>
+
+      {/* Mobile Mode Switcher: visible below lg */}
+      <div className="lg:hidden bg-white border-b border-neutral-200 px-3.5 py-2">
+        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setMobileActiveView("guide")}
+            className={`flex-1 py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${
+              mobileActiveView === "guide"
+                ? "bg-white text-neutral-900 shadow-2xs font-bold"
+                : "text-neutral-500 hover:text-neutral-900"
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Guide & Quiz</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileActiveView("lab")}
+            className={`flex-1 py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${
+              mobileActiveView === "lab"
+                ? "bg-brand-blue text-white shadow-2xs font-bold"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            {lesson.sandboxConfig ? <Code2 className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
+            <span>Interactive Lab</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          </button>
+        </div>
+      </div>
 
       {/* Completion Toast Notification */}
       {completionToast && (
@@ -167,9 +200,13 @@ export default function DIGIHubLessonPage() {
       )}
 
       {/* Split-Pane Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT PANE: Theory, Key Takeaways & Quiz (5 cols on lg) */}
-        <div className="lg:col-span-5 flex flex-col space-y-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+        {/* LEFT PANE: Theory, Key Takeaways & Quiz */}
+        <div
+          className={`${
+            mobileActiveView === "guide" ? "flex" : "hidden"
+          } lg:flex lg:col-span-5 flex-col space-y-4`}
+        >
           {/* Sub Navigation */}
           <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs">
             <button
@@ -190,7 +227,7 @@ export default function DIGIHubLessonPage() {
                   : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              Knowledge Check
+              <span>Knowledge Check</span>
               <span className="w-4 h-4 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-bold flex items-center justify-center">
                 {lesson.quiz.length}
               </span>
@@ -198,14 +235,14 @@ export default function DIGIHubLessonPage() {
           </div>
 
           {activePaneTab === "content" ? (
-            <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-7 space-y-6 flex-1 shadow-xs">
+            <div className="bg-white border border-neutral-200 rounded-2xl sm:rounded-3xl p-4 sm:p-7 space-y-5 sm:space-y-6 flex-1 shadow-xs">
               {/* Summary card */}
-              <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
-                <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
+              <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center justify-between text-xs text-neutral-500 mb-1.5 sm:mb-2">
                   <span className="font-semibold text-brand-blue">Module Overview</span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-[11px]">
                     <Clock className="w-3.5 h-3.5" />
-                    {lesson.durationMinutes} min reading & lab
+                    {lesson.durationMinutes} mins
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed">{lesson.summary}</p>
@@ -216,14 +253,14 @@ export default function DIGIHubLessonPage() {
                 {lesson.markdownContent.split("\n\n").map((para, i) => {
                   if (para.startsWith("### ")) {
                     return (
-                      <h3 key={i} className="text-base font-bold text-neutral-900 pt-2">
+                      <h3 key={i} className="text-sm sm:text-base font-bold text-neutral-900 pt-2">
                         {para.replace("### ", "")}
                       </h3>
                     );
                   }
                   if (para.startsWith("## ")) {
                     return (
-                      <h2 key={i} className="text-lg font-bold text-neutral-900 pt-3 border-b border-neutral-100 pb-1">
+                      <h2 key={i} className="text-base sm:text-lg font-bold text-neutral-900 pt-3 border-b border-neutral-100 pb-1">
                         {para.replace("## ", "")}
                       </h2>
                     );
@@ -243,10 +280,10 @@ export default function DIGIHubLessonPage() {
               </div>
 
               {/* Key Takeaways */}
-              <div className="p-5 rounded-2xl bg-brand-blue-light/40 border border-brand-blue/20 space-y-3">
+              <div className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-brand-blue-light/40 border border-brand-blue/20 space-y-2.5 sm:space-y-3">
                 <h4 className="text-xs font-bold text-brand-blue-dark flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-brand-blue" />
-                  Key Takeaways
+                  <span>Key Takeaways</span>
                 </h4>
                 <ul className="space-y-2">
                   {lesson.keyTakeaways.map((point, index) => (
@@ -258,33 +295,80 @@ export default function DIGIHubLessonPage() {
                 </ul>
               </div>
 
-              {/* Switch to Quiz Prompt */}
-              <div className="pt-2">
+              {/* Prompts to switch to Quiz or directly jump to Lab on mobile */}
+              <div className="pt-2 space-y-2.5">
                 <button
+                  type="button"
                   onClick={() => setActivePaneTab("quiz")}
-                  className="w-full py-3 rounded-2xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-xs transition flex items-center justify-center gap-2"
+                  className="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-xs transition flex items-center justify-center gap-2"
                 >
                   <span>Test Knowledge ({lesson.quiz.length} Questions)</span>
                   <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileActiveView("lab");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="lg:hidden w-full py-2.5 rounded-xl bg-brand-blue text-white font-semibold text-xs transition flex items-center justify-center gap-2 shadow-2xs"
+                >
+                  <span>Open Interactive Lab Workspace</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           ) : (
             /* Quiz Tab */
-            <QuizWidget
-              questions={lesson.quiz}
-              xpAward={lesson.xpAward}
-              onQuizCompleted={(score: number, total: number) => {
-                if (score === total) {
-                  handleMarkComplete();
-                }
-              }}
-            />
+            <div className="space-y-3">
+              <QuizWidget
+                questions={lesson.quiz}
+                xpAward={lesson.xpAward}
+                onQuizCompleted={(score: number, total: number) => {
+                  if (score === total) {
+                    handleMarkComplete();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileActiveView("lab");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="lg:hidden w-full py-2.5 rounded-xl bg-brand-blue text-white font-semibold text-xs transition flex items-center justify-center gap-2 shadow-2xs"
+              >
+                <span>Jump to Interactive Lab →</span>
+              </button>
+            </div>
           )}
         </div>
 
-        {/* RIGHT PANE: Interactive Sandbox / Cyber Lab (7 cols on lg) */}
-        <div className="lg:col-span-7 flex flex-col">
+        {/* RIGHT PANE: Interactive Sandbox / Cyber Lab */}
+        <div
+          className={`${
+            mobileActiveView === "lab" ? "flex" : "hidden"
+          } lg:flex lg:col-span-7 flex-col space-y-3`}
+        >
+          {/* Mobile Back Button to Guide */}
+          <div className="lg:hidden flex items-center justify-between pb-1">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileActiveView("guide");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-brand-blue font-semibold hover:underline"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Lesson Guide</span>
+            </button>
+            <span className="text-[11px] text-neutral-400">
+              Module 0{lesson.moduleNumber} Lab
+            </span>
+          </div>
+
           {lesson.sandboxConfig && (
             <CodeSandbox
               config={lesson.sandboxConfig}

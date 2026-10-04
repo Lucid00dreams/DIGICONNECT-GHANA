@@ -89,24 +89,24 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
   const entropy = calculateEntropy(testPassword);
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-3xl shadow-xs overflow-hidden flex flex-col flex-1">
+    <div className="bg-white border border-neutral-200 rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden flex flex-col flex-1">
       {/* Top Header */}
-      <div className="bg-neutral-50 border-b border-neutral-200 px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue flex items-center justify-center">
+      <div className="bg-neutral-50 border-b border-neutral-200 px-3.5 sm:px-5 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue flex items-center justify-center shrink-0">
             {config.type === "phishing-detector" && <ShieldAlert className="w-4 h-4" />}
             {config.type === "password-auditor" && <KeyRound className="w-4 h-4" />}
             {config.type === "sqli-defender" && <Database className="w-4 h-4" />}
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-neutral-900">{config.title}</h3>
-            <span className="text-[11px] text-neutral-500">{config.scenario}</span>
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-sm font-bold text-neutral-900 truncate">{config.title}</h3>
+            <span className="text-[11px] text-neutral-500 block truncate">{config.scenario}</span>
           </div>
         </div>
 
         <button
           onClick={() => setShowHint(!showHint)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition shrink-0 ${
             showHint
               ? "bg-amber-50 text-amber-800 border-amber-300"
               : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
@@ -119,7 +119,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
 
       {/* Guidance Alert */}
       {showHint && (
-        <div className="bg-amber-50/70 border-b border-amber-200/80 p-4 text-xs text-amber-900 flex items-start gap-2.5">
+        <div className="bg-amber-50/70 border-b border-amber-200/80 p-3.5 sm:p-4 text-xs text-amber-900 flex items-start gap-2.5">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <span className="font-semibold text-amber-950">Security Rule: </span>
@@ -129,24 +129,24 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
       )}
 
       {/* Main Lab Workspace */}
-      <div className="p-5 sm:p-7 flex-1 space-y-6">
+      <div className="p-3.5 sm:p-7 flex-1 space-y-5 sm:space-y-6">
         {/* LAB 1: PHISHING DETECTOR */}
         {config.type === "phishing-detector" && (
-          <div className="space-y-6">
-            <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-700">
+          <div className="space-y-5 sm:space-y-6">
+            <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-700 leading-relaxed">
               <span className="font-semibold text-neutral-900">Task: </span>
               {config.prompt}
             </div>
 
             {/* Email UI Simulation */}
-            <div className="bg-white rounded-2xl border border-neutral-300 shadow-2xs overflow-hidden">
+            <div className="bg-white rounded-xl sm:rounded-2xl border border-neutral-300 shadow-2xs overflow-hidden">
               {/* Fake Email Header */}
-              <div className="bg-neutral-100/90 border-b border-neutral-200 p-4 space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-500 font-medium">From:</span>
+              <div className="bg-neutral-100/90 border-b border-neutral-200 p-3 sm:p-4 space-y-2.5 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <span className="text-neutral-500 font-medium shrink-0">From:</span>
                   <button
                     onClick={() => handleToggleFlag(0)}
-                    className={`text-left font-mono px-2 py-1 rounded-md transition ${
+                    className={`text-left font-mono px-2 py-1 rounded-md transition break-all leading-normal ${
                       discoveredFlags.includes(0)
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold"
                         : "bg-neutral-200/70 text-neutral-800 hover:bg-neutral-200"
@@ -154,20 +154,20 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                     title="Inspect sender email"
                   >
                     Gh-Revenue-Authority &lt;security-alert@gh-gov-taxes-portal.net&gt;
-                    {discoveredFlags.includes(0) && " ✓ Spoofed Domain Identified"}
+                    {discoveredFlags.includes(0) && " ✓ Spoofed Domain"}
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-500 font-medium">To:</span>
-                  <span className="text-neutral-700 font-mono">student.account@digiconnect.org</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <span className="text-neutral-500 font-medium shrink-0">To:</span>
+                  <span className="text-neutral-700 font-mono break-all">student.account@digiconnect.org</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-500 font-medium">Subject:</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <span className="text-neutral-500 font-medium shrink-0">Subject:</span>
                   <button
                     onClick={() => handleToggleFlag(1)}
-                    className={`font-semibold px-2 py-0.5 rounded-md transition ${
+                    className={`font-semibold px-2 py-1 rounded-md transition text-left leading-snug break-words ${
                       discoveredFlags.includes(1)
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                         : "text-neutral-900 hover:bg-neutral-200/60"
@@ -180,7 +180,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
               </div>
 
               {/* Email Body */}
-              <div className="p-6 space-y-4 text-xs sm:text-sm text-neutral-800 leading-relaxed">
+              <div className="p-4 sm:p-6 space-y-4 text-xs sm:text-sm text-neutral-800 leading-relaxed">
                 <p>Dear Valued Citizen,</p>
                 <p>
                   Our automated audit system identified an unpaid registration penalty of <strong>GH₵ 420.00</strong> on your national profile.
@@ -190,7 +190,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                 <div className="py-2 text-center">
                   <button
                     onClick={() => handleToggleFlag(2)}
-                    className={`inline-block px-5 py-2.5 rounded-xl font-semibold text-xs transition border ${
+                    className={`inline-block w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs transition border leading-normal break-words ${
                       discoveredFlags.includes(2)
                         ? "bg-emerald-100 text-emerald-800 border-emerald-400"
                         : "bg-neutral-900 text-white hover:bg-neutral-800 border-neutral-900"
@@ -200,7 +200,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                       ? "✓ Identified Raw IP Destination (http://185.220.101.5/verify)"
                       : "Click Here to Clear Fine & Authenticate ID"}
                   </button>
-                  <div className="text-[11px] text-neutral-400 font-mono mt-1.5">
+                  <div className="text-[11px] text-neutral-400 font-mono mt-1.5 break-all">
                     Target URL: http://185.220.101.5/verify-account?token=9281
                   </div>
                 </div>
@@ -212,12 +212,12 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
             </div>
 
             {/* Flags Checklist */}
-            <div className="bg-neutral-50 rounded-2xl border border-neutral-200 p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs">
+            <div className="bg-neutral-50 rounded-xl sm:rounded-2xl border border-neutral-200 p-3.5 sm:p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                 <span className="font-semibold text-neutral-800">
                   Deceptive Indicators Discovered ({discoveredFlags.length} of 3)
                 </span>
-                <span className="text-neutral-500">Click suspicious elements in the email to analyze</span>
+                <span className="text-neutral-500">Tap suspicious elements in the email above</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
@@ -338,10 +338,10 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
             </div>
 
             {/* Mode Toggle */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setQueryMode("vulnerable")}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition ${
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition text-center ${
                   queryMode === "vulnerable"
                     ? "bg-rose-50 text-rose-800 border-rose-300"
                     : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
@@ -354,7 +354,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                   setQueryMode("parameterized");
                   if (onLabCompleted) onLabCompleted();
                 }}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition ${
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold border transition text-center ${
                   queryMode === "parameterized"
                     ? "bg-emerald-50 text-emerald-800 border-emerald-300"
                     : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100"
