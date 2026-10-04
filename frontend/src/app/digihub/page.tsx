@@ -18,6 +18,8 @@ import {
   GraduationCap,
   Calendar,
   FileCheck,
+  LogOut,
+  User,
 } from "lucide-react";
 import {
   LEARNING_TRACKS,
@@ -26,13 +28,17 @@ import {
   getLearnerProgress,
   getBookedSessions,
   saveLearnerProgress,
+  getActiveUser,
+  signOutLMS,
   Mentor,
   MentorshipSession,
   LearnerProgress,
   Lesson,
+  LMSUser,
 } from "@/lib/lmsStore";
 import { MentorBookingModal } from "@/components/digihub/MentorBookingModal";
 import { CertificateModal } from "@/components/digihub/CertificateModal";
+import { AuthGate } from "@/components/digihub/AuthGate";
 
 export default function DIGIHubPage() {
   const [activeTab, setActiveTab] = useState<"tracks" | "mentorship" | "certificate">("tracks");
@@ -43,21 +49,35 @@ export default function DIGIHubPage() {
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [selectedTrackFilter, setSelectedTrackFilter] = useState<"all" | "coding" | "cybersecurity">("all");
 
+  const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
   const allLessons = getAllLessons();
 
   useEffect(() => {
+    const user = getActiveUser();
+    setCurrentUser(user);
+    setAuthChecked(true);
+
     setProgress(getLearnerProgress());
     setSessions(getBookedSessions());
 
     const handleProgressUpdate = () => setProgress(getLearnerProgress());
     const handleSessionsUpdate = () => setSessions(getBookedSessions());
+    const handleAuthChange = () => {
+      const u = getActiveUser();
+      setCurrentUser(u);
+      setProgress(getLearnerProgress());
+    };
 
     window.addEventListener("digihub_progress_updated", handleProgressUpdate);
     window.addEventListener("digihub_sessions_updated", handleSessionsUpdate);
+    window.addEventListener("digihub_auth_changed", handleAuthChange);
 
     return () => {
       window.removeEventListener("digihub_progress_updated", handleProgressUpdate);
       window.removeEventListener("digihub_sessions_updated", handleSessionsUpdate);
+      window.removeEventListener("digihub_auth_changed", handleAuthChange);
     };
   }, []);
 
@@ -77,11 +97,61 @@ export default function DIGIHubPage() {
     setProgress(updated);
   };
 
+  // If user is not yet logged in, render the AuthGate
+  if (authChecked && !currentUser) {
+    return (
+      <div className="min-h-screen bg-neutral-50 pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AuthGate onAuthenticated={(user) => setCurrentUser(user)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <section className="bg-white rounded-3xl border border-neutral-200/90 p-6 sm:p-10 shadow-xs mb-8">
+          {/* Active Student Bar */}
+          {currentUser && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-5 mb-6">
+              <div className="flex items-center gap-3">
+                {currentUser.avatar ? (
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-10 h-10 rounded-full object-cover border border-neutral-200 shadow-2xs"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-brand-blue-light text-brand-blue font-bold text-xs flex items-center justify-center border border-brand-blue/20">
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="text-xs font-bold text-neutral-900 flex items-center gap-2">
+                    <span>{currentUser.name}</span>
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">
+                      {currentUser.provider === "google" ? "Google Account" : "Student"}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-neutral-500">{currentUser.email}</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  signOutLMS();
+                  setCurrentUser(null);
+                }}
+                className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 text-xs font-semibold transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="max-w-2xl space-y-3">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue-light text-brand-blue">

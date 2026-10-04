@@ -101,6 +101,22 @@ export interface MentorshipSession {
   createdAt: string;
 }
 
+export interface LMSUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  provider: "email" | "google";
+  role: "student" | "mentor" | "admin";
+  createdAt: string;
+  lastActive: string;
+  completedLessonIds: string[];
+  enrolledTracks: ("coding" | "cybersecurity")[];
+  currentTrackId: "coding" | "cybersecurity";
+  certificateClaimed: boolean;
+  notes?: string;
+}
+
 export interface LearnerProgress {
   completedLessonIds: string[];
   currentTrackId: "coding" | "cybersecurity";
@@ -724,49 +740,264 @@ export const INITIAL_SESSIONS: MentorshipSession[] = [
   },
 ];
 
+// ─── INITIAL REGISTERED STUDENTS (FOR CONNECTHUB MONITORING) ───────────
+
+export const INITIAL_STUDENTS: LMSUser[] = [
+  {
+    id: "stu-1",
+    name: "Emmanuel Adjei",
+    email: "emmanuel.adjei@example.com",
+    avatar: "/images/testimonials/participant-1.jpg",
+    provider: "email",
+    role: "student",
+    createdAt: "2026-09-15T09:00:00Z",
+    lastActive: "2026-10-04T08:15:00Z",
+    completedLessonIds: ["code-101", "code-102"],
+    enrolledTracks: ["coding"],
+    currentTrackId: "coding",
+    certificateClaimed: false,
+    notes: "Active participant in Accra HTML/CSS workshop cohorts.",
+  },
+  {
+    id: "stu-2",
+    name: "Akosua Mensah",
+    email: "akosua.m@gmail.com",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    provider: "google",
+    role: "student",
+    createdAt: "2026-09-18T14:30:00Z",
+    lastActive: "2026-10-03T18:40:00Z",
+    completedLessonIds: ["cyber-101", "cyber-102", "cyber-103", "code-101"],
+    enrolledTracks: ["cybersecurity", "coding"],
+    currentTrackId: "cybersecurity",
+    certificateClaimed: true,
+    notes: "Completed all 3 cyber threat simulations and earned verified diploma.",
+  },
+  {
+    id: "stu-3",
+    name: "Kweku Frimpong",
+    email: "kweku.frimpong@gmail.com",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    provider: "google",
+    role: "student",
+    createdAt: "2026-09-24T11:20:00Z",
+    lastActive: "2026-10-02T16:05:00Z",
+    completedLessonIds: ["code-101"],
+    enrolledTracks: ["coding"],
+    currentTrackId: "coding",
+    certificateClaimed: false,
+    notes: "Kumasi high school graduate studying responsive design.",
+  },
+  {
+    id: "stu-4",
+    name: "Blessing Appiah",
+    email: "blessing.appiah@example.com",
+    avatar: "/images/testimonials/participant-3.jpg",
+    provider: "email",
+    role: "student",
+    createdAt: "2026-09-10T10:00:00Z",
+    lastActive: "2026-10-04T07:22:00Z",
+    completedLessonIds: ["code-101", "code-102", "code-103", "cyber-101", "cyber-102"],
+    enrolledTracks: ["coding", "cybersecurity"],
+    currentTrackId: "coding",
+    certificateClaimed: true,
+    notes: "Outstanding progress across both tracks; ready for internship placement.",
+  },
+  {
+    id: "stu-5",
+    name: "Kofi Danso",
+    email: "kofi.danso@gmail.com",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    provider: "google",
+    role: "student",
+    createdAt: "2026-10-01T15:00:00Z",
+    lastActive: "2026-10-03T09:12:00Z",
+    completedLessonIds: [],
+    enrolledTracks: ["cybersecurity"],
+    currentTrackId: "cybersecurity",
+    certificateClaimed: false,
+    notes: "Enrolled recently. Needs onboarding check-in.",
+  },
+];
+
 // ─── LOCAL STORAGE KEYS & STORE HELPERS ────────────────────────────────
 
+const LMS_USERS_KEY = "dcg_digihub_users_v1";
+const LMS_ACTIVE_USER_KEY = "dcg_digihub_active_user_v1";
 const LMS_PROGRESS_KEY = "dcg_digihub_progress_v1";
 const LMS_SESSIONS_KEY = "dcg_digihub_sessions_v1";
 const LMS_LESSONS_KEY = "dcg_digihub_lessons_v1";
 
+export function getAllLMSUsers(): LMSUser[] {
+  if (typeof window === "undefined") return INITIAL_STUDENTS;
+  try {
+    const raw = localStorage.getItem(LMS_USERS_KEY);
+    if (!raw) {
+      localStorage.setItem(LMS_USERS_KEY, JSON.stringify(INITIAL_STUDENTS));
+      return INITIAL_STUDENTS;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return INITIAL_STUDENTS;
+  }
+}
+
+export function saveLMSUsers(users: LMSUser[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LMS_USERS_KEY, JSON.stringify(users));
+  window.dispatchEvent(new Event("digihub_users_updated"));
+}
+
+export function getActiveUser(): LMSUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(LMS_ACTIVE_USER_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setActiveUser(user: LMSUser | null): void {
+  if (typeof window === "undefined") return;
+  if (!user) {
+    localStorage.removeItem(LMS_ACTIVE_USER_KEY);
+  } else {
+    localStorage.setItem(LMS_ACTIVE_USER_KEY, JSON.stringify(user));
+  }
+  window.dispatchEvent(new Event("digihub_auth_changed"));
+}
+
+export function signInWithEmail(email: string, _password?: string): { success: boolean; user?: LMSUser; error?: string } {
+  const users = getAllLMSUsers();
+  const existing = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+  if (existing) {
+    existing.lastActive = new Date().toISOString();
+    saveLMSUsers(users);
+    setActiveUser(existing);
+    return { success: true, user: existing };
+  }
+  return { success: false, error: "No account found with this email address. Please sign up." };
+}
+
+export function signUpWithEmail(
+  name: string,
+  email: string,
+  _password?: string,
+  track: "coding" | "cybersecurity" = "coding"
+): { success: boolean; user?: LMSUser; error?: string } {
+  const users = getAllLMSUsers();
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = users.find((u) => u.email.toLowerCase() === normalizedEmail);
+  if (existing) {
+    setActiveUser(existing);
+    return { success: true, user: existing };
+  }
+
+  const newUser: LMSUser = {
+    id: `stu-${Date.now().toString(36)}`,
+    name: name.trim() || "Student",
+    email: normalizedEmail,
+    provider: "email",
+    role: "student",
+    createdAt: new Date().toISOString(),
+    lastActive: new Date().toISOString(),
+    completedLessonIds: [],
+    enrolledTracks: [track],
+    currentTrackId: track,
+    certificateClaimed: false,
+  };
+
+  users.unshift(newUser);
+  saveLMSUsers(users);
+  setActiveUser(newUser);
+  return { success: true, user: newUser };
+}
+
+export function signInWithGoogle(customName?: string, customEmail?: string): LMSUser {
+  const users = getAllLMSUsers();
+  const email = (customEmail || "student.learner@gmail.com").trim().toLowerCase();
+  const name = customName?.trim() || "Google Learner";
+
+  let user = users.find((u) => u.email.toLowerCase() === email);
+  if (user) {
+    user.lastActive = new Date().toISOString();
+    user.provider = "google";
+  } else {
+    user = {
+      id: `stu-g-${Date.now().toString(36)}`,
+      name,
+      email,
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      provider: "google",
+      role: "student",
+      createdAt: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      completedLessonIds: [],
+      enrolledTracks: ["coding", "cybersecurity"],
+      currentTrackId: "coding",
+      certificateClaimed: false,
+    };
+    users.unshift(user);
+  }
+
+  saveLMSUsers(users);
+  setActiveUser(user);
+  return user;
+}
+
+export function signOutLMS(): void {
+  setActiveUser(null);
+}
+
 export function getLearnerProgress(): LearnerProgress {
+  const activeUser = getActiveUser();
+
   if (typeof window === "undefined") {
     return {
-      completedLessonIds: [],
-      currentTrackId: "coding",
+      completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+      currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
       xp: 0,
       streakDays: 1,
       lastActiveDate: new Date().toISOString().split("T")[0],
-      certificateClaimed: false,
-      studentName: "Learner",
+      certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
+      studentName: activeUser ? activeUser.name : "Learner",
     };
   }
+
   try {
     const raw = localStorage.getItem(LMS_PROGRESS_KEY);
     if (!raw) {
       const initial: LearnerProgress = {
-        completedLessonIds: [],
-        currentTrackId: "coding",
+        completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+        currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
         xp: 0,
         streakDays: 1,
         lastActiveDate: new Date().toISOString().split("T")[0],
-        certificateClaimed: false,
-        studentName: "Learner",
+        certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
+        studentName: activeUser ? activeUser.name : "Learner",
       };
       localStorage.setItem(LMS_PROGRESS_KEY, JSON.stringify(initial));
       return initial;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (activeUser) {
+      // Sync with active user
+      parsed.completedLessonIds = activeUser.completedLessonIds;
+      parsed.studentName = activeUser.name;
+      parsed.certificateClaimed = activeUser.certificateClaimed;
+    }
+    return parsed;
   } catch {
     return {
-      completedLessonIds: [],
-      currentTrackId: "coding",
+      completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+      currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
       xp: 0,
       streakDays: 1,
       lastActiveDate: new Date().toISOString().split("T")[0],
-      certificateClaimed: false,
-      studentName: "Learner",
+      certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
+      studentName: activeUser ? activeUser.name : "Learner",
     };
   }
 }
@@ -774,6 +1005,21 @@ export function getLearnerProgress(): LearnerProgress {
 export function saveLearnerProgress(progress: LearnerProgress): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LMS_PROGRESS_KEY, JSON.stringify(progress));
+
+  // Sync to active user if logged in
+  const activeUser = getActiveUser();
+  if (activeUser) {
+    activeUser.completedLessonIds = progress.completedLessonIds;
+    activeUser.name = progress.studentName;
+    activeUser.certificateClaimed = progress.certificateClaimed;
+    activeUser.lastActive = new Date().toISOString();
+    setActiveUser(activeUser);
+
+    const allUsers = getAllLMSUsers();
+    const updated = allUsers.map((u) => (u.id === activeUser.id ? activeUser : u));
+    saveLMSUsers(updated);
+  }
+
   window.dispatchEvent(new Event("digihub_progress_updated"));
 }
 
@@ -787,6 +1033,42 @@ export function markLessonCompleted(lessonId: string, xpAward: number): LearnerP
     saveLearnerProgress(current);
   }
   return current;
+}
+
+export function adminToggleUserLesson(userId: string, lessonId: string): void {
+  const users = getAllLMSUsers();
+  const user = users.find((u) => u.id === userId);
+  if (!user) return;
+
+  if (user.completedLessonIds.includes(lessonId)) {
+    user.completedLessonIds = user.completedLessonIds.filter((id) => id !== lessonId);
+  } else {
+    user.completedLessonIds.push(lessonId);
+  }
+
+  user.certificateClaimed = user.completedLessonIds.length >= 4;
+  user.lastActive = new Date().toISOString();
+  saveLMSUsers(users);
+
+  // If this user is currently active in browser, sync active user
+  const active = getActiveUser();
+  if (active && active.id === userId) {
+    setActiveUser(user);
+    const progress = getLearnerProgress();
+    progress.completedLessonIds = user.completedLessonIds;
+    progress.certificateClaimed = user.certificateClaimed;
+    saveLearnerProgress(progress);
+  }
+}
+
+export function adminDeleteUser(userId: string): void {
+  const users = getAllLMSUsers().filter((u) => u.id !== userId);
+  saveLMSUsers(users);
+
+  const active = getActiveUser();
+  if (active && active.id === userId) {
+    signOutLMS();
+  }
 }
 
 export function getBookedSessions(): MentorshipSession[] {
@@ -846,3 +1128,4 @@ export function getAllLessons(): Lesson[] {
 export function getLessonById(id: string): Lesson | undefined {
   return getAllLessons().find((l) => l.id === id);
 }
+

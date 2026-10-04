@@ -114,6 +114,10 @@ import {
   updateSessionStatus,
   INITIAL_MENTORS,
   MentorshipSession,
+  getAllLMSUsers,
+  adminToggleUserLesson,
+  adminDeleteUser,
+  LMSUser,
 } from "@/lib/lmsStore";
 
 export default function ConnectHubPage() {
@@ -143,6 +147,10 @@ export default function ConnectHubPage() {
   // DIGIHub LMS & Mentorship state
   const [lmsSessions, setLmsSessions] = useState<MentorshipSession[]>(() => getBookedSessions());
   const [lmsStatusFilter, setLmsStatusFilter] = useState<"all" | "confirmed" | "completed" | "cancelled">("all");
+  const [lmsUsers, setLmsUsers] = useState<LMSUser[]>(() => getAllLMSUsers());
+  const [selectedLmsStudent, setSelectedLmsStudent] = useState<LMSUser | null>(null);
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const [studentFilter, setStudentFilter] = useState<"all" | "in-progress" | "certified" | "google" | "email">("all");
 
   // Central store state
   const [store, setStoreState] = useState<AppStore>(getStore());
@@ -331,19 +339,35 @@ export default function ConnectHubPage() {
     const syncStore = () => {
       setStoreState(getStore());
       setLmsSessions(getBookedSessions());
+      setLmsUsers(getAllLMSUsers());
     };
     const syncSessions = () => {
       setLmsSessions(getBookedSessions());
     };
+    const syncUsers = () => {
+      setLmsUsers(getAllLMSUsers());
+    };
     window.addEventListener("digiconnect_store_updated", syncStore);
     window.addEventListener("digihub_sessions_updated", syncSessions);
+    window.addEventListener("digihub_users_updated", syncUsers);
     window.addEventListener("storage", syncStore);
     return () => {
       window.removeEventListener("digiconnect_store_updated", syncStore);
       window.removeEventListener("digihub_sessions_updated", syncSessions);
+      window.removeEventListener("digihub_users_updated", syncUsers);
       window.removeEventListener("storage", syncStore);
     };
   }, []);
+
+  // Keep selected student dossier synchronized with latest user data
+  useEffect(() => {
+    if (selectedLmsStudent) {
+      const refreshed = lmsUsers.find((u) => u.id === selectedLmsStudent.id);
+      if (refreshed) {
+        setSelectedLmsStudent(refreshed);
+      }
+    }
+  }, [lmsUsers]);
 
   const triggerToast = (msg: string) => {
     setSaveToast(msg);
@@ -3146,6 +3170,100 @@ export default function ConnectHubPage() {
             triggerToast(`Mentorship session marked as ${newStatus}`);
           };
 
+          const filteredStudents = lmsUsers.filter((u) => {
+            const q = studentSearchQuery.toLowerCase().trim();
+            const matchesSearch =
+              !q ||
+              u.name.toLowerCase().includes(q) ||
+              u.email.toLowerCase().includes(q) ||
+              u.currentTrackId.toLowerCase().includes(q);
+
+            if (!matchesSearch) return false;
+
+            if (studentFilter === "in-progress") {
+              return u.completedLessonIds.length > 0 && u.completedLessonIds.length < allLessons.length;
+            }
+            if (studentFilter === "certified") {
+              return u.completedLessonIds.length >= allLessons.length || u.certificateClaimed;
+            }
+            if (studentFilter === "google") {
+              return u.provider === "google";
+            }
+            if (studentFilter === "email") {
+              return u.provider === "email";
+            }
+            return true;
+          });
+
+          const certifiedCount = lmsUsers.filter(
+            (u) => u.completedLessonIds.length >= allLessons.length || u.certificateClaimed
+          ).length;
+          const googleUserCount = lmsUsers.filter((u) => u.provider === "google").length;
+          const emailUserCount = lmsUsers.filter((u) => u.provider === "email").length;
+
+          const handleExportStudentsCSV = () => {
+            const headers = [
+              "Student ID",
+              "Full Name",
+              "Email",
+              "Auth Provider",
+              "Role",
+              "Current Track",
+              "Modules Completed Count",
+              "Total Modules",
+              "Progress Percentage",
+              "Completed Module IDs",
+              "Certificate Claimed",
+              "Enrolled Date",
+              "Last Active",
+            ];
+
+            const rows = lmsUsers.map((u) => {
+              const completedCount = u.completedLessonIds.length;
+              const pct = Math.round((completedCount / allLessons.length) * 100);
+              return [
+                `"${u.id}"`,
+                `"${u.name.replace(/"/g, '""')}"`,
+                `"${u.email}"`,
+                `"${u.provider}"`,
+                `"${u.role}"`,
+                `"${u.currentTrackId}"`,
+                completedCount,
+                allLessons.length,
+                `"${pct}%"`,
+                `"${u.completedLessonIds.join("; ")}"`,
+                u.certificateClaimed ? "YES" : "NO",
+                `"${u.createdAt}"`,
+                `"${u.lastActive}"`,
+              ].join(",");
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `digihub_students_progress_${new Date().toISOString().split("T")[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            triggerToast("Exported student roster & progress report (CSV)");
+          };
+
+          const handleDeleteStudent = (studentId: string, studentName: string) => {
+            if (
+              window.confirm(
+                `Are you sure you want to remove student "${studentName}"? Their progress will be permanently deleted.`
+              )
+            ) {
+              adminDeleteUser(studentId);
+              setLmsUsers(getAllLMSUsers());
+              if (selectedLmsStudent?.id === studentId) {
+                setSelectedLmsStudent(null);
+              }
+              triggerToast(`Removed student ${studentName}`);
+            }
+          };
+
           return (
             <div className="space-y-8">
               {/* Executive Stat Cards */}
@@ -3153,16 +3271,34 @@ export default function ConnectHubPage() {
                 <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                      Active Learners
+                      Registered Students
                     </span>
                     <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                       <Users className="w-5 h-5" />
                     </div>
                   </div>
-                  <div className="text-2xl font-bold text-neutral-900 mt-2">148</div>
-                  <div className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                    <span>↑ 24%</span>
-                    <span className="text-neutral-400 font-normal">intake this month</span>
+                  <div className="text-2xl font-bold text-neutral-900 mt-2">{lmsUsers.length}</div>
+                  <div className="text-xs text-neutral-500 mt-1 flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 font-semibold text-blue-600">
+                      {googleUserCount} Google
+                    </span>
+                    <span>•</span>
+                    <span className="font-semibold text-neutral-700">{emailUserCount} Email</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Certified Graduates
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <Award className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-neutral-900 mt-2">{certifiedCount}</div>
+                  <div className="text-xs text-emerald-600 font-medium mt-1">
+                    {lmsUsers.length > 0 ? Math.round((certifiedCount / lmsUsers.length) * 100) : 0}% completion rate
                   </div>
                 </div>
 
@@ -3178,21 +3314,6 @@ export default function ConnectHubPage() {
                   <div className="text-2xl font-bold text-neutral-900 mt-2">{lmsSessions.length}</div>
                   <div className="text-xs text-neutral-500 mt-1">
                     {lmsSessions.filter((s) => s.status === "confirmed").length} confirmed upcoming
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-neutral-200 p-5 shadow-2xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                      Interactive Labs
-                    </span>
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                      <Code2 className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold text-neutral-900 mt-2">{allLessons.length} Modules</div>
-                  <div className="text-xs text-neutral-500 mt-1">
-                    {codingLessons.length} Coding • {cyberLessons.length} Cyber
                   </div>
                 </div>
 
@@ -3216,6 +3337,248 @@ export default function ConnectHubPage() {
                     </Link>
                   </div>
                 </div>
+              </div>
+
+              {/* ─── REGISTERED STUDENTS & PROGRESS ADMINISTRATION ──── */}
+              <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-2xs space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-neutral-100">
+                  <div>
+                    <h3 className="font-bold text-lg text-neutral-900 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-brand-blue" />
+                      Registered Students & Individual Progress ({lmsUsers.length})
+                    </h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Monitor student coursework completion, view Google SSO accounts, and manually adjust module progress.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={handleExportStudentsCSV}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-neutral-200 hover:border-neutral-300 bg-white text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition"
+                    >
+                      <Download className="w-3.5 h-3.5 text-brand-blue" />
+                      <span>Export Roster (CSV)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search & Filter Bar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search students by name, email, or track..."
+                      value={studentSearchQuery}
+                      onChange={(e) => setStudentSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-brand-blue focus:outline-none bg-neutral-50/50"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl text-xs overflow-x-auto">
+                    {[
+                      { id: "all", label: `All (${lmsUsers.length})` },
+                      {
+                        id: "in-progress",
+                        label: `In Progress (${
+                          lmsUsers.filter((u) => u.completedLessonIds.length > 0 && u.completedLessonIds.length < allLessons.length).length
+                        })`,
+                      },
+                      { id: "certified", label: `Certified (${certifiedCount})` },
+                      { id: "google", label: `Google (${googleUserCount})` },
+                      { id: "email", label: `Email (${emailUserCount})` },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setStudentFilter(tab.id as any)}
+                        className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                          studentFilter === tab.id
+                            ? "bg-white text-neutral-900 shadow-2xs"
+                            : "text-neutral-500 hover:text-neutral-900"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Students Table */}
+                {filteredStudents.length === 0 ? (
+                  <div className="py-12 text-center text-neutral-400 text-xs bg-neutral-50/50 rounded-2xl border border-dashed border-neutral-200">
+                    No registered students found matching your search or filters.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-neutral-100 text-neutral-400 uppercase text-[10px] tracking-wider">
+                          <th className="pb-3 font-semibold">Student & Account</th>
+                          <th className="pb-3 font-semibold">Track</th>
+                          <th className="pb-3 font-semibold min-w-[180px]">Curriculum Progress</th>
+                          <th className="pb-3 font-semibold">Completed Modules</th>
+                          <th className="pb-3 font-semibold">Activity</th>
+                          <th className="pb-3 font-semibold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {filteredStudents.map((student) => {
+                          const completedCount = student.completedLessonIds.length;
+                          const progressPct = Math.round((completedCount / allLessons.length) * 100);
+                          const isComplete = completedCount >= allLessons.length || student.certificateClaimed;
+
+                          return (
+                            <tr key={student.id} className="hover:bg-neutral-50/80 transition">
+                              {/* Student Info & Auth Provider */}
+                              <td className="py-4 pr-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative shrink-0">
+                                    {student.avatar ? (
+                                      <img
+                                        src={student.avatar}
+                                        alt={student.name}
+                                        className="w-9 h-9 rounded-xl object-cover border border-neutral-200"
+                                      />
+                                    ) : (
+                                      <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white font-bold text-xs flex items-center justify-center">
+                                        {student.name.slice(0, 2).toUpperCase()}
+                                      </div>
+                                    )}
+                                    {student.provider === "google" && (
+                                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white shadow-xs border border-neutral-200 flex items-center justify-center">
+                                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24">
+                                          <path
+                                            fill="#4285F4"
+                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                          />
+                                          <path
+                                            fill="#34A853"
+                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                          />
+                                          <path
+                                            fill="#FBBC05"
+                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                                          />
+                                          <path
+                                            fill="#EA4335"
+                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                                          />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <div className="font-bold text-neutral-900 flex items-center gap-1.5">
+                                      <span>{student.name}</span>
+                                      {student.provider === "google" ? (
+                                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                                          Google
+                                        </span>
+                                      ) : (
+                                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-neutral-100 text-neutral-600 border border-neutral-200">
+                                          Email
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-[11px] text-neutral-500">{student.email}</div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Enrolled Track */}
+                              <td className="py-4 pr-3">
+                                <span
+                                  className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${
+                                    student.currentTrackId === "cybersecurity"
+                                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                      : "bg-blue-50 text-blue-700 border border-blue-200"
+                                  }`}
+                                >
+                                  {student.currentTrackId === "cybersecurity" ? "Cyber Defense" : "Web Coding"}
+                                </span>
+                              </td>
+
+                              {/* Curriculum Progress Bar */}
+                              <td className="py-4 pr-3">
+                                <div>
+                                  <div className="flex items-center justify-between text-[11px] font-medium mb-1">
+                                    <span className={isComplete ? "text-emerald-700 font-bold" : "text-neutral-700"}>
+                                      {completedCount} / {allLessons.length} Modules
+                                    </span>
+                                    <span className="text-neutral-500 font-semibold">{progressPct}%</span>
+                                  </div>
+                                  <div className="w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-300 ${
+                                        isComplete ? "bg-emerald-500" : "bg-brand-blue"
+                                      }`}
+                                      style={{ width: `${progressPct}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Completed Module Chips */}
+                              <td className="py-4 pr-3">
+                                {completedCount === 0 ? (
+                                  <span className="text-[11px] text-neutral-400 italic">No modules finished</span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-1 max-w-xs">
+                                    {student.completedLessonIds.map((lid) => {
+                                      const lesson = allLessons.find((l) => l.id === lid);
+                                      return (
+                                        <span
+                                          key={lid}
+                                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 truncate max-w-[130px]"
+                                          title={lesson ? lesson.title : lid}
+                                        >
+                                          {lesson ? `Mod ${lesson.moduleNumber}: ${lesson.title.split(":")[0]}` : lid}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Activity */}
+                              <td className="py-4 pr-3">
+                                <div className="text-[11px] font-medium text-neutral-800">
+                                  Enrolled: {student.createdAt}
+                                </div>
+                                <div className="text-[10px] text-neutral-400">
+                                  Last active: {student.lastActive}
+                                </div>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="py-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => setSelectedLmsStudent(student)}
+                                    className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-[11px] transition flex items-center gap-1"
+                                    title="View student dossier and edit progress"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span>Dossier</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteStudent(student.id, student.name)}
+                                    className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                                    title="Delete student"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               {/* 1-on-1 Mentorship Sessions Administration */}
@@ -5747,6 +6110,257 @@ export default function ConnectHubPage() {
                 <Plus className="w-4 h-4" /> Add Program to Catalog
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ─── MODAL: STUDENT DOSSIER & PROGRESS OVERRIDE ──────── */}
+      {selectedLmsStudent && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-neutral-200 space-y-6 my-8 animate-in fade-in zoom-in-95">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-neutral-100 gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="relative">
+                  {selectedLmsStudent.avatar ? (
+                    <img
+                      src={selectedLmsStudent.avatar}
+                      alt={selectedLmsStudent.name}
+                      className="w-12 h-12 rounded-2xl object-cover border border-neutral-200"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-white font-bold text-base flex items-center justify-center shadow-xs">
+                      {selectedLmsStudent.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  {selectedLmsStudent.provider === "google" && (
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white shadow-xs border border-neutral-200 flex items-center justify-center">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-xl font-bold text-neutral-900">{selectedLmsStudent.name}</h3>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        selectedLmsStudent.provider === "google"
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : "bg-blue-50 text-blue-700 border border-blue-200"
+                      }`}
+                    >
+                      {selectedLmsStudent.provider === "google" ? "Google SSO" : "Email & Password"}
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-0.5">{selectedLmsStudent.email}</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedLmsStudent(null)}
+                className="w-8 h-8 rounded-full bg-neutral-100 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-neutral-100">
+                <span className="text-[11px] font-semibold text-neutral-500 uppercase">Progress</span>
+                <div className="text-lg font-bold text-neutral-900 mt-1">
+                  {Math.round((selectedLmsStudent.completedLessonIds.length / getAllLessons().length) * 100)}%
+                </div>
+                <div className="text-[11px] text-neutral-400">
+                  {selectedLmsStudent.completedLessonIds.length} of {getAllLessons().length} modules
+                </div>
+              </div>
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-neutral-100">
+                <span className="text-[11px] font-semibold text-neutral-500 uppercase">Current Track</span>
+                <div className="text-sm font-bold text-neutral-900 mt-1 capitalize">
+                  {selectedLmsStudent.currentTrackId === "cybersecurity" ? "Cyber Defense" : "Web Coding"}
+                </div>
+                <div className="text-[11px] text-neutral-400">Primary track</div>
+              </div>
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-neutral-100">
+                <span className="text-[11px] font-semibold text-neutral-500 uppercase">Certificate</span>
+                <div className="text-sm font-bold text-neutral-900 mt-1">
+                  {selectedLmsStudent.certificateClaimed ? (
+                    <span className="text-emerald-600 flex items-center gap-1 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Claimed
+                    </span>
+                  ) : selectedLmsStudent.completedLessonIds.length >= getAllLessons().length ? (
+                    <span className="text-blue-600 font-semibold">Eligible</span>
+                  ) : (
+                    <span className="text-neutral-400">In Progress</span>
+                  )}
+                </div>
+                <div className="text-[11px] text-neutral-400">ID #{selectedLmsStudent.id.slice(-6)}</div>
+              </div>
+            </div>
+
+            {/* Interactive Module Checklist (Admin Override) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-sm text-neutral-900">Curriculum Progress (Admin Override)</h4>
+                  <p className="text-[11px] text-neutral-500">
+                    Click checkboxes to manually grant or revoke module completion credit for this student.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-brand-blue bg-blue-50 px-2.5 py-1 rounded-lg">
+                  {selectedLmsStudent.completedLessonIds.length}/{getAllLessons().length} Completed
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {getAllLessons().map((lesson) => {
+                  const isCompleted = selectedLmsStudent.completedLessonIds.includes(lesson.id);
+                  return (
+                    <div
+                      key={lesson.id}
+                      onClick={() => {
+                        adminToggleUserLesson(selectedLmsStudent.id, lesson.id);
+                        setLmsUsers(getAllLMSUsers());
+                        triggerToast(
+                          isCompleted
+                            ? `Revoked credit for "${lesson.title}"`
+                            : `Granted completion for "${lesson.title}"`
+                        );
+                      }}
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
+                        isCompleted
+                          ? "bg-emerald-50/70 border-emerald-200 text-emerald-950"
+                          : "bg-white border-neutral-200 hover:border-neutral-300 text-neutral-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${
+                            isCompleted
+                              ? "bg-emerald-600 border-emerald-600 text-white"
+                              : "border-neutral-300 bg-white"
+                          }`}
+                        >
+                          {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                              {lesson.trackId === "coding" ? "Web Dev" : "Cyber"} • Mod {lesson.moduleNumber}
+                            </span>
+                            <span className="text-xs font-semibold">{lesson.title}</span>
+                          </div>
+                          <p className="text-[11px] text-neutral-500 line-clamp-1">{lesson.summary}</p>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                          isCompleted ? "bg-emerald-100 text-emerald-800" : "bg-neutral-100 text-neutral-500"
+                        }`}
+                      >
+                        {isCompleted ? "Done" : "Pending"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Mentorship History for this student */}
+            <div className="pt-2 border-t border-neutral-100 space-y-2">
+              <h4 className="font-bold text-xs text-neutral-900 uppercase tracking-wider">
+                1-on-1 Mentorship Activity
+              </h4>
+              {(() => {
+                const studentSessions = lmsSessions.filter(
+                  (s) => s.studentEmail.toLowerCase() === selectedLmsStudent.email.toLowerCase()
+                );
+                if (studentSessions.length === 0) {
+                  return (
+                    <p className="text-xs text-neutral-400 italic">
+                      No 1-on-1 mentorship sessions booked yet by this student.
+                    </p>
+                  );
+                }
+                return (
+                  <div className="space-y-1.5">
+                    {studentSessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-between text-xs"
+                      >
+                        <div>
+                          <span className="font-semibold text-neutral-900">{session.mentorName}</span>
+                          <span className="text-neutral-400 mx-1.5">•</span>
+                          <span className="text-neutral-600">
+                            {session.date} ({session.timeSlot})
+                          </span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            session.status === "confirmed"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : session.status === "completed"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {session.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-4 border-t border-neutral-100 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Are you sure you want to remove student "${selectedLmsStudent.name}"? Their progress will be permanently deleted.`
+                    )
+                  ) {
+                    adminDeleteUser(selectedLmsStudent.id);
+                    setLmsUsers(getAllLMSUsers());
+                    setSelectedLmsStudent(null);
+                    triggerToast(`Removed student ${selectedLmsStudent.name}`);
+                  }
+                }}
+                className="px-3.5 py-2 rounded-xl text-red-600 hover:bg-red-50 font-semibold text-xs transition flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Student</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedLmsStudent(null)}
+                className="px-5 py-2 rounded-xl bg-neutral-900 text-white font-semibold text-xs hover:bg-neutral-800 transition"
+              >
+                Close Dossier
+              </button>
+            </div>
           </div>
         </div>
       )}

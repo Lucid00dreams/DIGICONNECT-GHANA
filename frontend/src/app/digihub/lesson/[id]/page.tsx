@@ -18,11 +18,14 @@ import {
   getAllLessons,
   markLessonCompleted,
   getLearnerProgress,
+  getActiveUser,
+  LMSUser,
   Lesson,
 } from "@/lib/lmsStore";
 import { CodeSandbox } from "@/components/digihub/CodeSandbox";
 import { CyberLab } from "@/components/digihub/CyberLab";
 import { QuizWidget } from "@/components/digihub/QuizWidget";
+import { AuthGate } from "@/components/digihub/AuthGate";
 
 export default function DIGIHubLessonPage() {
   const params = useParams();
@@ -30,11 +33,17 @@ export default function DIGIHubLessonPage() {
   const lessonId = params?.id as string;
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [activePaneTab, setActivePaneTab] = useState<"content" | "quiz">("content");
   const [completionToast, setCompletionToast] = useState(false);
 
   useEffect(() => {
+    const user = getActiveUser();
+    setCurrentUser(user);
+    setAuthChecked(true);
+
     if (!lessonId) return;
     const found = getLessonById(lessonId);
     if (found) {
@@ -43,6 +52,20 @@ export default function DIGIHubLessonPage() {
       setIsCompleted(progress.completedLessonIds.includes(found.id));
     }
   }, [lessonId]);
+
+  if (authChecked && !currentUser) {
+    return (
+      <div className="min-h-screen bg-neutral-50 pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AuthGate
+            title="Sign in to access this interactive lab"
+            subtitle="Please sign in or create your student account to run live code in the sandbox and submit your answers."
+            onAuthenticated={(user) => setCurrentUser(user)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   if (!lesson) {
     return (
