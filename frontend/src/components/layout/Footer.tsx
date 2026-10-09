@@ -21,7 +21,7 @@ export function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  if (pathname.startsWith("/connecthub")) {
+  if (pathname.startsWith("/connecthub") || pathname.startsWith("/digihub")) {
     return null;
   }
 

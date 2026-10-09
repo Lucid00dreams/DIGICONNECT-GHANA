@@ -1207,7 +1207,15 @@ resetBtn.addEventListener('click', () => {
           "Parameterized queries are the single most effective defense against SQL injection.",
           "Never concatenate raw user strings into SQL queries.",
         ],
-        hasLab: false,
+        hasLab: true,
+        labType: "cyber",
+        cyberLabConfig: {
+          type: "network-inspector",
+          title: "Network Port Forensic & Packet Sniffer Lab",
+          scenario: "Inspect open ports on server 192.168.1.100 and enforce firewall protection",
+          prompt: "Run an Nmap scan to find insecure legacy ports (21 FTP, 23 Telnet), and apply firewall policy to enforce TLS encryption.",
+          hint: "Click 'Run Nmap Port Scan', review the listening ports, and click 'Apply Firewall Policy' to secure the host."
+        },
       },
     ],
     cyberLabConfig: {
@@ -1295,7 +1303,15 @@ resetBtn.addEventListener('click', () => {
           "Never set sensitive spreadsheets to 'Anyone on the internet can edit'.",
           "Restrict organizational folders to verified corporate emails.",
         ],
-        hasLab: false,
+        hasLab: true,
+        labType: "digital-literacy",
+        digitalLiteracyLabConfig: {
+          type: "cloud-permissions",
+          title: "Cloud Document Access Control Lab",
+          scenario: "Configure safe sharing for confidential payroll file with external consultant",
+          prompt: "Prevent unauthorized editing and leaks by locking general access to 'Restricted (Invite Only)', setting role to 'Viewer', and enforcing 2FA verification.",
+          hint: "Confidential company records must never be 'Public' and consultants must never have 'Editor' rights. Select Restricted and Viewer."
+        },
       },
       {
         id: "digi-101-top-3",
@@ -1401,7 +1417,15 @@ resetBtn.addEventListener('click', () => {
         keyTakeaways: [
           "Formulas update automatically whenever underlying data numbers change.",
         ],
-        hasLab: false,
+        hasLab: true,
+        labType: "digital-literacy",
+        digitalLiteracyLabConfig: {
+          type: "spreadsheet-formulas",
+          title: "Interactive Spreadsheet Formula Sandbox",
+          scenario: "Calculate the total equipment budget for a youth coding bootcamp in Kumasi",
+          prompt: "Write the formula '=SUM(D2:D5)' into the fx formula bar to sum all item totals and verify budget calculation.",
+          hint: "Type '=SUM(D2:D5)' into the formula bar and click Calculate to compute the sum."
+        },
       },
       {
         id: "digi-102-top-3",
@@ -1508,25 +1532,24 @@ resetBtn.addEventListener('click', () => {
           "Lists are indexed starting from 0.",
         ],
         hasLab: true,
-        labType: "sandbox",
-        sandboxConfig: {
-          initialHtml: `<div class="python-output">
-  <h3>Python Script Simulator</h3>
-  <pre id="output-log">Click 'Run Script' to execute Python...</pre>
-</div>`,
-          initialCss: `.python-output {
-  background: #0f172a;
-  color: #38bdf8;
-  padding: 20px;
-  border-radius: 12px;
-  font-family: monospace;
-}`,
-          initialJs: `const student = "Kofi";
-const track = "Python Automation";
-const modules = 3;
-document.getElementById('output-log').textContent = 
-  "Student: " + student + "\\nTrack: " + track + "\\nTotal Modules: " + modules + "\\nStatus: Ready for Automation!";`,
-          challengeInstructions: "Inspect the output log and change student name or track title in the script!",
+        labType: "python",
+        pythonLabConfig: {
+          title: "Python 3 Variables & F-String Lab",
+          scenario: "Create a welcome notification script for a new student at DigiConnect Ghana Academy",
+          initialCode: `# Python Variables & F-String Formatting
+student_name = "Kofi"
+track = "Python Automation"
+xp_score = 150
+
+print(f"Welcome to DigiConnect Ghana, {student_name}!")
+print(f"Enrolled Track: {track}")
+print(f"Starting XP: {xp_score}")`,
+          challengeInstructions: "Change student_name to your name, set xp_score to 200, and click 'Run Script' to verify!",
+          expectedOutputSubstring: "Welcome to DigiConnect Ghana",
+          expectedVariables: {
+            xp_score: 200,
+          },
+          hint: "Update student_name = 'YourName' and xp_score = 200, then click 'Run Script'."
         },
       },
       {
@@ -1638,60 +1661,19 @@ document.getElementById('output-log').textContent =
           "Loops are the foundation of all digital data processing and automation.",
         ],
         hasLab: true,
-        labType: "sandbox",
-        sandboxConfig: {
-          initialHtml: `<div class="loop-box">
-  <h3>Batch Notification Automation</h3>
-  <div id="log-output" class="log-screen">Initializing batch processor...</div>
-  <button id="run-loop-btn">Process All Students</button>
-</div>`,
-          initialCss: `.loop-box {
-  background: white;
-  border: 2px solid #0284c7;
-  padding: 20px;
-  border-radius: 12px;
-  font-family: sans-serif;
-}
-.log-screen {
-  background: #0f172a;
-  color: #a5f3fc;
-  padding: 16px;
-  border-radius: 8px;
-  margin: 12px 0;
-  font-family: monospace;
-  white-space: pre-line;
-  max-height: 180px;
-  overflow-y: auto;
-}
-button {
-  background: #0284c7;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}`,
-          initialJs: `const students = [
-  { name: "Kofi", score: 92 },
-  { name: "Abena", score: 74 },
-  { name: "Kwesi", score: 88 },
-  { name: "Akosua", score: 95 }
-];
+        labType: "python",
+        pythonLabConfig: {
+          title: "Python For-Loop & Batch Automation Lab",
+          scenario: "Automate batch notifications for tech bootcamp students across Ghana",
+          initialCode: `# For-Loop Batch Processing
+cities = ["Accra", "Kumasi", "Tamale", "Takoradi"]
 
-document.getElementById('run-loop-btn').addEventListener('click', () => {
-  let logs = "Batch Processing Started...\\n";
-  for (const s of students) {
-    if (s.score >= 80) {
-      logs += "✓ Certificate Conferred: " + s.name + " (" + s.score + "%)\\n";
-    } else {
-      logs += "• In Progress: " + s.name + " (" + s.score + "%)\\n";
-    }
-  }
-  logs += "All 4 records processed in 2ms!";
-  document.getElementById('log-output').textContent = logs;
-});`,
-          challengeInstructions: "Click 'Process All Students' to run the batch loop and observe conditional evaluation in action!",
+for city in cities:
+    print(f"Launching DigiConnect tech workshop in {city}!")
+`,
+          challengeInstructions: "Add 'Cape Coast' to the cities list and run the script to automate notifications to all 5 cities!",
+          expectedOutputSubstring: "Cape Coast",
+          hint: "Add 'Cape Coast' inside the cities = [...] list with quotes, e.g. cities = ['Accra', 'Kumasi', 'Tamale', 'Takoradi', 'Cape Coast']"
         },
       },
       {
@@ -1732,4 +1714,860 @@ document.getElementById('run-loop-btn').addEventListener('click', () => {
       },
     ],
   },
+
+  // ─── CYBERSECURITY ARCHITECTURE & IAM TRACK (IBM & DCG) ─────────────────────
+  {
+    id: "iam-101",
+    trackId: "cybersecurity-architecture",
+    moduleNumber: 1,
+    moduleTitle: "Cloud Security & Identity Architecture",
+    lessonNumber: 1,
+    title: "Identity and Access Management (IAM) & Cloud Access Controls",
+    durationMinutes: 25,
+    level: "Beginner",
+    xpAward: 120,
+    summary: "Master enterprise identity governance: differentiate authentication from authorization, implement role-based access control, and enforce Zero Trust principles.",
+    keyTakeaways: [
+      "Authentication validates identity (who you are), while Authorization determines permissions (what you can do).",
+      "Role-Based Access Control (RBAC) assigns permissions to job roles rather than individual accounts.",
+      "The Principle of Least Privilege guarantees users and applications receive only the minimum access necessary.",
+      "Zero Trust operates under the core mantra: never trust, always verify every access request.",
+    ],
+    topics: [
+      {
+        id: "iam-101-top-1",
+        topicNumber: 1,
+        title: "The Fundamentals of IAM: Authentication vs Authorization",
+        durationMinutes: 8,
+        summary: "Understand the critical distinction between proving who you are and granting specific resource rights.",
+        sections: [
+          {
+            heading: "Who Are You vs What Can You Access?",
+            explanation: "Identity and Access Management (IAM) is the frontline defense of any modern corporate infrastructure. When an employee attempts to sign into a company database, two distinct checkpoints occur: Authentication (AuthN) verifies the user's claimed identity with passwords or biometrics. Once verified, Authorization (AuthZ) checks the access policy matrix to determine if that specific employee is permitted to view, edit, or delete the target records.",
+            analogy: "Think of checking in at Kotoka International Airport in Accra. Your Ghana Passport or National ID proves your identity (Authentication). Your boarding pass proves you are authorized to enter Flight 204 to London (Authorization). A valid passport without a boarding pass will not get you past the departure gate.",
+            keyPoints: [
+              "AuthN (Authentication): Verifying identity via password, SMS OTP, or authenticator app.",
+              "AuthZ (Authorization): Verifying permissions via token scopes, claims, or ACLs.",
+              "Centralized Identity Providers (IdPs) like IBM Security Verify, Okta, and Azure AD unify logins across all cloud apps.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Authentication must always precede authorization in any secure architecture.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "iam-101-top-2",
+        topicNumber: 2,
+        title: "Role-Based Access Control (RBAC) & Principle of Least Privilege",
+        durationMinutes: 9,
+        summary: "Design scalable access hierarchies that prevent privilege escalation and unauthorized data exposure.",
+        sections: [
+          {
+            heading: "Why Individual Account Permissions Fail at Scale",
+            explanation: "In an organization with hundreds of employees, assigning individual permissions to each staff member creates chaotic configuration drift and security loopholes. Role-Based Access Control solves this by defining roles such as Financial Auditor, Software Engineer, or Human Resource Officer. Employees are assigned to roles, and roles inherit policies. If an employee leaves the company or shifts departments, simply updating their role assignment instantly revokes or grants the appropriate permissions.",
+            analogy: "Like issuing master keycards in a corporate bank. Tellers receive teller cards granting access to the cash counter. Managers receive vault keycards. You never give a teller full access to the bank vault just in case they might need it someday.",
+            keyPoints: [
+              "The Principle of Least Privilege: Never grant wildcard permissions (e.g., *:* admin access) when specific read-only access suffices.",
+              "Separation of Duties prevents any single user from initiating and approving high-risk transactions alone.",
+              "Just-In-Time (JIT) access grants elevated privileges temporarily and expires them automatically.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Always design IAM policies around minimum necessary permissions and role-based groupings.",
+        ],
+        hasLab: true,
+        labType: "cyber",
+        cyberLabConfig: {
+          type: "password-auditor",
+          title: "Enterprise IAM & Credential Hardening Lab",
+          scenario: "Audit enterprise cloud accounts for weak credentials, shared service accounts, and missing Multi-Factor Authentication (MFA).",
+          prompt: "Identify accounts lacking MFA, enforce a minimum 16-character passphrase policy, and configure automatic session timeout.",
+          hint: "Eliminate generic admin accounts and require hardware security keys or authenticator apps for all privileged roles."
+        },
+      },
+      {
+        id: "iam-101-top-3",
+        topicNumber: 3,
+        title: "Zero Trust Architecture: Never Trust, Always Verify",
+        durationMinutes: 8,
+        summary: "Transition from old perimeter firewalls to identity-driven continuous verification across all network packets.",
+        sections: [
+          {
+            heading: "The Death of the Traditional Corporate Perimeter",
+            explanation: "Historically, companies relied on perimeter security: once a device was inside the office building or connected via VPN, it was implicitly trusted. Modern threats have made this model obsolete. Zero Trust Architecture assumes the network is already hostile. Every single request—whether from a remote laptop in Kumasi or a local server in Accra—must authenticate, prove device compliance, and verify context before accessing sensitive assets.",
+            keyPoints: [
+              "Continuous verification evaluates user location, device posture, and risk score on every request.",
+              "Microsegmentation limits lateral movement if an attacker breaches one server.",
+              "Encrypt data both in transit (TLS 1.3) and at rest (AES-256).",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Zero Trust is not a single software product—it is a comprehensive architecture of continuous verification.",
+        ],
+        hasLab: false,
+      },
+    ],
+    quiz: [
+      {
+        id: "iam-q1",
+        question: "What is the primary difference between Authentication and Authorization in IAM?",
+        options: [
+          "Authentication is for mobile phones; Authorization is for desktop laptops",
+          "Authentication verifies who you are; Authorization determines what you are allowed to access",
+          "Authentication encrypts files; Authorization deletes malicious files",
+          "Authentication is managed by databases; Authorization is managed by firewalls",
+        ],
+        correctAnswer: 1,
+        explanation: "Authentication proves your claimed identity; Authorization checks whether that identity has permissions for the requested action.",
+      },
+      {
+        id: "iam-q2",
+        question: "What does the Principle of Least Privilege dictate?",
+        options: [
+          "Every employee should receive full administrator access to work quickly",
+          "Users should only be granted the minimum permissions strictly necessary to perform their job duties",
+          "Passwords should never exceed 6 characters for ease of memory",
+          "Cloud permissions should never be revoked even when employees change teams",
+        ],
+        correctAnswer: 1,
+        explanation: "The Principle of Least Privilege limits access strictly to what is required, minimizing the blast radius of any compromised credential.",
+      },
+    ],
+  },
+
+  // ─── DATA ANALYTICS TRACK (GOOGLE & DCG) ────────────────────────────────────
+  {
+    id: "data-101",
+    trackId: "data-analytics",
+    moduleNumber: 1,
+    moduleTitle: "Foundations of Data Analytics",
+    lessonNumber: 1,
+    title: "Data-Driven Decision Making & Spreadsheet Analytics",
+    durationMinutes: 25,
+    level: "Beginner",
+    xpAward: 110,
+    summary: "Discover how organizations transform raw rows into actionable business intelligence through spreadsheets, SQL, and visual storytelling.",
+    keyTakeaways: [
+      "The 5 phases of data analysis: Ask questions, Prepare data, Process hygiene, Analyze trends, and Share insights.",
+      "Spreadsheet formulas (SUM, AVERAGE, COUNTIF, XLOOKUP) automate quantitative business modeling.",
+      "Clean data is the prerequisite for accurate decision making and avoiding garbage-in, garbage-out errors.",
+    ],
+    topics: [
+      {
+        id: "data-101-top-1",
+        topicNumber: 1,
+        title: "The Five Core Phases of Data Analytics",
+        durationMinutes: 8,
+        summary: "Learn the systematic workflow used by Google and top tech enterprises to solve complex problems.",
+        sections: [
+          {
+            heading: "From Raw Numbers to Business Strategy",
+            explanation: "Data analytics is the process of collecting, transforming, and modeling raw data to discover actionable insights. Successful analytics projects follow a structured five-step lifecycle: Ask the right business questions, Prepare raw data sources, Process and clean missing values, Analyze patterns with formulas or queries, and Share conclusions through visual charts.",
+            analogy: "Like a chef preparing a banquet in Accra. You don't just dump raw cassava and tomatoes onto a plate. You ask what the guests desire, procure fresh ingredients, wash and peel thoroughly, cook with precision, and present a beautifully plated meal.",
+            keyPoints: [
+              "Ask: Define the specific problem statement and metric goals.",
+              "Prepare & Process: Clean typos, eliminate duplicate records, and standardize date formats.",
+              "Analyze & Share: Translate numerical patterns into executive recommendations.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "High-impact data analysts focus on answering real business questions rather than just calculating numbers.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "data-101-top-2",
+        topicNumber: 2,
+        title: "Spreadsheet Analytics & Quantitative Modeling",
+        durationMinutes: 9,
+        summary: "Harness formulas and logic to model startup revenue, growth percentages, and customer cohorts.",
+        sections: [
+          {
+            heading: "The Swiss Army Knife of Modern Business",
+            explanation: "Whether working at Google or launching a tech startup in Ghana, spreadsheets remain the universal tool for quick quantitative modeling. Mastering formulas like SUM, AVERAGE, COUNTIF, and XLOOKUP allows you to summarize thousands of customer transactions in seconds.",
+            keyPoints: [
+              "=SUM(range) aggregates total revenue or user numbers.",
+              "=AVERAGE(range) calculates the statistical mean value per customer.",
+              "=COUNTIF(range, criterion) counts items that meet specific condition thresholds.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Always test your formulas against sample test rows before applying them across whole datasets.",
+        ],
+        hasLab: true,
+        labType: "digital-literacy",
+        digitalLiteracyLabConfig: {
+          type: "spreadsheet-formulas",
+          title: "Startup Revenue & Cohort Metrics Lab",
+          scenario: "Calculate quarterly revenue and average transaction value for digital innovation hubs in Accra.",
+          prompt: "Write =SUM(B2:B5) and =AVERAGE(B2:B5) to compute the quarterly total and mean customer purchase.",
+          hint: "Input the standard spreadsheet syntax starting with an equals sign = followed by the formula name."
+        },
+      },
+      {
+        id: "data-101-top-3",
+        topicNumber: 3,
+        title: "Data Visualization & Executive Dashboards",
+        durationMinutes: 8,
+        summary: "Transform complex tables into intuitive charts that communicate trends in seconds.",
+        sections: [
+          {
+            heading: "Choosing the Right Visual Chart",
+            explanation: "Executives rarely read through raw spreadsheet rows; they make decisions based on clear visual dashboards. Matching the chart type to your communication goal is essential: line charts show trends over time, bar charts compare categorical groups, and pie charts show percentage breakdowns of a whole.",
+            keyPoints: [
+              "Use Line Charts for chronological trends (e.g. monthly active users).",
+              "Use Bar Charts for discrete category comparisons (e.g. sales by city).",
+              "Avoid 3D charts and visual clutter that distract from the core data story.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "A great chart explains a complex trend in five seconds or less.",
+        ],
+        hasLab: false,
+      },
+    ],
+    quiz: [
+      {
+        id: "data-q1",
+        question: "What is the primary risk of analyzing data without first completing the cleaning/processing phase?",
+        options: [
+          "The computer screen will turn off automatically",
+          "Duplicate, null, or corrupted data will produce inaccurate and misleading conclusions (Garbage In, Garbage Out)",
+          "The internet connection will be permanently terminated",
+          "The spreadsheet will convert all numbers into plain text",
+        ],
+        correctAnswer: 1,
+        explanation: "Analyzing uncleaned data leads to flawed conclusions that can severely mislead organizational strategy.",
+      },
+    ],
+  },
+
+  // ─── CLOUD & DEVOPS TRACK (AWS & DCG) ───────────────────────────────────────
+  {
+    id: "cloud-101",
+    trackId: "cloud-devops",
+    moduleNumber: 1,
+    moduleTitle: "Cloud Infrastructure Architecture",
+    lessonNumber: 1,
+    title: "AWS Cloud Fundamentals & Scalable Infrastructure",
+    durationMinutes: 25,
+    level: "Beginner",
+    xpAward: 120,
+    summary: "Learn how modern cloud providers replace physical server rooms with virtual machines, container orchestration, and continuous delivery pipelines.",
+    keyTakeaways: [
+      "Cloud computing replaces capital expenditure on physical servers with elastic on-demand resources.",
+      "The three main service models are IaaS (Infrastructure), PaaS (Platform), and SaaS (Software).",
+      "Docker containers package application code and dependencies into portable, reproducible runtime units.",
+    ],
+    topics: [
+      {
+        id: "cloud-101-top-1",
+        topicNumber: 1,
+        title: "Demystifying Cloud Architecture: Regions, VPCs & EC2",
+        durationMinutes: 8,
+        summary: "Understand how Amazon Web Services organizes worldwide data centers for high availability.",
+        sections: [
+          {
+            heading: "The Shift from On-Premises Server Rooms to the Cloud",
+            explanation: "Before cloud computing, businesses had to purchase physical servers, lease air-conditioned server rooms, and employ round-the-clock maintenance engineers. Cloud platforms like AWS, Google Cloud, and Microsoft Azure provide virtualized compute (EC2), storage (S3), and networking on demand, allowing developers to spin up enterprise servers in seconds.",
+            analogy: "Like electricity from the national power grid in Ghana. You do not build a personal hydroelectric dam in your backyard to power your laptop; you plug into the wall and pay only for the kilowatt-hours you consume.",
+            keyPoints: [
+              "Regions are geographic locations around the world with multiple isolated data centers (Availability Zones).",
+              "Virtual Private Clouds (VPCs) create isolated private network subnets for your company's servers.",
+              "Elasticity allows servers to scale up automatically during high traffic and scale down when traffic drops.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Cloud computing delivers agility, global reach, and pay-as-you-go financial flexibility.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "cloud-101-top-2",
+        topicNumber: 2,
+        title: "Docker Containers & Microservices Architecture",
+        durationMinutes: 9,
+        summary: "Package software into lightweight containers that run reliably anywhere from laptop to cloud cluster.",
+        sections: [
+          {
+            heading: "Eliminating 'It Works on My Machine' Forever",
+            explanation: "A common frustration in software development is when code works perfectly on a developer's laptop but crashes in production due to different operating system libraries. Docker solves this by packaging the application code, runtime libraries, and environment variables into an immutable Docker container.",
+            keyPoints: [
+              "Dockerfiles define step-by-step instructions for building a container image.",
+              "Containers share the host OS kernel, making them much faster and lighter than full virtual machines.",
+              "Container registries store and version images for deployment.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Containers guarantee that software behaves identically across development, testing, and production environments.",
+        ],
+        hasLab: true,
+        labType: "sandbox",
+        sandboxConfig: {
+          initialHtml: `<div class="cloud-status">
+  <h2>Cloud Cluster Health Check</h2>
+  <div class="pod-grid">
+    <div class="pod status-green">EC2-Web-Node-01: Running</div>
+    <div class="pod status-green">EC2-Web-Node-02: Running</div>
+    <div class="pod status-amber">Docker-Worker-03: Scaling Up</div>
+  </div>
+  <button id="deploy-btn">Trigger Blue-Green Deploy</button>
+</div>`,
+          initialCss: `.cloud-status {
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 24px;
+  border-radius: 16px;
+}
+.pod-grid {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+.pod {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.status-green { background: #065f46; color: #a7f3d0; }
+.status-amber { background: #78350f; color: #fde68a; }
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}`,
+          initialJs: `document.getElementById('deploy-btn').addEventListener('click', function() {
+  alert('Initiating zero-downtime rolling deployment across AWS cluster!');
+});`,
+          challengeInstructions: "Add a new pod element for 'S3-Storage-Bucket: Active' and test the deploy button.",
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "cloud-q1",
+        question: "What is the primary advantage of Docker containerization over traditional virtual machines?",
+        options: [
+          "Containers make computers completely immune to all passwords",
+          "Containers share the host OS kernel, making them much lighter, faster to launch, and highly portable",
+          "Containers can only run on Linux computers manufactured in 2026",
+          "Containers consume 100% of all available CPU continuously",
+        ],
+        correctAnswer: 1,
+        explanation: "Containers share the host operating system kernel and isolate dependencies, enabling rapid deployment and portability.",
+      },
+    ],
+  },
+
+  // ─── MACHINE LEARNING & AI FOUNDATIONS (DEEPLEARNING.AI & DCG) ─────────────
+  {
+    id: "ml-101",
+    trackId: "machine-learning",
+    moduleNumber: 1,
+    moduleTitle: "Supervised Learning & Python Data Science",
+    lessonNumber: 1,
+    title: "Foundations of Machine Learning & Predictive Models",
+    durationMinutes: 30,
+    level: "Beginner",
+    xpAward: 130,
+    summary: "Understand how computers learn from historical patterns to make predictions without being explicitly hardcoded with rules.",
+    keyTakeaways: [
+      "Traditional programming writes explicit rules; Machine Learning learns rules from input data and target labels.",
+      "Supervised learning trains on labeled datasets to perform regression (continuous numbers) or classification (categories).",
+      "Splitting data into training and test sets ensures models generalize to new unseen data rather than just memorizing.",
+    ],
+    topics: [
+      {
+        id: "ml-101-top-1",
+        topicNumber: 1,
+        title: "Traditional Programming vs Machine Learning",
+        durationMinutes: 10,
+        summary: "Understand the fundamental paradigm shift from rule-based code to data-driven learning.",
+        sections: [
+          {
+            heading: "Teaching Computers by Example",
+            explanation: "In traditional software, a programmer writes rules (if/else logic) that take inputs and generate outputs. In machine learning, we provide inputs and historical outputs to an algorithm, and the computer calculates the underlying mathematical relationship. This allows algorithms to recognize spoken voices, detect fraud, and diagnose medical scans where writing manual if/else rules would be impossible.",
+            keyPoints: [
+              "Traditional Code: Data + Handcrafted Rules = Answers.",
+              "Machine Learning: Data + Answers = Discovered Rules (The Model).",
+              "Features are the measurable properties (e.g. house size, rooms), and Labels are the targets we predict (e.g. price).",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Machine learning excels at complex pattern recognition tasks where manual rules are too intricate to specify.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "ml-101-top-2",
+        topicNumber: 2,
+        title: "Linear Regression & Predictive Model Training",
+        durationMinutes: 10,
+        summary: "Build intuition for how a model finds the optimal line of best fit through data points.",
+        sections: [
+          {
+            heading: "Finding the Line of Best Fit",
+            explanation: "Linear regression is the simplest and most interpretable supervised learning algorithm. It calculates a mathematical relationship y = mx + b where m is the slope factor and b is the intercept. The algorithm iteratively minimizes the prediction error (loss function) across all training samples.",
+            keyPoints: [
+              "Loss functions measure the numerical distance between the model's prediction and the actual truth.",
+              "Gradient Descent is the optimization algorithm that adjusts parameters to minimize prediction loss.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "All machine learning models fundamentally minimize loss between prediction and reality.",
+        ],
+        hasLab: true,
+        labType: "python",
+        pythonLabConfig: {
+          title: "Python Linear Predictive Model Lab",
+          scenario: "Train a predictive model to forecast mobile data consumption for tech hubs in Ghana.",
+          initialCode: `# Linear Demand Prediction Model
+x_users = [100, 200, 300, 400]
+y_gigabytes = [150, 300, 450, 600]
+
+# Calculate slope rate (gigabytes per user)
+slope = (y_gigabytes[-1] - y_gigabytes[0]) / (x_users[-1] - x_users[0])
+print(f"Calculated usage rate: {slope} GB per active user")
+
+# Test prediction on new user cohort
+new_cohort = 500
+predicted_bandwidth = new_cohort * slope
+print(f"Predicted bandwidth for {new_cohort} users: {predicted_bandwidth} GB")
+`,
+          challengeInstructions: "Change new_cohort = 600 and run the script to predict bandwidth demand for a 600-person cohort.",
+          expectedOutputSubstring: "900.0 GB",
+          hint: "Update new_cohort = 600 on line 10 and click Run Script."
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "ml-q1",
+        question: "In supervised learning, what do we call the target value that the model is trying to predict?",
+        options: [
+          "The hardware processor",
+          "The label (or target variable)",
+          "The browser cookie",
+          "The CSS stylesheet",
+        ],
+        correctAnswer: 1,
+        explanation: "The label is the ground truth output that the supervised learning model learns to predict.",
+      },
+    ],
+  },
+
+  // ─── PROMPT ENGINEERING & GENERATIVE AI (VANDERBILT & DCG) ──────────────────
+  {
+    id: "prompt-101",
+    trackId: "prompt-engineering",
+    moduleNumber: 1,
+    moduleTitle: "LLM Mechanics & Cognitive Prompting",
+    lessonNumber: 1,
+    title: "Generative AI Prompt Engineering for Professionals",
+    durationMinutes: 20,
+    level: "Beginner",
+    xpAward: 100,
+    summary: "Master the principles of instructing Large Language Models with few-shot reasoning, structured outputs, and cognitive chains of thought.",
+    keyTakeaways: [
+      "Large Language Models (LLMs) are next-token probabilistic predictors trained on massive text corpuses.",
+      "Providing concrete examples (Few-Shot Prompting) dramatically improves accuracy and formatting consistency.",
+      "Chain-of-Thought (CoT) prompting encourages models to reason step-by-step before producing final conclusions.",
+    ],
+    topics: [
+      {
+        id: "prompt-101-top-1",
+        topicNumber: 1,
+        title: "How Large Language Models Process Language",
+        durationMinutes: 7,
+        summary: "Understand tokens, context windows, and why precision phrasing matters.",
+        sections: [
+          {
+            heading: "Tokens and Probabilistic Completion",
+            explanation: "LLMs do not understand human language the way humans do; they break text into numerical fragments called tokens. Given a sequence of preceding tokens, the model computes the mathematical probability distribution of which token should come next. When you write a vague prompt, you leave the probability space wide open, leading to generic or inaccurate answers. By providing role, context, and clear constraints, you steer the model toward high-precision completions.",
+            keyPoints: [
+              "Tokens are chunks of characters (1 token is roughly 4 characters or 0.75 words).",
+              "Context window is the total memory limit of input plus output tokens the model can hold at once.",
+              "Hallucination occurs when a model produces confident-sounding statements that are factually incorrect.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Vague prompts produce vague answers; specific constraints unlock precise, production-grade intelligence.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "prompt-101-top-2",
+        topicNumber: 2,
+        title: "Advanced Prompting Patterns: Few-Shot & Chain-of-Thought",
+        durationMinutes: 8,
+        summary: "Apply proven engineering patterns to dramatically reduce hallucinations and enforce structured JSON.",
+        sections: [
+          {
+            heading: "The Power of Few-Shot Examples",
+            explanation: "Rather than simply describing what you want in paragraph form, providing 2-3 concrete input/output examples teaches the model the exact schema, tone, and reasoning style required. Adding the instruction 'Think step-by-step before answering' (Chain of Thought) activates intermediate reasoning tokens, dramatically reducing logic errors.",
+            keyPoints: [
+              "Zero-Shot: Asking the model directly without examples.",
+              "Few-Shot: Showing 2-3 demonstration pairs before asking the real query.",
+              "Chain of Thought: Asking the model to show intermediate reasoning steps.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Always provide explicit output format constraints (e.g. valid JSON) when integrating LLMs into software.",
+        ],
+        hasLab: true,
+        labType: "python",
+        pythonLabConfig: {
+          title: "Automated Prompt Evaluation & Template Lab",
+          scenario: "Construct and validate a structured system prompt template for an automated student mentoring advisor.",
+          initialCode: `# Prompt Template Engineering
+persona = "Senior Academic Advisor at DigiConnect Ghana"
+target_task = "Provide a 2-step study recommendation for learning cybersecurity IAM."
+output_format = "Format strictly as a JSON object with 'milestone' and 'duration' keys."
+
+system_prompt = f"Role: {persona}\nTask: {target_task}\nConstraint: {output_format}"
+print("Engineered Prompt:\n" + system_prompt)
+`,
+          challengeInstructions: "Add 'and include real-world analogies' to the target_task string and run the script.",
+          expectedOutputSubstring: "real-world analogies",
+          hint: "Edit line 3: target_task = 'Provide a 2-step study recommendation for learning cybersecurity IAM and include real-world analogies.'"
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "prompt-q1",
+        question: "Why does adding 'Think step-by-step' (Chain-of-Thought) improve the accuracy of LLM answers?",
+        options: [
+          "It forces the user's internet browser to refresh its cache",
+          "It prompts the model to generate intermediate reasoning tokens, giving it more computational space before arriving at the conclusion",
+          "It disables all security firewalls on the server",
+          "It reduces the size of the computer memory by 50%",
+        ],
+        correctAnswer: 1,
+        explanation: "Chain-of-thought prompting forces the model to generate intermediate reasoning steps, which mathematically conditions higher accuracy on subsequent tokens.",
+      },
+    ],
+  },
+
+  // ─── CROSS-PLATFORM MOBILE APP DEV (META & DCG) ─────────────────────────────
+  {
+    id: "mobile-101",
+    trackId: "mobile-dev",
+    moduleNumber: 1,
+    moduleTitle: "Mobile UI Architecture & React Native",
+    lessonNumber: 1,
+    title: "Cross-Platform Mobile App Architecture with React Native",
+    durationMinutes: 25,
+    level: "Beginner",
+    xpAward: 120,
+    summary: "Discover how React Native compiles TypeScript and JSX into native Android and iOS user interfaces with 60 FPS performance.",
+    keyTakeaways: [
+      "React Native uses native platform widgets (UIView on iOS, android.view on Android) rather than mobile web views.",
+      "The core components are View (container), Text (typography), Image, and TouchableOpacity (buttons).",
+      "Flexbox layout on mobile defaults to flexDirection: 'column' (unlike CSS web which defaults to row).",
+    ],
+    topics: [
+      {
+        id: "mobile-101-top-1",
+        topicNumber: 1,
+        title: "Native Mobile UI vs Mobile Web Views",
+        durationMinutes: 8,
+        summary: "Understand the performance advantages of compiling to native widgets.",
+        sections: [
+          {
+            heading: "True Native Feel on Every Device",
+            explanation: "While mobile web apps run inside a browser shell, React Native connects your JavaScript logic to real native platform components via a high-speed bridge and Hermes engine. When you write a <Text> component, it renders as a native Android TextView or iOS UILabel, ensuring silky-smooth touch gestures and device battery efficiency.",
+            keyPoints: [
+              "Native components render using the operating system's native graphics engine.",
+              "Single codebase deploys simultaneously to Google Play Store and Apple App Store.",
+              "Access native hardware sensors: GPS, camera, biometric face unlock, and accelerometer.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "React Native bridges web developer skillsets to high-performance native mobile devices.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "mobile-101-top-2",
+        topicNumber: 2,
+        title: "Mobile Layout Systems & Touch Ergonomics",
+        durationMinutes: 9,
+        summary: "Master mobile-first flexbox and thumb-friendly interactive tap targets.",
+        sections: [
+          {
+            heading: "Designing for One-Handed Smartphone Interaction",
+            explanation: "Mobile screens range from small 4.7-inch smartphones to large 12.9-inch tablets. Mobile layouts must accommodate safe areas (notches and home indicator bars) and adhere to minimum tap target sizes (at least 44x44 points) so users can tap comfortably with their thumbs.",
+            keyPoints: [
+              "Flexbox is the default layout engine on both Android and iOS.",
+              "SafeAreaView prevents content from rendering under the smartphone camera notch or speaker grill.",
+              "Touchable feedback provides immediate visual confirmation when users tap buttons.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Always design with touch targets of at least 44px to prevent user frustration.",
+        ],
+        hasLab: true,
+        labType: "sandbox",
+        sandboxConfig: {
+          initialHtml: `<div class="phone-frame">
+  <div class="notch"></div>
+  <div class="screen-content">
+    <div class="app-header">
+      <h3>DIGIHub Mobile</h3>
+      <span class="badge">Accra, GH</span>
+    </div>
+    <div class="card">
+      <h4>Cybersecurity Architecture</h4>
+      <p>Lesson 1: Identity & Access Management</p>
+      <div class="progress-bar"><div class="fill" style="width:27%"></div></div>
+      <button id="tap-btn">Resume Lesson (27%)</button>
+    </div>
+  </div>
+</div>`,
+          initialCss: `.phone-frame {
+  width: 280px;
+  margin: 0 auto;
+  background: #18181b;
+  border-radius: 36px;
+  padding: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+  border: 4px solid #27272a;
+}
+.notch {
+  width: 90px;
+  height: 18px;
+  background: #27272a;
+  margin: 0 auto 8px;
+  border-radius: 10px;
+}
+.screen-content {
+  background: #fafafa;
+  border-radius: 24px;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+}
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.card { background: white; border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.progress-bar { height: 6px; background: #e4e4e7; border-radius: 99px; margin: 8px 0 12px; overflow: hidden; }
+.fill { height: 100%; background: #0056D2; }
+button { width: 100%; background: #0056D2; color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }`,
+          initialJs: `document.getElementById('tap-btn').addEventListener('click', function() {
+  alert('Haptic feedback simulated! Resuming interactive lesson on mobile.');
+});`,
+          challengeInstructions: "Change the progress fill to width: 50% and click the button to simulate mobile tap feedback.",
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "mob-q1",
+        question: "What is the recommended minimum tap target size for buttons on mobile interfaces?",
+        options: [
+          "5x5 pixels",
+          "At least 44x44 points (or pixels) to accommodate human thumb taps comfortably",
+          "1000x1000 pixels",
+          "Buttons should never be tappable on smartphones",
+        ],
+        correctAnswer: 1,
+        explanation: "Apple and Google accessibility standards recommend minimum 44x44 or 48x48 point touch targets for mobile accessibility.",
+      },
+    ],
+  },
+
+  // ─── ETHICAL HACKING & PENETRATION TESTING (EC-COUNCIL & DCG) ───────────────
+  {
+    id: "hack-101",
+    trackId: "ethical-hacking",
+    moduleNumber: 1,
+    moduleTitle: "Penetration Testing Methodology & Network Recon",
+    lessonNumber: 1,
+    title: "Network Reconnaissance, Port Scanning & Nmap",
+    durationMinutes: 25,
+    level: "Beginner",
+    xpAward: 125,
+    summary: "Step into the boots of an authorized white-hat ethical hacker: scan target networks, analyze open listening ports, and detect unpatched vulnerabilities.",
+    keyTakeaways: [
+      "Ethical hacking operates strictly under legal authorization and defined Rules of Engagement (RoE).",
+      "Network reconnaissance identifies live IP hosts, open TCP/UDP ports, and running service versions.",
+      "Unencrypted legacy protocols like Telnet (port 23) and FTP (port 21) leak credentials in plaintext.",
+    ],
+    topics: [
+      {
+        id: "hack-101-top-1",
+        topicNumber: 1,
+        title: "The Ethical Hacking Code & Rules of Engagement",
+        durationMinutes: 8,
+        summary: "Understand the strict legal boundaries and ethics that separate white-hat defenders from cybercriminals.",
+        sections: [
+          {
+            heading: "Authorization Is the Line in the Sand",
+            explanation: "The techniques used by ethical penetration testers and criminal black-hat hackers are technically identical. What distinguishes ethical hackers is explicit written authorization. Penetration testers sign formal Rules of Engagement that dictate scope, permissible time windows, and emergency communication protocols to verify security posture without disrupting business operations.",
+            keyPoints: [
+              "Never scan or test any network or computer system without explicit written consent.",
+              "Confidentiality agreements protect sensitive customer data discovered during assessments.",
+              "Detailed remediation reports provide actionable recommendations to secure identified vulnerabilities.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Without written authorization, scanning any remote network is illegal and unethical.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "hack-101-top-2",
+        topicNumber: 2,
+        title: "TCP Handshakes, Port Scanning & Nmap Inspection",
+        durationMinutes: 9,
+        summary: "Inspect how computers negotiate connections and discover open network service listeners.",
+        sections: [
+          {
+            heading: "How Port Scanning Reveals the Attack Surface",
+            explanation: "Every network computer has 65,535 possible communication ports. Common services listen on standardized numbers: web servers on port 80 (HTTP) and 443 (HTTPS), remote consoles on port 22 (SSH). Tools like Nmap send network packets to detect which ports respond, exposing what software versions are running and whether dangerous services are open to the internet.",
+            keyPoints: [
+              "SYN scans (half-open scans) send a SYN packet to check if the target responds with SYN-ACK.",
+              "Banner grabbing reads the welcoming text string sent by a service to reveal exact version numbers.",
+              "Exposed legacy ports like Telnet (23) transmit passwords across the internet unencrypted.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Hardening a network begins by closing every unnecessary listening port.",
+        ],
+        hasLab: true,
+        labType: "cyber",
+        cyberLabConfig: {
+          type: "network-inspector",
+          title: "Network Port Inspection & Vulnerability Detection",
+          scenario: "Perform an authorized network audit of a corporate gateway in Accra. Detect unencrypted ports and recommend firewall hardening.",
+          prompt: "Identify the open insecure port (Telnet on port 23) transmitting plaintext data, and configure the firewall to enforce SSH on port 22.",
+          hint: "Filter the connection table for port 23 and flag it as a critical security vulnerability."
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "hack-q1",
+        question: "Why is Telnet (port 23) considered a severe security risk on modern networks?",
+        options: [
+          "Telnet causes computer monitors to overheat",
+          "Telnet transmits all usernames, passwords, and commands in plaintext with zero encryption, allowing anyone on the network to intercept credentials",
+          "Telnet can only be accessed using rotary telephones",
+          "Telnet cannot connect to the internet",
+        ],
+        correctAnswer: 1,
+        explanation: "Telnet transmits data unencrypted, meaning attackers capturing network packets can read passwords directly in plaintext. SSH (port 22) must always be used instead.",
+      },
+    ],
+  },
+
+  // ─── IT SUPPORT & SYSTEMS ENGINEERING (GOOGLE / COMPTIA & DCG) ─────────────
+  {
+    id: "itsup-101",
+    trackId: "it-support",
+    moduleNumber: 1,
+    moduleTitle: "Hardware, Operating Systems & Client Diagnostics",
+    lessonNumber: 1,
+    title: "Hardware Troubleshooting, Operating Systems & Networking",
+    durationMinutes: 20,
+    level: "Beginner",
+    xpAward: 100,
+    summary: "Master the diagnostic toolset of systems engineers: dissect computer hardware, troubleshoot OS crashes, and resolve networking failures.",
+    keyTakeaways: [
+      "The CPU executes instructions, RAM provides temporary fast memory, and SSD/NVMe provides permanent storage.",
+      "The BIOS/UEFI initiates Power-On Self-Test (POST) before handing control over to the operating system bootloader.",
+      "Command-line networking tools (ping, traceroute, ipconfig/ifconfig, nslookup) quickly isolate root causes of connection drops.",
+    ],
+    topics: [
+      {
+        id: "itsup-101-top-1",
+        topicNumber: 1,
+        title: "Computer Hardware Architecture & Boot Diagnostics",
+        durationMinutes: 7,
+        summary: "Understand how Motherboards, CPUs, RAM, and Storage communicate during the boot process.",
+        sections: [
+          {
+            heading: "Inside the Physical Machine",
+            explanation: "Every modern computer—from budget smartphones to massive server racks—shares the core Von Neumann architecture: the Central Processing Unit (CPU) acts as the brain; Random Access Memory (RAM) provides lightning-fast temporary working memory; and Solid State Drives (SSDs) store the operating system and files permanently. When powered on, the firmware (UEFI/BIOS) executes a hardware test before loading Windows, Linux, or macOS.",
+            keyPoints: [
+              "POST (Power-On Self-Test) checks that RAM and essential components are responding before loading the OS.",
+              "Overheating due to clogged fans or dry thermal paste is a primary cause of unexpected system shutdowns.",
+              "Storage drives can fail; always maintain 3-2-1 backup strategies for critical organizational data.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Accurate hardware troubleshooting requires isolating whether a failure is physical hardware or software configuration.",
+        ],
+        hasLab: false,
+      },
+      {
+        id: "itsup-101-top-2",
+        topicNumber: 2,
+        title: "Networking Diagnostics: Ping, DNS & Default Gateways",
+        durationMinutes: 8,
+        summary: "Diagnose and restore internet connectivity using essential network troubleshooting commands.",
+        sections: [
+          {
+            heading: "The 4-Step Network Diagnostic Checklist",
+            explanation: "When a user in an office complains that 'the internet is down', professional IT support specialists isolate the layer: 1) Verify physical cable or Wi-Fi link. 2) Ping 127.0.0.1 (local loopback) to verify the network card. 3) Ping the local default gateway (router) to verify the local LAN. 4) Ping 8.8.8.8 and test DNS with nslookup to verify external internet name resolution.",
+            keyPoints: [
+              "ping tests ICMP reachability and packet latency.",
+              "Default gateway is the local router IP that forwards packets outside the local subnet.",
+              "DNS converts human-friendly domain names (e.g. digiconnectghana.org) into numerical IP addresses.",
+            ],
+          },
+        ],
+        keyTakeaways: [
+          "Systematic elimination isolates network outages in minutes instead of guessing.",
+        ],
+        hasLab: true,
+        labType: "cyber",
+        cyberLabConfig: {
+          type: "network-inspector",
+          title: "Workstation Network Connectivity & DNS Diagnostics",
+          scenario: "An office computer in Accra can connect to the local printer on the LAN but cannot load websites due to a misconfigured DNS server.",
+          prompt: "Inspect the network configuration, update the primary DNS address to Google Public DNS (8.8.8.8), and verify external connection.",
+          hint: "Check DNS settings and verify default gateway routing."
+        },
+      },
+    ],
+    quiz: [
+      {
+        id: "it-q1",
+        question: "What is the primary role of the Default Gateway in a local network configuration?",
+        options: [
+          "It controls the brightness of the computer screen",
+          "It is the router address that forwards network traffic from the local network to external networks like the internet",
+          "It permanently erases old files at midnight",
+          "It powers the computer cooling fans",
+        ],
+        correctAnswer: 1,
+        explanation: "The default gateway is the local network router that forwards traffic destined for outside IP addresses onto the wider internet.",
+      },
+    ],
+  },
 ];
+

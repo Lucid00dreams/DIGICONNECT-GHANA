@@ -81,6 +81,49 @@ function getDropdownIcon(iconName: string) {
   }
 }
 
+interface MoreDropdownItem {
+  title: string;
+  href: string;
+  description: string;
+  icon: string;
+  onlyCompact?: boolean;
+}
+
+const MORE_NAV_ITEMS: MoreDropdownItem[] = [
+  {
+    title: "News & Stories",
+    href: "/news",
+    description: "Press releases, graduations & community stories.",
+    icon: "Newspaper",
+    onlyCompact: true,
+  },
+  {
+    title: "Upcoming Events",
+    href: "/events",
+    description: "Workshops, hackathons & community bootcamps.",
+    icon: "Calendar",
+    onlyCompact: true,
+  },
+  {
+    title: "Media Gallery",
+    href: "/gallery",
+    description: "Visual journey of DCG bootcamps and tech labs.",
+    icon: "Sparkles",
+  },
+  {
+    title: "Get Involved",
+    href: "/get-involved",
+    description: "Volunteer, mentor, or explore NGO partnerships.",
+    icon: "Heart",
+  },
+  {
+    title: "Contact Us",
+    href: "/contact",
+    description: "Reach our headquarters and hub team in Accra.",
+    icon: "Info",
+  },
+];
+
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -130,12 +173,29 @@ export function Navbar() {
     }));
   };
 
-  if (pathname.startsWith("/connecthub")) {
+  if (pathname.startsWith("/connecthub") || pathname.startsWith("/digihub")) {
     return null;
   }
 
-  // On desktop, filter out "Home" since the logo is prominent, accessible, and already links to "/"
-  const desktopNavItems = NAV_ITEMS.filter((item) => item.href !== "/");
+  // Curated desktop navigation items to prevent cramped spacing and eliminate any button overlap
+  const desktopNavItems = [
+    NAV_ITEMS.find((item) => item.label === "About Us")!,
+    NAV_ITEMS.find((item) => item.label === "Programs")!,
+    NAV_ITEMS.find((item) => item.label === "DIGIHub")!,
+    NAV_ITEMS.find((item) => item.label === "Impact")!,
+    NAV_ITEMS.find((item) => item.label === "News")!,
+    NAV_ITEMS.find((item) => item.label === "Resources")!,
+  ].filter(Boolean);
+
+  const isMoreActive =
+    pathname === "/gallery" ||
+    pathname === "/get-involved" ||
+    pathname === "/contact" ||
+    pathname.startsWith("/gallery") ||
+    pathname.startsWith("/get-involved") ||
+    pathname.startsWith("/contact");
+
+  const isMoreOpen = activeDropdown === "More";
 
   return (
     <header
@@ -145,7 +205,7 @@ export function Navbar() {
           : "bg-white border-b border-neutral-100 py-3"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-3.5 sm:px-5 lg:px-3 xl:px-6 2xl:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-3.5 sm:px-5 lg:px-4 xl:px-6 2xl:px-8 gap-2 xl:gap-4">
         {/* Brand Logo */}
         <Link
           href="/"
@@ -172,13 +232,13 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <ul className="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 shrink min-w-0">
+        <ul className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2 shrink-0">
           {desktopNavItems.map((item, itemIdx) => {
             const hasChildren = Boolean(item.children && item.children.length > 0);
             const isDropdownOpen = activeDropdown === item.label;
 
             // Align right if it's near the right half of the menu
-            const alignRight = itemIdx >= desktopNavItems.length - 3;
+            const alignRight = itemIdx >= desktopNavItems.length - 2;
 
             // An item is active if exact path matches, or if any of its child sub-pages match
             const isActive =
@@ -189,7 +249,7 @@ export function Navbar() {
               return (
                 <li
                   key={item.label}
-                  className="relative group shrink-0"
+                  className={`relative group shrink-0 ${item.label === "News" ? "hidden xl:block" : ""}`}
                   onMouseEnter={() => handleMouseEnter(item.label)}
                   onMouseLeave={handleMouseLeave}
                 >
@@ -316,10 +376,107 @@ export function Navbar() {
               </li>
             );
           })}
+
+          {/* Dedicated "More" Dropdown for Secondary Directory */}
+          <li
+            className="relative group shrink-0"
+            onMouseEnter={() => handleMouseEnter("More")}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="flex items-center">
+              <button
+                type="button"
+                className={`inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2.5 2xl:px-3 py-1.5 text-[12px] xl:text-[13px] 2xl:text-[13.5px] font-medium rounded-lg transition-colors whitespace-nowrap ${
+                  isMoreActive
+                    ? "text-brand-blue font-semibold bg-brand-blue-light/50"
+                    : "text-neutral-600 hover:text-brand-dark hover:bg-neutral-50"
+                }`}
+                aria-haspopup="true"
+                aria-expanded={isMoreOpen}
+              >
+                <span>More</span>
+                <ChevronDown
+                  className={`w-3 h-3 xl:w-3.5 xl:h-3.5 text-neutral-400 transition-transform duration-200 shrink-0 ${
+                    isMoreOpen ? "rotate-180 text-brand-blue" : "group-hover:text-neutral-700"
+                  }`}
+                />
+                {isMoreActive && (
+                  <span className="absolute bottom-0 left-1.5 right-1.5 xl:left-2.5 xl:right-2.5 2xl:left-3 2xl:right-3 h-[2px] bg-brand-blue rounded-full" />
+                )}
+              </button>
+            </div>
+
+            {/* "More" Dropdown Card */}
+            <div
+              className={`absolute top-full pt-2 transition-all duration-200 z-50 right-0 ${
+                isMoreOpen
+                  ? "opacity-100 visible translate-y-0"
+                  : "opacity-0 invisible -translate-y-1 pointer-events-none"
+              }`}
+            >
+              <div className="w-[340px] rounded-2xl bg-white p-2.5 shadow-xl border border-neutral-200/90 ring-1 ring-black/5">
+                <div className="px-3 pt-2 pb-1.5 border-b border-neutral-100 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                    Explore DCG
+                  </span>
+                  <span className="text-[11px] font-medium text-neutral-400">
+                    Community & Connect
+                  </span>
+                </div>
+
+                <div className="mt-1 space-y-1 max-h-[380px] overflow-y-auto">
+                  {MORE_NAV_ITEMS.map((child) => {
+                    const IconComponent = getDropdownIcon(child.icon);
+                    const isChildActive = pathname === child.href;
+
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        prefetch={true}
+                        onClick={() => setActiveDropdown(null)}
+                        className={`group/item flex items-start gap-3 p-2.5 rounded-xl transition-all ${
+                          child.onlyCompact ? "xl:hidden " : ""
+                        }${
+                          isChildActive
+                            ? "bg-brand-blue-50/80 border border-brand-blue/10"
+                            : "hover:bg-neutral-50 border border-transparent"
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            isChildActive
+                              ? "bg-brand-blue text-white shadow-xs"
+                              : "bg-neutral-100 text-neutral-600 group-hover/item:bg-brand-blue/10 group-hover/item:text-brand-blue"
+                          }`}
+                        >
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div
+                            className={`text-[13px] font-semibold tracking-tight transition-colors ${
+                              isChildActive
+                                ? "text-brand-blue"
+                                : "text-neutral-900 group-hover/item:text-brand-blue"
+                            }`}
+                          >
+                            {child.title}
+                          </div>
+                          <div className="text-[11.5px] text-neutral-500 line-clamp-1 mt-0.5">
+                            {child.description}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </li>
         </ul>
 
         {/* Desktop Controls & CTA */}
-        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 2xl:gap-3 shrink-0">
+        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 2xl:gap-3 shrink-0 ml-auto pl-1 xl:pl-2 z-10">
           {/* Donate Button */}
           <Link
             href="/donate"

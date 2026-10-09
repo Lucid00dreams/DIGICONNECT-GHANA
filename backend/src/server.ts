@@ -18,6 +18,7 @@ import programsRouter from "./routes/programs.routes";
 import statsRouter from "./routes/stats.routes";
 import uploadsRouter from "./routes/uploads.routes";
 import cookiesRouter from "./routes/cookies.routes";
+import lmsRouter from "./routes/lms.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import { globalApiLimiter } from "./middleware/rateLimiter";
 import { sanitizeRequest } from "./middleware/sanitizer";
@@ -159,6 +160,7 @@ app.use("/api/programs", programsRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/upload", uploadsRouter);
 app.use("/api/cookies", cookiesRouter);
+app.use("/api/lms", lmsRouter);
 
 // Security Audit Logs endpoint (Admin only)
 app.get("/api/admin/audit-logs", requireAdminAuth, (req, res) => {

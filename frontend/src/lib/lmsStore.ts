@@ -43,6 +43,24 @@ export interface TopicSection {
   };
 }
 
+export interface PythonLabConfig {
+  title: string;
+  scenario: string;
+  initialCode: string;
+  challengeInstructions: string;
+  expectedOutputSubstring?: string;
+  expectedVariables?: Record<string, any>;
+  hint?: string;
+}
+
+export interface DigitalLiteracyLabConfig {
+  type: "cloud-permissions" | "spreadsheet-formulas";
+  title: string;
+  scenario: string;
+  prompt: string;
+  hint: string;
+}
+
 export interface Topic {
   id: string;
   topicNumber: number;
@@ -52,9 +70,11 @@ export interface Topic {
   sections: TopicSection[];
   keyTakeaways: string[];
   hasLab: boolean;
-  labType?: "sandbox" | "cyber" | "quiz";
+  labType?: "sandbox" | "cyber" | "python" | "digital-literacy" | "quiz";
   sandboxConfig?: CodeSandboxConfig;
   cyberLabConfig?: CyberLabConfig;
+  pythonLabConfig?: PythonLabConfig;
+  digitalLiteracyLabConfig?: DigitalLiteracyLabConfig;
   quiz?: QuizQuestion[];
 }
 
@@ -75,6 +95,8 @@ export interface Lesson {
   keyTakeaways: string[];
   sandboxConfig?: CodeSandboxConfig;
   cyberLabConfig?: CyberLabConfig;
+  pythonLabConfig?: PythonLabConfig;
+  digitalLiteracyLabConfig?: DigitalLiteracyLabConfig;
   quiz: QuizQuestion[];
 }
 
@@ -86,11 +108,20 @@ export interface CourseSyllabusWeek {
 }
 
 export interface Course {
-  id: string; // "coding" | "cybersecurity" | "digital-literacy" | "python"
+  id: string;
   title: string;
   slug: string;
   badge: string;
-  category: "Coding & Web" | "Cybersecurity" | "Digital Literacy" | "Programming";
+  category:
+    | "Coding & Web"
+    | "Cybersecurity"
+    | "Digital Literacy"
+    | "Programming"
+    | "Data & AI"
+    | "Cloud & DevOps"
+    | "Mobile & Apps"
+    | "IT & Systems"
+    | string;
   headline: string;
   description: string;
   instructorName: string;
@@ -107,7 +138,7 @@ export interface Course {
   enrolledStudentsCount: number;
   skillsGained: string[];
   prerequisites: string[];
-  accentColor: "blue" | "red" | "green" | "yellow";
+  accentColor: "blue" | "red" | "green" | "yellow" | "purple" | "indigo";
   lessons: Lesson[];
   certificateEnabled: boolean;
   syllabus: CourseSyllabusWeek[];
@@ -149,7 +180,7 @@ export interface LearningTrack {
   badge: string;
   description: string;
   icon: string;
-  accentColor: "blue" | "red" | "green" | "yellow";
+  accentColor: "blue" | "red" | "green" | "yellow" | "purple" | "indigo";
   totalModules: number;
   totalLessons: number;
   totalHours: number;
@@ -209,6 +240,11 @@ export interface LMSUser {
   currentTrackId: "coding" | "cybersecurity" | string;
   certificateClaimed: boolean;
   notes?: string;
+  onboardingCompleted?: boolean;
+  careerGoal?: string;
+  currentRole?: string;
+  targetSkills?: string[];
+  educationLevel?: string;
 }
 
 export interface LearnerProgress {
@@ -220,27 +256,90 @@ export interface LearnerProgress {
   lastActiveDate: string;
   certificateClaimed: boolean;
   studentName: string;
+  onboardingCompleted?: boolean;
+  careerGoal?: string;
+  currentRole?: string;
+  targetSkills?: string[];
+  educationLevel?: string;
 }
 
 // ─── INITIAL LESSON DATA ───────────────────────────────────────────────
 import { INITIAL_LESSONS } from "./lmsLessonsData";
 export { INITIAL_LESSONS };
 
-// ─── COURSERA-STYLE COURSE CATALOG ─────────────────────────────────────
+// ─── DIGICONNECT GHANA ACADEMY COURSE CATALOG ─────────────────────────
 
 export const COURSES: Course[] = [
+  {
+    id: "cybersecurity-architecture",
+    title: "Cybersecurity Architecture & IAM Defense",
+    slug: "cybersecurity-architecture-iam",
+    badge: "DCG Cyber Architecture Diploma",
+    category: "Cybersecurity",
+    headline: "Design enterprise Zero-Trust architectures, secure hybrid cloud identities, and configure Identity & Access Management (IAM) governance.",
+    description: "Developed by DigiConnect Ghana Technical Faculty. Step into the role of a Principal Security Architect: master enterprise cloud identity, role-based access control (RBAC), multi-factor authentication (MFA), and zero-trust verification for resilient digital infrastructure.",
+    instructorName: "Sarah Mensah",
+    instructorTitle: "Principal Cloud Security Architect, DCG",
+    instructorAvatar: "/images/testimonials/participant-2.jpg",
+    organization: "DigiConnect Cyber Academy",
+    durationWeeks: 4,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Beginner to Intermediate",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 68,
+    enrolledStudentsCount: 312,
+    skillsGained: [
+      "Zero Trust Architecture",
+      "Identity & Access Management (IAM)",
+      "Role-Based Access Control (RBAC)",
+      "Authentication vs Authorization",
+      "Credential Auditing & MFA",
+    ],
+    prerequisites: ["Basic familiarity with computer networks and cloud fundamentals"],
+    accentColor: "blue",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Identity & Access Management (IAM) & Cloud Access Controls",
+        description: "Authentication vs Authorization, directory services, and central identity providers.",
+        hours: 2,
+      },
+      {
+        week: 2,
+        title: "Role-Based Access Control (RBAC) & Least Privilege",
+        description: "Designing security hierarchies, separating administrative duties, and just-in-time access.",
+        hours: 2,
+      },
+      {
+        week: 3,
+        title: "Zero Trust Architecture & Enterprise Hardening",
+        description: "Continuous micro-segmentation, packet encryption, and credential auditing.",
+        hours: 2,
+      },
+      {
+        week: 4,
+        title: "Capstone: Enterprise Cloud Identity Posture Assessment",
+        description: "Audit a real-world enterprise infrastructure configuration and remediate identity risks.",
+        hours: 2,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "cybersecurity-architecture"),
+  },
   {
     id: "coding",
     title: "Foundations of Web Development & Basic Coding",
     slug: "web-development-foundations",
-    badge: "Professional Certificate",
+    badge: "DCG Web Engineering Certificate",
     category: "Coding & Web",
     headline: "Build modern, responsive websites and interactive web applications from scratch with HTML5, CSS3, and JavaScript.",
-    description: "Designed specifically for aspiring software developers and young creators in Ghana. This hands-on course takes you from foundational web architecture through to writing responsive CSS and dynamic JavaScript event listeners with live interactive browser sandboxes in every module.",
+    description: "Designed specifically by DigiConnect Ghana for aspiring software developers and young creators in Ghana. This hands-on course takes you from foundational web architecture through to writing responsive CSS and dynamic JavaScript event listeners with live interactive browser sandboxes in every module.",
     instructorName: "Patrick Paul",
     instructorTitle: "Lead Technology Instructor & Director",
     instructorAvatar: "/images/testimonials/participant-1.jpg",
-    organization: "DigiConnect Ghana Academy",
+    organization: "DigiConnect Software Lab",
     durationWeeks: 4,
     totalModules: 3,
     estimatedHours: 6,
@@ -286,14 +385,14 @@ export const COURSES: Course[] = [
     id: "cybersecurity",
     title: "Applied Cybersecurity & Defensive Threat Analysis",
     slug: "applied-cybersecurity-defense",
-    badge: "Security Specialization",
+    badge: "DCG Cyber Defense Credential",
     category: "Cybersecurity",
     headline: "Deconstruct real-world cyber threats: detect phishing, evaluate password entropy, and defend against database injection attacks.",
-    description: "Step into the role of a digital defender. Learn how malicious actors craft social engineering exploits and develop practical skills to defend corporate credentials and web databases using industry-standard OWASP best practices.",
+    description: "Step into the role of a community digital defender with DigiConnect Ghana. Learn how malicious actors craft social engineering exploits and develop practical skills to defend corporate credentials and web databases using industry-standard OWASP best practices.",
     instructorName: "Kwame Osei-Tutu",
-    instructorTitle: "Cyber Defense Specialist",
+    instructorTitle: "Cyber Defense Specialist, DCG",
     instructorAvatar: "/images/testimonials/participant-2.jpg",
-    organization: "DigiConnect Ghana Academy",
+    organization: "DigiConnect Cyber Academy",
     durationWeeks: 4,
     totalModules: 3,
     estimatedHours: 6,
@@ -335,17 +434,421 @@ export const COURSES: Course[] = [
     lessons: INITIAL_LESSONS.filter((l) => l.trackId === "cybersecurity"),
   },
   {
+    id: "data-analytics",
+    title: "Data Analytics & Business Intelligence",
+    slug: "data-analytics-business-intelligence",
+    badge: "DCG Data & BI Diploma",
+    category: "Data & AI",
+    headline: "Harness data to solve organizational challenges: master spreadsheet modeling, SQL data extraction, and executive visual dashboards.",
+    description: "Prepare for entry-level data analyst and intelligence roles. Learn the complete five-phase lifecycle: ask structured questions, clean messy spreadsheets, write SQL aggregation queries, and present dynamic business recommendations.",
+    instructorName: "Eunice Addo",
+    instructorTitle: "Senior Business Intelligence Analyst, DCG",
+    instructorAvatar: "/images/testimonials/participant-3.jpg",
+    organization: "DigiConnect Data Labs",
+    durationWeeks: 4,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Beginner",
+    language: "English",
+    rating: 4.8,
+    reviewsCount: 52,
+    enrolledStudentsCount: 226,
+    skillsGained: [
+      "Data Analysis Lifecycle",
+      "Spreadsheet Formulas (XLOOKUP, SUM)",
+      "Data Cleaning & Hygiene",
+      "SQL Extraction & Aggregation",
+      "Visual Storytelling & Dashboards",
+    ],
+    prerequisites: ["None • Basic comfort with numbers"],
+    accentColor: "indigo",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "The Data Analysis Lifecycle: Ask, Prepare & Process",
+        description: "Problem formulation, data integrity, and cleaning corrupted or duplicate entries.",
+        hours: 2,
+      },
+      {
+        week: 2,
+        title: "Spreadsheet Modeling & Business Formulas",
+        description: "SUM, AVERAGE, COUNTIF, pivot tables, and financial calculation models.",
+        hours: 2,
+      },
+      {
+        week: 3,
+        title: "Data Visualization & Dashboard Design",
+        description: "Designing high-impact charts and communicating insights to executive stakeholders.",
+        hours: 2,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "data-analytics"),
+  },
+  {
+    id: "python",
+    title: "Python for Problem Solving & Automation",
+    slug: "python-problem-solving",
+    badge: "DCG Python Automation Certificate",
+    category: "Programming",
+    headline: "Learn the world's most versatile programming language to automate routine workflows, parse files, and solve real-world problems.",
+    description: "An approachable and practical introduction to Python created by DigiConnect Ghana. Write scripts to automate repetitive tasks, manipulate data collections, and build algorithmic problem-solving confidence.",
+    instructorName: "Patrick Paul",
+    instructorTitle: "Lead Technology Instructor & Director",
+    instructorAvatar: "/images/testimonials/participant-1.jpg",
+    organization: "DigiConnect Software Lab",
+    durationWeeks: 4,
+    totalModules: 2,
+    estimatedHours: 5,
+    level: "Beginner",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 54,
+    enrolledStudentsCount: 210,
+    skillsGained: [
+      "Python 3 Syntax",
+      "Control Flow & Loops",
+      "File & Data Processing",
+      "Scripting Automation",
+      "Algorithmic Thinking",
+    ],
+    prerequisites: ["None • Recommended to take Basic Web Coding first"],
+    accentColor: "yellow",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Python Syntax, Variables & Dynamic Typing",
+        description: "Core syntax, data types, console I/O, and writing first Python automation script.",
+        hours: 2.5,
+      },
+      {
+        week: 2,
+        title: "Control Flow, Loops & Data Structures",
+        description: "Conditionals, iteration loops, lists, dictionaries, and file processing.",
+        hours: 2.5,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "python"),
+  },
+  {
+    id: "cloud-devops",
+    title: "Cloud Architecture & DevOps Deployment",
+    slug: "cloud-architecture-devops",
+    badge: "DCG Cloud Architecture Certificate",
+    category: "Cloud & DevOps",
+    headline: "Deploy scalable cloud infrastructure, master Docker containerization, configure CI/CD pipelines, and secure modern cloud workloads.",
+    description: "Designed by DigiConnect Ghana for aspiring cloud engineers. Learn how modern tech ecosystems replace physical hardware with elastic virtual compute, object storage, and continuous automated deployment pipelines.",
+    instructorName: "Kofi Owusu",
+    instructorTitle: "Senior Cloud DevOps Lead, DCG",
+    instructorAvatar: "/images/testimonials/participant-2.jpg",
+    organization: "DigiConnect Cloud Academy",
+    durationWeeks: 5,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Beginner to Intermediate",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 44,
+    enrolledStudentsCount: 195,
+    skillsGained: [
+      "Cloud Infrastructure Fundamentals",
+      "Virtual Private Cloud (VPC)",
+      "Docker Containers",
+      "CI/CD Pipelines",
+      "High Availability & Elastic Scaling",
+    ],
+    prerequisites: ["Basic command line familiarity and web fundamentals"],
+    accentColor: "blue",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Cloud Infrastructure Architecture & Core Fundamentals",
+        description: "Regions, availability zones, compute instances, and cloud networking.",
+        hours: 2,
+      },
+      {
+        week: 2,
+        title: "Containerization with Docker & Microservices",
+        description: "Writing Dockerfiles, building container images, and container registries.",
+        hours: 2,
+      },
+      {
+        week: 3,
+        title: "Automated Deployments & Continuous Integration (CI/CD)",
+        description: "GitHub Actions, automated testing, and zero-downtime rolling releases.",
+        hours: 2,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "cloud-devops"),
+  },
+  {
+    id: "machine-learning",
+    title: "Machine Learning & AI Foundations",
+    slug: "machine-learning-ai-foundations",
+    badge: "DCG AI & Machine Learning Diploma",
+    category: "Data & AI",
+    headline: "Build predictive models with Python: master linear regression, classification, model evaluation, and neural network concepts.",
+    description: "Unlock the mathematical foundations of artificial intelligence with DigiConnect Ghana. Discover how algorithms learn predictive patterns from historical datasets, compute gradient descent, and evaluate generalization error.",
+    instructorName: "Dr. Yaw Asare",
+    instructorTitle: "Machine Learning Researcher, DCG",
+    instructorAvatar: "/images/testimonials/participant-3.jpg",
+    organization: "DigiConnect AI Institute",
+    durationWeeks: 5,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Intermediate",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 38,
+    enrolledStudentsCount: 165,
+    skillsGained: [
+      "Supervised vs Unsupervised Learning",
+      "Linear & Logistic Regression",
+      "Loss Functions & Gradient Descent",
+      "Training vs Testing Validation",
+      "Scikit-Learn & Python Data Science",
+    ],
+    prerequisites: ["Python fundamentals and basic algebra concepts"],
+    accentColor: "purple",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Introduction to Machine Learning & Predictive Modeling",
+        description: "Core paradigms, feature engineering, and model training workflows.",
+        hours: 2.5,
+      },
+      {
+        week: 2,
+        title: "Regression & Optimization with Gradient Descent",
+        description: "Minimizing loss functions and calculating optimal model coefficients.",
+        hours: 2.5,
+      },
+      {
+        week: 3,
+        title: "Classification Algorithms & Model Generalization",
+        description: "Logistic regression, precision/recall metrics, and avoiding overfitting.",
+        hours: 3,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "machine-learning"),
+  },
+  {
+    id: "prompt-engineering",
+    title: "Generative AI Prompt Engineering for Professionals",
+    slug: "generative-ai-prompt-engineering",
+    badge: "DCG Generative AI Credential",
+    category: "Data & AI",
+    headline: "Master prompt design for Large Language Models: few-shot reasoning, chain of thought, structured JSON, and agentic workflows.",
+    description: "Turn generative AI into your superpower with DigiConnect Ghana's applied course. Learn how tokens, context windows, and probabilistic completions work, and apply proven prompting patterns to generate reliable code, analysis, and structured outputs.",
+    instructorName: "Patrick Paul",
+    instructorTitle: "Lead Technology Instructor & Director",
+    instructorAvatar: "/images/testimonials/participant-1.jpg",
+    organization: "DigiConnect AI Institute",
+    durationWeeks: 3,
+    totalModules: 2,
+    estimatedHours: 5,
+    level: "Beginner",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 62,
+    enrolledStudentsCount: 280,
+    skillsGained: [
+      "Tokens & Context Window Mechanics",
+      "Few-Shot & Zero-Shot Prompting",
+      "Chain-of-Thought (CoT) Reasoning",
+      "Structured Output Formatting (JSON)",
+      "Hallucination Mitigation & Guardrails",
+    ],
+    prerequisites: ["None"],
+    accentColor: "blue",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "LLM Mechanics, Tokens & Cognitive Constraints",
+        description: "Understanding probabilistic text generation, roles, and context framing.",
+        hours: 2,
+      },
+      {
+        week: 2,
+        title: "Advanced Prompting Patterns & System Guardrails",
+        description: "Few-shot templates, step-by-step reasoning, and enforcing schema compliance.",
+        hours: 2,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "prompt-engineering"),
+  },
+  {
+    id: "mobile-dev",
+    title: "Cross-Platform Mobile App Development with React Native",
+    slug: "mobile-app-development-react-native",
+    badge: "DCG Mobile Engineering Certificate",
+    category: "Mobile & Apps",
+    headline: "Build and deploy production mobile apps for iOS and Android using modern component-driven architectures and native APIs.",
+    description: "Master cross-platform mobile development with DigiConnect Ghana. Build rich, responsive smartphone user interfaces with React Native, flexbox layout, touch gestures, state management, and device camera/GPS access.",
+    instructorName: "Emmanuel Mensah",
+    instructorTitle: "Mobile Engineering Lead, DCG",
+    instructorAvatar: "/images/testimonials/participant-2.jpg",
+    organization: "DigiConnect Software Lab",
+    durationWeeks: 5,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Beginner to Intermediate",
+    language: "English",
+    rating: 4.8,
+    reviewsCount: 41,
+    enrolledStudentsCount: 178,
+    skillsGained: [
+      "React Native & JSX",
+      "Mobile Component Hierarchy",
+      "Mobile-First Flexbox Layouts",
+      "Touch Gesture Handling",
+      "Native Device APIs & Navigation",
+    ],
+    prerequisites: ["Basic JavaScript and web development fundamentals"],
+    accentColor: "indigo",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Native Mobile UI vs Web Views",
+        description: "Architecture of React Native, Hermes engine, and native runtime widgets.",
+        hours: 2.5,
+      },
+      {
+        week: 2,
+        title: "Layout Systems, SafeAreas & Touch Ergonomics",
+        description: "Flexbox direction, responsive phone screens, and 44px tap targets.",
+        hours: 2.5,
+      },
+      {
+        week: 3,
+        title: "State Management & Device Navigation",
+        description: "Stack navigators, tab bars, local storage, and app publishing preparation.",
+        hours: 3,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "mobile-dev"),
+  },
+  {
+    id: "ethical-hacking",
+    title: "Ethical Hacking & Network Penetration Testing",
+    slug: "ethical-hacking-penetration-testing",
+    badge: "DCG Ethical Hacking Credential",
+    category: "Cybersecurity",
+    headline: "Scan network perimeters, analyze open ports with Nmap, and ethically identify infrastructure vulnerabilities before attackers strike.",
+    description: "Train with DigiConnect Ghana's cybersecurity team. Learn reconnaissance methodologies, packet sniffing with Wireshark, scanning open ports, identifying unencrypted legacy protocols, and compiling executive remediation reports.",
+    instructorName: "Kwame Osei-Tutu",
+    instructorTitle: "Certified Ethical Hacker & Defense Specialist, DCG",
+    instructorAvatar: "/images/testimonials/participant-2.jpg",
+    organization: "DigiConnect Cyber Academy",
+    durationWeeks: 5,
+    totalModules: 3,
+    estimatedHours: 8,
+    level: "Intermediate",
+    language: "English",
+    rating: 4.9,
+    reviewsCount: 47,
+    enrolledStudentsCount: 198,
+    skillsGained: [
+      "Penetration Testing Methodology",
+      "Network Port Scanning & Nmap",
+      "Packet Sniffing with Wireshark",
+      "Vulnerability Identification",
+      "Perimeter Defense Hardening",
+    ],
+    prerequisites: ["Foundations of cybersecurity and TCP/IP networking"],
+    accentColor: "red",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Ethical Hacking Ethics & Rules of Engagement",
+        description: "Legal boundaries, written authorization, and assessment scoping.",
+        hours: 2.5,
+      },
+      {
+        week: 2,
+        title: "Network Reconnaissance & Port Scanning",
+        description: "TCP three-way handshakes, SYN scans, banner grabbing, and service detection.",
+        hours: 2.5,
+      },
+      {
+        week: 3,
+        title: "Vulnerability Assessment & Security Remediation",
+        description: "Identifying dangerous unencrypted ports (Telnet, FTP) and firewall configuration.",
+        hours: 3,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "ethical-hacking"),
+  },
+  {
+    id: "it-support",
+    title: "IT Support Professional & Systems Engineering",
+    slug: "it-support-professional-systems",
+    badge: "DCG IT Systems Certificate",
+    category: "IT & Systems",
+    headline: "Master computer hardware diagnostics, operating systems administration, local area networking, and client ticketing troubleshooting.",
+    description: "Launch your career in IT infrastructure with DigiConnect Ghana. Learn how CPUs, RAM, and SSDs communicate, troubleshoot Windows and Linux operating systems via command line, and isolate network connectivity outages systematically.",
+    instructorName: "Blessing Appiah",
+    instructorTitle: "IT Systems Specialist, DCG",
+    instructorAvatar: "/images/testimonials/participant-3.jpg",
+    organization: "DigiConnect Systems & IT Faculty",
+    durationWeeks: 4,
+    totalModules: 3,
+    estimatedHours: 7,
+    level: "Beginner",
+    language: "English",
+    rating: 4.8,
+    reviewsCount: 39,
+    enrolledStudentsCount: 160,
+    skillsGained: [
+      "Computer Hardware Architecture",
+      "BIOS & POST Boot Diagnostics",
+      "Command Line Administration",
+      "TCP/IP, DNS & DHCP Troubleshooting",
+      "Client Support Ticketing",
+    ],
+    prerequisites: ["None • Eagerness to understand physical and digital computer systems"],
+    accentColor: "green",
+    certificateEnabled: true,
+    syllabus: [
+      {
+        week: 1,
+        title: "Hardware Architecture & Motherboard Components",
+        description: "CPU, memory buses, solid state storage, and power supply diagnostics.",
+        hours: 2,
+      },
+      {
+        week: 2,
+        title: "Operating Systems & Command Line Troubleshooting",
+        description: "Process management, file permissions, and system recovery environments.",
+        hours: 2,
+      },
+      {
+        week: 3,
+        title: "Networking Diagnostics: Ping, DNS & Default Gateways",
+        description: "4-step network troubleshooting checklist and restoring client internet access.",
+        hours: 2,
+      },
+    ],
+    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "it-support"),
+  },
+  {
     id: "digital-literacy",
     title: "Digital Workplace Productivity & Cloud Collaboration",
     slug: "digital-workplace-productivity",
-    badge: "Foundational Certificate",
+    badge: "DCG Digital Workplace Certificate",
     category: "Digital Literacy",
     headline: "Master essential cloud productivity tools, collaborative workspaces, professional digital communication, and data hygiene.",
-    description: "Designed to prepare students and career entrants for modern digital office environments across Africa and global remote teams. Covers cloud workspaces, document collaboration, spreadsheets, and digital privacy.",
+    description: "Designed by DigiConnect Ghana to prepare students and career entrants for modern digital office environments across Africa and global remote teams. Covers cloud workspaces, document collaboration, spreadsheets, and digital privacy.",
     instructorName: "Akosua Mensah",
-    instructorTitle: "Digital Workforce Specialist",
+    instructorTitle: "Digital Workforce Specialist, DCG",
     instructorAvatar: "/images/testimonials/participant-3.jpg",
-    organization: "DigiConnect Ghana Academy",
+    organization: "DigiConnect Community Literacy Center",
     durationWeeks: 3,
     totalModules: 2,
     estimatedHours: 4,
@@ -378,51 +881,6 @@ export const COURSES: Course[] = [
       },
     ],
     lessons: INITIAL_LESSONS.filter((l) => l.trackId === "digital-literacy"),
-  },
-  {
-    id: "python",
-    title: "Python for Problem Solving & Automation",
-    slug: "python-problem-solving",
-    badge: "High Demand Track",
-    category: "Programming",
-    headline: "Learn the world's most versatile programming language to automate routine workflows, parse files, and solve real-world problems.",
-    description: "An approachable and practical introduction to Python. Write scripts to automate repetitive tasks, manipulate data collections, and build algorithmic problem-solving confidence.",
-    instructorName: "Patrick Paul",
-    instructorTitle: "Lead Technology Instructor & Director",
-    instructorAvatar: "/images/testimonials/participant-1.jpg",
-    organization: "DigiConnect Ghana Academy",
-    durationWeeks: 4,
-    totalModules: 2,
-    estimatedHours: 5,
-    level: "Beginner",
-    language: "English",
-    rating: 4.9,
-    reviewsCount: 54,
-    enrolledStudentsCount: 210,
-    skillsGained: [
-      "Python 3 Syntax",
-      "Control Flow & Loops",
-      "File & Data Processing",
-      "Scripting Automation",
-    ],
-    prerequisites: ["None • Recommended to take Basic Web Coding first"],
-    accentColor: "yellow",
-    certificateEnabled: true,
-    syllabus: [
-      {
-        week: 1,
-        title: "Python Syntax, Variables & Dynamic Typing",
-        description: "Core syntax, data types, console I/O, and writing first Python automation script.",
-        hours: 2.5,
-      },
-      {
-        week: 2,
-        title: "Control Flow, Loops & Data Structures",
-        description: "Conditionals, iteration loops, lists, dictionaries, and file processing.",
-        hours: 2.5,
-      },
-    ],
-    lessons: INITIAL_LESSONS.filter((l) => l.trackId === "python"),
   },
 ];
 
@@ -757,7 +1215,10 @@ export function signInWithGoogle(customName?: string, customEmail?: string): LMS
     user.lastActive = new Date().toISOString();
     user.provider = "google";
     if (!user.enrolledCourseIds || user.enrolledCourseIds.length === 0) {
-      user.enrolledCourseIds = ["coding", "cybersecurity"];
+      user.enrolledCourseIds = ["cybersecurity-architecture", "coding", "data-analytics"];
+    }
+    if (!user.currentTrackId) {
+      user.currentTrackId = "cybersecurity-architecture";
     }
   } else {
     user = {
@@ -770,9 +1231,9 @@ export function signInWithGoogle(customName?: string, customEmail?: string): LMS
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),
       completedLessonIds: [],
-      enrolledTracks: ["coding", "cybersecurity"],
-      enrolledCourseIds: ["coding", "cybersecurity"],
-      currentTrackId: "coding",
+      enrolledTracks: ["cybersecurity-architecture", "coding", "data-analytics"],
+      enrolledCourseIds: ["cybersecurity-architecture", "coding", "data-analytics"],
+      currentTrackId: "cybersecurity-architecture",
       certificateClaimed: false,
     };
     users.unshift(user);
@@ -785,6 +1246,71 @@ export function signInWithGoogle(customName?: string, customEmail?: string): LMS
 
 export function signOutLMS(): void {
   setActiveUser(null);
+}
+
+export function completeLearnerOnboarding(
+  goal: string,
+  role: string,
+  skills: string[],
+  educationLevel?: string,
+  recommendedCourseIds?: string[]
+): LMSUser | null {
+  const active = getActiveUser();
+  if (!active) return null;
+
+  active.onboardingCompleted = true;
+  active.careerGoal = goal;
+  active.currentRole = role;
+  active.targetSkills = skills;
+  active.educationLevel = educationLevel;
+  active.lastActive = new Date().toISOString();
+
+  if (recommendedCourseIds && recommendedCourseIds.length > 0) {
+    if (!active.enrolledCourseIds) active.enrolledCourseIds = [];
+    for (const cid of recommendedCourseIds) {
+      if (!active.enrolledCourseIds.includes(cid)) {
+        active.enrolledCourseIds.push(cid);
+      }
+      if (!active.enrolledTracks.includes(cid)) {
+        active.enrolledTracks.push(cid);
+      }
+    }
+    if (recommendedCourseIds[0]) {
+      active.currentTrackId = recommendedCourseIds[0];
+    }
+  }
+
+  const users = getAllLMSUsers();
+  const updatedUsers = users.map((u) => (u.id === active.id ? active : u));
+  saveLMSUsers(updatedUsers);
+  setActiveUser(active);
+
+  const progress = getLearnerProgress();
+  progress.onboardingCompleted = true;
+  progress.careerGoal = goal;
+  progress.currentRole = role;
+  progress.targetSkills = skills;
+  progress.educationLevel = educationLevel;
+  if (recommendedCourseIds && recommendedCourseIds.length > 0) {
+    progress.enrolledCourseIds = active.enrolledCourseIds;
+    progress.currentTrackId = active.currentTrackId;
+  }
+  saveLearnerProgress(progress);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("digihub_progress_updated"));
+    window.dispatchEvent(new Event("digihub_auth_changed"));
+    window.dispatchEvent(new Event("digihub_enrollment_updated"));
+  }
+
+  return active;
+}
+
+export function loginAsDemoLearner(
+  name = "Gyamwodie Patrick Paul Boateng",
+  email = "patrick.boateng@example.com"
+): LMSUser {
+  return signInWithGoogle(name, email);
 }
 
 export function getLearnerProgress(): LearnerProgress {
@@ -800,6 +1326,11 @@ export function getLearnerProgress(): LearnerProgress {
       lastActiveDate: new Date().toISOString().split("T")[0],
       certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
       studentName: activeUser ? activeUser.name : "Learner",
+      onboardingCompleted: activeUser ? activeUser.onboardingCompleted : false,
+      careerGoal: activeUser?.careerGoal,
+      currentRole: activeUser?.currentRole,
+      targetSkills: activeUser?.targetSkills,
+      educationLevel: activeUser?.educationLevel,
     };
   }
 
@@ -815,6 +1346,11 @@ export function getLearnerProgress(): LearnerProgress {
         lastActiveDate: new Date().toISOString().split("T")[0],
         certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
         studentName: activeUser ? activeUser.name : "Learner",
+        onboardingCompleted: activeUser ? activeUser.onboardingCompleted : false,
+        careerGoal: activeUser?.careerGoal,
+        currentRole: activeUser?.currentRole,
+        targetSkills: activeUser?.targetSkills,
+        educationLevel: activeUser?.educationLevel,
       };
       localStorage.setItem(LMS_PROGRESS_KEY, JSON.stringify(initial));
       return initial;
@@ -825,6 +1361,11 @@ export function getLearnerProgress(): LearnerProgress {
       parsed.completedLessonIds = activeUser.completedLessonIds;
       parsed.studentName = activeUser.name;
       parsed.certificateClaimed = activeUser.certificateClaimed;
+      parsed.onboardingCompleted = activeUser.onboardingCompleted;
+      parsed.careerGoal = activeUser.careerGoal;
+      parsed.currentRole = activeUser.currentRole;
+      parsed.targetSkills = activeUser.targetSkills;
+      parsed.educationLevel = activeUser.educationLevel;
     }
     return parsed;
   } catch {
@@ -837,6 +1378,11 @@ export function getLearnerProgress(): LearnerProgress {
       lastActiveDate: new Date().toISOString().split("T")[0],
       certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
       studentName: activeUser ? activeUser.name : "Learner",
+      onboardingCompleted: activeUser ? activeUser.onboardingCompleted : false,
+      careerGoal: activeUser?.careerGoal,
+      currentRole: activeUser?.currentRole,
+      targetSkills: activeUser?.targetSkills,
+      educationLevel: activeUser?.educationLevel,
     };
   }
 }
@@ -851,6 +1397,11 @@ export function saveLearnerProgress(progress: LearnerProgress): void {
     activeUser.completedLessonIds = progress.completedLessonIds;
     activeUser.name = progress.studentName;
     activeUser.certificateClaimed = progress.certificateClaimed;
+    activeUser.onboardingCompleted = progress.onboardingCompleted;
+    activeUser.careerGoal = progress.careerGoal;
+    activeUser.currentRole = progress.currentRole;
+    activeUser.targetSkills = progress.targetSkills;
+    activeUser.educationLevel = progress.educationLevel;
     activeUser.lastActive = new Date().toISOString();
     setActiveUser(activeUser);
 
@@ -1054,8 +1605,62 @@ export const INITIAL_CERTIFICATES: CertificateRecord[] = [
 
 // ─── COURSE & ENROLLMENT HELPERS ───────────────────────────────────────
 
+export const LMS_COURSES_KEY = "dcg_lms_courses_v2";
+
 export function getAllCourses(): Course[] {
-  return COURSES;
+  if (typeof window === "undefined") return COURSES;
+  try {
+    const raw = localStorage.getItem(LMS_COURSES_KEY);
+    if (!raw) {
+      localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(COURSES));
+      return COURSES;
+    }
+    const parsed: Course[] = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length < COURSES.length) {
+      localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(COURSES));
+      return COURSES;
+    }
+    return parsed;
+  } catch {
+    return COURSES;
+  }
+}
+
+export function saveCourse(course: Course): Course[] {
+  const current = getAllCourses();
+  const index = current.findIndex((c) => c.id === course.id);
+  let updated: Course[];
+  if (index >= 0) {
+    updated = [...current];
+    updated[index] = { ...current[index], ...course };
+  } else {
+    updated = [course, ...current];
+  }
+  if (typeof window !== "undefined") {
+    localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("digihub_courses_updated"));
+    // Asynchronously notify backend
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/lms/courses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(course),
+    }).catch(() => {});
+  }
+  return updated;
+}
+
+export function deleteCourse(courseId: string): Course[] {
+  const current = getAllCourses();
+  const updated = current.filter((c) => c.id !== courseId);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("digihub_courses_updated"));
+    // Asynchronously notify backend
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/lms/courses/${courseId}`, {
+      method: "DELETE",
+    }).catch(() => {});
+  }
+  return updated;
 }
 
 export function getCourseById(id: string): Course | undefined {
@@ -1331,5 +1936,84 @@ export function adminUploadSignature(
     ...(signerTitle ? { signerTitle } : {}),
   });
 }
+
+// ─── MASTER BIDIRECTIONAL SYNC ENGINE WITH CONNECT HUB & BACKEND ───────
+
+export async function syncLMSWithBackendServer(): Promise<{
+  success: boolean;
+  message: string;
+  syncedAt: string;
+}> {
+  if (typeof window === "undefined") {
+    return { success: false, message: "Client-side only", syncedAt: new Date().toISOString() };
+  }
+
+  try {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const clientCourses = getAllCourses();
+    const clientStudents = getAllLMSUsers();
+    const clientCertificates = getAllCertificates();
+    const clientSettings = getCertificateSettings();
+    const clientSessions = getBookedSessions();
+
+    const res = await fetch(`${API_BASE}/lms/sync`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientCourses,
+        clientStudents,
+        clientCertificates,
+        clientSettings,
+        clientSessions,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Sync responded with HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+    if (json.success && json.data) {
+      const { courses, students, certificates, settings, sessions } = json.data;
+
+      if (Array.isArray(courses) && courses.length > 0) {
+        localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(courses));
+      }
+      if (Array.isArray(students) && students.length > 0) {
+        localStorage.setItem(LMS_USERS_KEY, JSON.stringify(students));
+      }
+      if (Array.isArray(certificates) && certificates.length > 0) {
+        localStorage.setItem(LMS_CERTIFICATES_KEY, JSON.stringify(certificates));
+      }
+      if (settings) {
+        localStorage.setItem(LMS_CERT_SETTINGS_KEY, JSON.stringify(settings));
+      }
+      if (Array.isArray(sessions) && sessions.length > 0) {
+        localStorage.setItem(LMS_SESSIONS_KEY, JSON.stringify(sessions));
+      }
+
+      window.dispatchEvent(new CustomEvent("digihub_cloud_synced", { detail: json.data }));
+      window.dispatchEvent(new Event("digihub_courses_updated"));
+      window.dispatchEvent(new Event("digihub_users_updated"));
+      window.dispatchEvent(new Event("digihub_certificates_updated"));
+      window.dispatchEvent(new Event("digihub_cert_settings_updated"));
+      window.dispatchEvent(new Event("digihub_sessions_updated"));
+
+      return {
+        success: true,
+        message: "Successfully synchronized with DIGIHub Cloud Engine!",
+        syncedAt: new Date().toLocaleTimeString(),
+      };
+    }
+    return { success: false, message: "Sync response incomplete", syncedAt: new Date().toISOString() };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: `Offline mode active (Local Cache). Reason: ${err.message || "Server unreachable"}`,
+      syncedAt: new Date().toLocaleTimeString(),
+    };
+  }
+}
+
 
 

@@ -162,3 +162,153 @@ export async function uploadImage(file: File) {
     mimetype: string;
   }>;
 }
+
+// ─── LMS & CONNECT HUB SYNC APIS ──────────────────────────────────────────
+
+export async function fetchLMSCourses() {
+  return request<{ success: boolean; count: number; data: any[] }>("/lms/courses");
+}
+
+export async function saveLMSCourse(courseData: any) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/courses", {
+    method: "POST",
+    body: JSON.stringify(courseData),
+  });
+}
+
+export async function deleteLMSCourse(courseId: string) {
+  return request<{ success: boolean; message: string }>(`/lms/courses/${courseId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function fetchLMSStudents() {
+  return request<{ success: boolean; count: number; data: any[] }>("/lms/students");
+}
+
+export async function saveLMSStudent(studentData: any) {
+  return request<{ success: boolean; data: any }>("/lms/students", {
+    method: "POST",
+    body: JSON.stringify(studentData),
+  });
+}
+
+export async function updateLMSProgress(data: {
+  studentId?: string;
+  studentEmail?: string;
+  lessonId: string;
+  xpAward?: number;
+}) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/progress", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function enrollLMSCourse(data: {
+  studentId?: string;
+  studentEmail?: string;
+  courseId: string;
+  action?: "enroll" | "unenroll";
+}) {
+  return request<{ success: boolean; message: string }>("/lms/enroll", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchLMSCertificates(student?: string) {
+  const query = student ? `?student=${encodeURIComponent(student)}` : "";
+  return request<{ success: boolean; count: number; data: any[] }>(`/lms/certificates${query}`);
+}
+
+export async function requestLMSCertificate(data: {
+  studentId?: string;
+  studentName: string;
+  studentEmail?: string;
+  courseId: string;
+  courseTitle?: string;
+}) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/certificates/request", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function approveLMSCertificate(data: {
+  certificateId: string;
+  signerName?: string;
+  signatureUrl?: string;
+}) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/certificates/approve", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function rejectLMSCertificate(data: {
+  certificateId: string;
+  reason?: string;
+}) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/certificates/reject", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchLMSSettings() {
+  return request<{ success: boolean; data: any }>("/lms/settings");
+}
+
+export async function saveLMSSettings(settings: any) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/settings", {
+    method: "POST",
+    body: JSON.stringify(settings),
+  });
+}
+
+export async function fetchLMSSessions() {
+  return request<{ success: boolean; count: number; data: any[] }>("/lms/sessions");
+}
+
+export async function bookLMSSession(data: any) {
+  return request<{ success: boolean; message: string; data: any }>("/lms/sessions", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateLMSSessionStatus(id: string, status: string) {
+  return request<{ success: boolean; message: string; data: any }>(`/lms/sessions/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function syncLMSMaster(payload: {
+  clientCourses?: any[];
+  clientStudents?: any[];
+  clientCertificates?: any[];
+  clientSettings?: any;
+  clientSessions?: any[];
+}) {
+  return request<{
+    success: boolean;
+    message: string;
+    timestamp: string;
+    data: {
+      courses: any[];
+      students: any[];
+      certificates: any[];
+      settings: any;
+      sessions: any[];
+    };
+  }>("/lms/sync", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchLMSStats() {
+  return request<{ success: boolean; data: any }>("/lms/stats");
+}

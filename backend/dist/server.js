@@ -21,6 +21,7 @@ const programs_routes_1 = __importDefault(require("./routes/programs.routes"));
 const stats_routes_1 = __importDefault(require("./routes/stats.routes"));
 const uploads_routes_1 = __importDefault(require("./routes/uploads.routes"));
 const cookies_routes_1 = __importDefault(require("./routes/cookies.routes"));
+const lms_routes_1 = __importDefault(require("./routes/lms.routes"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const rateLimiter_1 = require("./middleware/rateLimiter");
 const sanitizer_1 = require("./middleware/sanitizer");
@@ -132,6 +133,7 @@ app.use("/api/programs", programs_routes_1.default);
 app.use("/api/stats", stats_routes_1.default);
 app.use("/api/upload", uploads_routes_1.default);
 app.use("/api/cookies", cookies_routes_1.default);
+app.use("/api/lms", lms_routes_1.default);
 // Security Audit Logs endpoint (Admin only)
 app.get("/api/admin/audit-logs", auth_1.requireAdminAuth, (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 50;

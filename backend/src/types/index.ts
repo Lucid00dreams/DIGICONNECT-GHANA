@@ -111,6 +111,102 @@ export interface ImpactStat {
   accent: "blue" | "red" | "yellow" | "green";
 }
 
+export interface LMSCourse {
+  id: string;
+  title: string;
+  slug: string;
+  badge: string;
+  category: string;
+  headline: string;
+  description: string;
+  instructorName: string;
+  instructorTitle: string;
+  instructorAvatar: string;
+  organization: string;
+  durationWeeks: number;
+  totalModules: number;
+  estimatedHours: number;
+  level: string;
+  language: string;
+  rating: number;
+  reviewsCount: number;
+  enrolledStudentsCount: number;
+  skillsGained: string[];
+  prerequisites: string[];
+  accentColor: "blue" | "red" | "green" | "yellow";
+  lessons: any[];
+  certificateEnabled: boolean;
+  syllabus: any[];
+}
+
+export interface LMSUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  provider: "email" | "google";
+  role: "student" | "mentor" | "admin";
+  createdAt: string;
+  lastActive: string;
+  completedLessonIds: string[];
+  enrolledTracks?: string[];
+  enrolledCourseIds: string[];
+  currentTrackId: string;
+  certificateClaimed: boolean;
+  xp?: number;
+  streakDays?: number;
+  notes?: string;
+}
+
+export interface LMSCertificateRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  courseId: string;
+  courseTitle: string;
+  status: "pending_approval" | "approved" | "rejected";
+  completionDate: string;
+  approvedDate?: string;
+  approvedBy?: string;
+  signerName?: string;
+  signerTitle?: string;
+  signatureUrl?: string;
+  sealUrl?: string;
+  verificationCode: string;
+  rejectionReason?: string;
+}
+
+export interface LMSCertificateSettings {
+  signerName: string;
+  signerTitle: string;
+  signatureUrl: string;
+  sealUrl?: string;
+  autoApproveOnCompletion: boolean;
+  institutionName: string;
+  accreditationText: string;
+  lastUpdated?: string;
+}
+
+export interface LMSMentorshipSession {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string;
+  mentorId: string;
+  mentorName: string;
+  mentorTitle?: string;
+  mentorAvatar?: string;
+  topic?: string;
+  trackTopic?: "coding" | "cybersecurity" | "career";
+  date: string;
+  timeSlot: string;
+  notes?: string;
+  meetingLink: string;
+  status: "confirmed" | "completed" | "cancelled";
+  createdAt: string;
+}
+
 export interface DatabaseSchema {
   applications: ApplicationSubmission[];
   contacts: ContactSubmission[];
@@ -127,4 +223,9 @@ export interface DatabaseSchema {
     location: string;
     hours: string;
   };
+  lmsCourses?: LMSCourse[];
+  lmsStudents?: LMSUser[];
+  lmsCertificates?: LMSCertificateRecord[];
+  lmsCertificateSettings?: LMSCertificateSettings;
+  lmsSessions?: LMSMentorshipSession[];
 }

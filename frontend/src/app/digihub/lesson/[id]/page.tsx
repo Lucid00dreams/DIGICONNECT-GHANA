@@ -21,6 +21,14 @@ import {
   Layers,
   Award,
   Terminal,
+  Bot,
+  X,
+  RotateCw,
+  Folder,
+  Menu,
+  HelpCircle,
+  Brain,
+  MessageCircle,
 } from "lucide-react";
 import {
   getLessonById,
@@ -34,6 +42,8 @@ import {
 } from "@/lib/lmsStore";
 import { CodeSandbox } from "@/components/digihub/CodeSandbox";
 import { CyberLab } from "@/components/digihub/CyberLab";
+import { PythonLab } from "@/components/digihub/PythonLab";
+import { DigitalLiteracyLab } from "@/components/digihub/DigitalLiteracyLab";
 import { QuizWidget } from "@/components/digihub/QuizWidget";
 import { AuthGate } from "@/components/digihub/AuthGate";
 
@@ -55,11 +65,20 @@ export default function DIGIHubLessonPage() {
   const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [activePaneTab, setActivePaneTab] = useState<"content" | "quiz">("content");
+  const [activePaneTab, setActivePaneTab] = useState<"content" | "flashcards" | "quiz">("content");
   const [mobileActiveView, setMobileActiveView] = useState<"guide" | "lab">("guide");
   const [activeTopicIndex, setActiveTopicIndex] = useState<number>(0);
   const [completionToast, setCompletionToast] = useState(false);
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
+
+  // Drawer states
+  const [isCurriculumDrawerOpen, setIsCurriculumDrawerOpen] = useState(false);
+  const [isCoachDrawerOpen, setIsCoachDrawerOpen] = useState(false);
+  const [coachActiveTopic, setCoachActiveTopic] = useState<string | null>(null);
+
+  // Flashcards state
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
 
   useEffect(() => {
     const user = getActiveUser();
@@ -74,6 +93,8 @@ export default function DIGIHubLessonPage() {
       setIsCompleted(progress.completedLessonIds.includes(found.id));
       setActiveTopicIndex(0);
       setActivePaneTab("content");
+      setActiveCardIndex(0);
+      setIsCardFlipped(false);
     }
   }, [lessonId]);
 
@@ -113,6 +134,7 @@ export default function DIGIHubLessonPage() {
   }
 
   const allLessons = getAllLessons();
+  const trackLessons = allLessons.filter((l) => l.trackId === lesson.trackId);
   const currentIndex = allLessons.findIndex((l) => l.id === lesson.id);
   const nextLesson =
     currentIndex >= 0 && currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
@@ -120,10 +142,20 @@ export default function DIGIHubLessonPage() {
   const topics: Topic[] = lesson.topics && lesson.topics.length > 0 ? lesson.topics : [];
   const currentTopic = topics[activeTopicIndex] || null;
 
-  // Active lab config: preference for topic lab, fallback to lesson lab
+  // Active lab config
   const activeSandbox = currentTopic?.sandboxConfig || lesson.sandboxConfig;
   const activeCyberLab = currentTopic?.cyberLabConfig || lesson.cyberLabConfig;
-  const currentHasLab = !!(activeSandbox || activeCyberLab);
+  const activePythonLab = currentTopic?.pythonLabConfig || lesson.pythonLabConfig;
+  const activeDigitalLiteracyLab = currentTopic?.digitalLiteracyLabConfig || lesson.digitalLiteracyLabConfig;
+
+  const currentHasLab = !!(
+    activeSandbox ||
+    activeCyberLab ||
+    activePythonLab ||
+    activeDigitalLiteracyLab
+  );
+
+  const learnerProgress = getLearnerProgress();
 
   const handleMarkComplete = () => {
     markLessonCompleted(lesson.id, lesson.xpAward);
@@ -143,7 +175,6 @@ export default function DIGIHubLessonPage() {
       setActiveTopicIndex((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      // Reached end of topics -> switch to Knowledge Check quiz
       setActivePaneTab("quiz");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -156,9 +187,23 @@ export default function DIGIHubLessonPage() {
     }
   };
 
+  // Generate flashcards from lesson takeaways and topic summaries
+  const flashcards = [
+    ...(lesson.keyTakeaways || []).map((t, idx) => ({
+      front: `Core Principle 0${idx + 1}: ${cleanNoAsterisks(lesson.title)}`,
+      back: cleanNoAsterisks(t),
+      analogy: topics[idx]?.sections[0]?.analogy || "Relate this directly to everyday technology workflows.",
+    })),
+    ...topics.map((top) => ({
+      front: `What is the key insight of "${cleanNoAsterisks(top.title)}"?`,
+      back: cleanNoAsterisks(top.summary),
+      analogy: top.sections[0]?.analogy || "Practice building intuition with real-world examples.",
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col pt-16">
-      {/* Top Header */}
+      {/* ─── STICKY HEADER ──────────────────────────────────────────────── */}
       <header className="sticky top-16 z-40 bg-white border-b border-neutral-200 px-3.5 sm:px-6 py-2.5 sm:py-3.5 shadow-2xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -169,6 +214,16 @@ export default function DIGIHubLessonPage() {
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
+
+            <button
+              type="button"
+              onClick={() => setIsCurriculumDrawerOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-semibold shrink-0 transition"
+              title="View all course modules"
+            >
+              <Menu className="w-3.5 h-3.5 text-neutral-500" />
+              <span className="hidden sm:inline">Curriculum</span>
+            </button>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-neutral-500 truncate">
@@ -185,6 +240,16 @@ export default function DIGIHubLessonPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Ask AI Study Coach Button */}
+            <button
+              type="button"
+              onClick={() => setIsCoachDrawerOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Study Coach</span>
+            </button>
+
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
               <Clock className="w-3.5 h-3.5 text-neutral-400" />
               <span>{lesson.durationMinutes} mins</span>
@@ -204,7 +269,6 @@ export default function DIGIHubLessonPage() {
               </button>
             )}
 
-            {/* NEXT MODULE BUTTON: ALWAYS VISIBLE ON PC AND MOBILE */}
             {nextLesson ? (
               <Link
                 href={`/digihub/lesson/${nextLesson.id}`}
@@ -230,7 +294,7 @@ export default function DIGIHubLessonPage() {
         </div>
       </header>
 
-      {/* Mobile Mode Switcher: visible below lg */}
+      {/* ─── MOBILE MODE SWITCHER ────────────────────────────────────────── */}
       <div className="lg:hidden bg-white border-b border-neutral-200 px-3.5 py-2">
         <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl text-xs font-semibold">
           <button
@@ -254,14 +318,22 @@ export default function DIGIHubLessonPage() {
                 : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            {activeSandbox ? <Code2 className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
+            {activeSandbox ? (
+              <Code2 className="w-3.5 h-3.5" />
+            ) : activePythonLab ? (
+              <Terminal className="w-3.5 h-3.5" />
+            ) : activeDigitalLiteracyLab ? (
+              <Folder className="w-3.5 h-3.5" />
+            ) : (
+              <Shield className="w-3.5 h-3.5" />
+            )}
             <span>Interactive Lab</span>
             {currentHasLab && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
           </button>
         </div>
       </div>
 
-      {/* Completion Toast Notification with direct Next Button */}
+      {/* ─── COMPLETION TOAST NOTIFICATION ───────────────────────────────── */}
       {completionToast && (
         <div className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-3 px-4 sm:px-5 py-3.5 rounded-2xl bg-neutral-900 text-white font-medium text-xs shadow-2xl animate-in slide-in-from-bottom duration-200 max-w-[92vw]">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -280,328 +352,308 @@ export default function DIGIHubLessonPage() {
         </div>
       )}
 
-      {/* Split-Pane Workspace */}
+      {/* ─── SPLIT-PANE WORKSPACE ────────────────────────────────────────── */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-        {/* LEFT PANE: Topics, Relatable Explanations & Quiz */}
+        {/* LEFT PANE: Topics, Relatable Explanations, Flashcards & Quiz */}
         <div
           className={`${
             mobileActiveView === "guide" ? "flex" : "hidden"
           } lg:flex lg:col-span-5 flex-col space-y-4`}
         >
-          {/* Sub Navigation (Guide vs Quiz) */}
+          {/* Sub Navigation (Guide vs Flashcards vs Quiz) */}
           <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs">
             <button
               onClick={() => setActivePaneTab("content")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition ${
                 activePaneTab === "content"
                   ? "bg-neutral-100 text-neutral-900 font-bold"
                   : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              Step-by-Step Topics
+              Topics Guide
             </button>
+
+            <button
+              onClick={() => setActivePaneTab("flashcards")}
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 ${
+                activePaneTab === "flashcards"
+                  ? "bg-neutral-100 text-neutral-900 font-bold"
+                  : "text-neutral-500 hover:text-neutral-900"
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Flashcards</span>
+            </button>
+
             <button
               onClick={() => setActivePaneTab("quiz")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 ${
                 activePaneTab === "quiz"
                   ? "bg-neutral-100 text-neutral-900 font-bold"
                   : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              <span>Knowledge Check</span>
-              <span className="w-4 h-4 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-bold flex items-center justify-center">
-                {lesson.quiz.length}
-              </span>
+              <span>Quiz ({lesson.quiz.length})</span>
             </button>
           </div>
 
-          {activePaneTab === "content" ? (
-            <div className="bg-white border border-neutral-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 shadow-xs">
-              {/* TOPIC SELECTOR STEPPER (Topic-by-Topic structure) */}
-              {topics.length > 0 && (
-                <div className="space-y-2.5 pb-2 border-b border-neutral-100">
-                  <div className="flex items-center justify-between text-xs text-neutral-500">
-                    <span className="font-bold text-neutral-800 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-brand-blue" />
-                      <span>Module Topics</span>
-                    </span>
-                    <span className="text-[11px] font-medium text-neutral-500">
+          {/* TAB 1: TOPICS GUIDE */}
+          {activePaneTab === "content" && (
+            <div className="bg-white rounded-3xl border border-neutral-200 p-5 sm:p-6 shadow-2xs space-y-5">
+              {/* Topic Stepper Header */}
+              {topics.length > 1 && (
+                <div className="border-b border-neutral-100 pb-3.5">
+                  <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
+                    <span className="font-semibold text-neutral-800">
                       Topic {activeTopicIndex + 1} of {topics.length}
                     </span>
+                    <span>{currentTopic?.durationMinutes || 5} mins</span>
                   </div>
-
-                  {/* Horizontal Scrollable Topic Tabs */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
-                    {topics.map((t, idx) => {
-                      const isActive = idx === activeTopicIndex;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => {
-                            setActiveTopicIndex(idx);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 shrink-0 ${
-                            isActive
-                              ? "bg-brand-blue text-white shadow-2xs font-bold"
-                              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700"
-                          }`}
-                        >
-                          <span
-                            className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                              isActive ? "bg-white text-brand-blue" : "bg-neutral-200 text-neutral-700"
-                            }`}
-                          >
-                            {t.topicNumber}
-                          </span>
-                          <span className="max-w-[130px] sm:max-w-[160px] truncate">{cleanNoAsterisks(t.title)}</span>
-                          {t.hasLab && (
-                            <span
-                              className={`text-[9px] px-1 py-0.2 rounded font-bold uppercase tracking-wider ${
-                                isActive ? "bg-white/20 text-white" : "bg-brand-blue/10 text-brand-blue"
-                              }`}
-                            >
-                              Lab
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center gap-1.5">
+                    {topics.map((t, i) => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          setActiveTopicIndex(i);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className={`flex-1 h-2 rounded-full transition-all ${
+                          i === activeTopicIndex
+                            ? "bg-brand-blue"
+                            : i < activeTopicIndex
+                            ? "bg-emerald-500"
+                            : "bg-neutral-200"
+                        }`}
+                        title={`Jump to Topic ${i + 1}: ${t.title}`}
+                      />
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* ACTIVE TOPIC CONTENT */}
+              {/* Active Topic Content */}
               {currentTopic ? (
-                <div className="space-y-5">
-                  {/* Topic Title & Duration Header */}
+                <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between text-xs text-neutral-500 mb-1">
-                      <span className="font-semibold text-brand-blue uppercase tracking-wider text-[11px]">
-                        Topic {currentTopic.topicNumber} of {topics.length}
-                      </span>
-                      <span className="flex items-center gap-1 text-[11px] text-neutral-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        {currentTopic.durationMinutes} mins
-                      </span>
-                    </div>
-                    <h2 className="text-base sm:text-lg font-bold text-neutral-900 leading-snug">
+                    <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider">
+                      Topic 0{currentTopic.topicNumber}
+                    </span>
+                    <h2 className="text-base sm:text-lg font-bold text-neutral-900 mt-0.5">
                       {cleanNoAsterisks(currentTopic.title)}
                     </h2>
-                    <p className="text-xs sm:text-sm text-neutral-600 mt-1.5 leading-relaxed">
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
                       {cleanNoAsterisks(currentTopic.summary)}
                     </p>
                   </div>
 
-                  {/* Topic Sections with Everyday Relatable Analogies */}
-                  <div className="space-y-5">
-                    {currentTopic.sections.map((section, sIdx) => (
-                      <div key={sIdx} className="space-y-3.5">
-                        <h3 className="text-sm sm:text-base font-bold text-neutral-900 pt-2 border-t border-neutral-100 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-blue shrink-0" />
-                          <span>{cleanNoAsterisks(section.heading)}</span>
+                  {/* Topic Sections with Analogies and Clean Snippets */}
+                  <div className="space-y-4 pt-2">
+                    {currentTopic.sections.map((sec, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 space-y-2.5"
+                      >
+                        <h3 className="font-bold text-xs sm:text-sm text-neutral-900 flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-md bg-brand-blue-light text-brand-blue flex items-center justify-center text-[10px] font-bold">
+                            {idx + 1}
+                          </span>
+                          <span>{cleanNoAsterisks(sec.heading)}</span>
                         </h3>
 
-                        {/* Relatable Analogy Card (Easy to understand!) */}
-                        {section.analogy && (
-                          <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50/80 border border-amber-200/80 space-y-1.5">
-                            <div className="flex items-center gap-1.5 text-amber-800 text-xs font-bold">
-                              <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
-                              <span>Everyday Analogy (Easy to Understand)</span>
-                            </div>
-                            <p className="text-xs sm:text-sm text-amber-950 leading-relaxed">
-                              {cleanNoAsterisks(section.analogy)}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Clear Pedagogical Explanation (No asterisks) */}
-                        <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed">
-                          {cleanNoAsterisks(section.explanation)}
+                        <p className="text-xs text-neutral-700 leading-relaxed">
+                          {cleanNoAsterisks(sec.explanation)}
                         </p>
 
-                        {/* Key Bullet Points */}
-                        {section.keyPoints && section.keyPoints.length > 0 && (
-                          <div className="space-y-1.5 pt-1">
-                            {section.keyPoints.map((pt, pIdx) => (
-                              <div key={pIdx} className="flex items-start gap-2 text-xs sm:text-sm text-neutral-700">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                <span>{cleanNoAsterisks(pt)}</span>
-                              </div>
-                            ))}
+                        {/* Real-World Analogy Callout */}
+                        {sec.analogy && (
+                          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-950 flex items-start gap-2.5">
+                            <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                            <div className="leading-relaxed">
+                              <span className="font-bold text-amber-900">Ghanaian Everyday Analogy: </span>
+                              {cleanNoAsterisks(sec.analogy)}
+                            </div>
                           </div>
                         )}
 
-                        {/* Syntax Code Snippet */}
-                        {section.codeSnippet && (
-                          <div className="rounded-xl overflow-hidden bg-neutral-900 text-neutral-100 border border-neutral-800 shadow-2xs">
-                            <div className="flex items-center justify-between px-3.5 py-2 bg-neutral-800/80 border-b border-neutral-700 text-xs">
-                              <span className="font-mono text-neutral-400 text-[11px]">
-                                {section.codeSnippet.title || section.codeSnippet.language}
-                              </span>
+                        {/* Code Snippet Box */}
+                        {sec.codeSnippet && (
+                          <div className="mt-2 rounded-xl bg-neutral-950 text-neutral-100 p-3 font-mono text-xs overflow-hidden">
+                            <div className="flex items-center justify-between pb-1.5 border-b border-neutral-800 text-[11px] text-neutral-400">
+                              <span>{sec.codeSnippet.title || sec.codeSnippet.language}</span>
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleCopyCode(
-                                    section.codeSnippet!.code,
-                                    `snip-${sIdx}`
-                                  )
+                                  handleCopyCode(sec.codeSnippet!.code, `snip-${idx}`)
                                 }
-                                className="inline-flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white transition"
+                                className="hover:text-white transition flex items-center gap-1"
                               >
-                                {copiedSnippetId === `snip-${sIdx}` ? (
-                                  <>
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                    <span className="text-emerald-400">Copied</span>
-                                  </>
+                                {copiedSnippetId === `snip-${idx}` ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
                                 ) : (
-                                  <>
-                                    <Copy className="w-3 h-3" />
-                                    <span>Copy</span>
-                                  </>
+                                  <Copy className="w-3 h-3" />
                                 )}
+                                <span>{copiedSnippetId === `snip-${idx}` ? "Copied" : "Copy"}</span>
                               </button>
                             </div>
-                            <pre className="p-3.5 overflow-x-auto text-[11px] sm:text-xs font-mono leading-relaxed text-neutral-200">
-                              <code>{cleanNoAsterisks(section.codeSnippet.code)}</code>
+                            <pre className="pt-2 text-emerald-300 overflow-x-auto text-[11px] leading-relaxed">
+                              <code>{sec.codeSnippet.code}</code>
                             </pre>
                           </div>
+                        )}
+
+                        {/* Bullet takeaways */}
+                        {sec.keyPoints && sec.keyPoints.length > 0 && (
+                          <ul className="space-y-1 text-xs text-neutral-600 pt-1">
+                            {sec.keyPoints.map((pt, pIdx) => (
+                              <li key={pIdx} className="flex items-start gap-1.5">
+                                <span className="text-brand-blue font-bold">•</span>
+                                <span>{cleanNoAsterisks(pt)}</span>
+                              </li>
+                            ))}
+                          </ul>
                         )}
                       </div>
                     ))}
                   </div>
 
-                  {/* Topic Key Takeaways */}
+                  {/* Key Takeaways */}
                   {currentTopic.keyTakeaways && currentTopic.keyTakeaways.length > 0 && (
-                    <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-brand-blue-light/40 border border-brand-blue/20 space-y-2">
-                      <h4 className="text-xs font-bold text-brand-blue-dark flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-brand-blue" />
-                        <span>Topic Takeaways</span>
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {currentTopic.keyTakeaways.map((point, index) => (
-                          <li key={index} className="flex items-start gap-2 text-xs text-neutral-700">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-blue mt-1.5 shrink-0" />
-                            <span>{cleanNoAsterisks(point)}</span>
+                    <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/60 space-y-2">
+                      <span className="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        Quick Bite-Sized Takeaways:
+                      </span>
+                      <ul className="space-y-1 text-xs text-blue-950">
+                        {currentTopic.keyTakeaways.map((takeaway, tIdx) => (
+                          <li key={tIdx} className="flex items-start gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                            <span>{cleanNoAsterisks(takeaway)}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
 
-                  {/* Topic Stepper Bottom Action Buttons */}
-                  <div className="pt-2 flex flex-col gap-2.5">
-                    <div className="flex items-center gap-2">
-                      {activeTopicIndex > 0 && (
-                        <button
-                          type="button"
-                          onClick={handlePrevTopic}
-                          className="flex-1 py-2.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span>Previous Topic</span>
-                        </button>
-                      )}
+                  {/* Navigation Footer */}
+                  <div className="pt-4 border-t border-neutral-100 flex items-center justify-between gap-2.5">
+                    {activeTopicIndex > 0 ? (
+                      <button
+                        type="button"
+                        onClick={handlePrevTopic}
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Previous Topic</span>
+                      </button>
+                    ) : (
+                      <div className="flex-1" />
+                    )}
 
-                      {activeTopicIndex < topics.length - 1 ? (
-                        <button
-                          type="button"
-                          onClick={handleNextTopic}
-                          className="flex-1 py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
-                        >
-                          <span>Next Topic: {cleanNoAsterisks(topics[activeTopicIndex + 1]?.title)}</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActivePaneTab("quiz");
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className="flex-1 py-2.5 px-4 rounded-xl bg-brand-gold hover:bg-brand-gold-dark text-neutral-900 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
-                        >
-                          <span>Knowledge Check Quiz</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Mobile button to switch to Lab */}
-                    {currentHasLab && (
+                    {activeTopicIndex < topics.length - 1 ? (
+                      <button
+                        type="button"
+                        onClick={handleNextTopic}
+                        className="flex-1 py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
+                      >
+                        <span>Next Topic</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    ) : (
                       <button
                         type="button"
                         onClick={() => {
-                          setMobileActiveView("lab");
+                          setActivePaneTab("quiz");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="lg:hidden w-full py-2.5 rounded-xl bg-neutral-900 text-white font-semibold text-xs transition flex items-center justify-center gap-2 shadow-2xs"
+                        className="flex-1 py-2.5 px-4 rounded-xl bg-brand-gold hover:bg-brand-gold-dark text-neutral-900 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
                       >
-                        {activeSandbox ? <Code2 className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
-                        <span>Open Topic Lab Workspace</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <span>Knowledge Check Quiz</span>
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                     )}
                   </div>
                 </div>
-              ) : (
-                /* Fallback if module has no topics array */
-                <div className="space-y-4">
-                  <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200">
-                    <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed">
-                      {cleanNoAsterisks(lesson.summary)}
-                    </p>
-                  </div>
-                  {lesson.markdownContent && (
-                    <div className="space-y-3 text-xs sm:text-sm text-neutral-700 leading-relaxed">
-                      {lesson.markdownContent.split("\n\n").map((para, i) => (
-                        <p key={i}>{cleanNoAsterisks(para)}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* CELEBRATORY CARD WITH PROMINENT NEXT MODULE BUTTON AFTER COMPLETION */}
-              {isCompleted && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 space-y-3 shadow-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                      ✓
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-emerald-950">
-                        Module Completed! (+{lesson.xpAward} XP Earned)
-                      </h4>
-                      <p className="text-xs text-emerald-800">
-                        Excellent progress. Continue immediately to the next lesson or track your certificate progress.
-                      </p>
-                    </div>
-                  </div>
-
-                  {nextLesson ? (
-                    <Link
-                      href={`/digihub/lesson/${nextLesson.id}`}
-                      className="w-full py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
-                    >
-                      <span>Continue to Next Module: {cleanNoAsterisks(nextLesson.title)}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/digihub"
-                      className="w-full py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
-                    >
-                      <span>All Modules Finished! View Certificate in DIGIHub</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  )}
-                </div>
-              )}
+              ) : null}
             </div>
-          ) : (
-            /* Quiz Tab */
+          )}
+
+          {/* TAB 2: INTERACTIVE FLASHCARDS */}
+          {activePaneTab === "flashcards" && (
+            <div className="bg-white rounded-3xl border border-neutral-200 p-5 sm:p-6 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-800">
+                  Card {activeCardIndex + 1} of {flashcards.length}
+                </span>
+                <span className="text-neutral-500">Tap card to flip</span>
+              </div>
+
+              {/* 3D Flip Flashcard */}
+              <div
+                onClick={() => setIsCardFlipped(!isCardFlipped)}
+                className="cursor-pointer min-h-[220px] rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between select-none shadow-xs text-center"
+                style={{
+                  backgroundColor: isCardFlipped ? "#0f172a" : "#f8fafc",
+                  color: isCardFlipped ? "#f8fafc" : "#0f172a",
+                  borderColor: isCardFlipped ? "#38bdf8" : "#cbd5e1",
+                }}
+              >
+                <div className="text-[11px] uppercase font-bold tracking-wider opacity-60">
+                  {isCardFlipped ? "✓ Answer & Explanation" : "? Question / Concept"}
+                </div>
+
+                <div className="py-4 text-sm sm:text-base font-bold leading-relaxed">
+                  {isCardFlipped
+                    ? flashcards[activeCardIndex]?.back
+                    : flashcards[activeCardIndex]?.front}
+                </div>
+
+                {isCardFlipped && flashcards[activeCardIndex]?.analogy && (
+                  <div className="text-xs text-amber-300 italic">
+                    💡 Analogy: {flashcards[activeCardIndex].analogy}
+                  </div>
+                )}
+
+                <div className="text-[11px] opacity-50 flex items-center justify-center gap-1">
+                  <RotateCw className="w-3 h-3" />
+                  <span>Click to flip card</span>
+                </div>
+              </div>
+
+              {/* Card Controls */}
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  disabled={activeCardIndex === 0}
+                  onClick={() => {
+                    setActiveCardIndex((prev) => Math.max(0, prev - 1));
+                    setIsCardFlipped(false);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 disabled:opacity-40 text-xs font-semibold text-neutral-700 transition"
+                >
+                  Previous Card
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeCardIndex < flashcards.length - 1) {
+                      setActiveCardIndex((prev) => prev + 1);
+                      setIsCardFlipped(false);
+                    } else {
+                      setActiveCardIndex(0);
+                      setIsCardFlipped(false);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold transition shadow-2xs"
+                >
+                  {activeCardIndex < flashcards.length - 1 ? "Next Card" : "Restart Deck"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: QUIZ */}
+          {activePaneTab === "quiz" && (
             <div className="space-y-3">
               <QuizWidget
                 questions={lesson.quiz}
@@ -612,96 +664,229 @@ export default function DIGIHubLessonPage() {
                   }
                 }}
               />
-
-              {/* Post Quiz Next Lesson Flow */}
-              {isCompleted && nextLesson && (
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
-                  <p className="text-xs font-semibold text-emerald-900">
-                    Ready for the next lesson?
-                  </p>
-                  <Link
-                    href={`/digihub/lesson/${nextLesson.id}`}
-                    className="w-full py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
-                  >
-                    <span>Continue to Next Module: {cleanNoAsterisks(nextLesson.title)}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              )}
-
-              {currentHasLab && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileActiveView("lab");
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="lg:hidden w-full py-2.5 rounded-xl bg-brand-blue text-white font-semibold text-xs transition flex items-center justify-center gap-2 shadow-2xs"
-                >
-                  <span>Jump to Topic Lab →</span>
-                </button>
-              )}
             </div>
           )}
         </div>
 
-        {/* RIGHT PANE: Interactive Sandbox / Cyber Lab per Topic */}
+        {/* RIGHT PANE: Interactive Labs */}
         <div
           className={`${
             mobileActiveView === "lab" ? "flex" : "hidden"
           } lg:flex lg:col-span-7 flex-col space-y-3`}
         >
-          {/* Mobile Back Button to Guide */}
-          <div className="lg:hidden flex items-center justify-between pb-1">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileActiveView("guide");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="inline-flex items-center gap-1.5 text-xs text-brand-blue font-semibold hover:underline"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Topics Guide</span>
-            </button>
-            <span className="text-[11px] text-neutral-500 font-medium">
-              Topic {activeTopicIndex + 1} Lab
-            </span>
-          </div>
-
-          {/* Active Sandbox Lab for Current Topic */}
+          {/* Active Sandbox Lab (Web Development) */}
           {activeSandbox && (
             <CodeSandbox
               key={`sandbox-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
               config={activeSandbox}
-              onCodeRun={() => {
-                // Handled in sandbox
-              }}
+              onLabCompleted={handleMarkComplete}
             />
           )}
 
-          {/* Active Cyber Lab for Current Topic */}
+          {/* Active Cyber Lab (Cybersecurity) */}
           {activeCyberLab && (
             <CyberLab
               key={`cyberlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
               config={activeCyberLab}
-              onLabCompleted={() => {
-                handleMarkComplete();
-              }}
+              onLabCompleted={handleMarkComplete}
             />
           )}
 
-          {!activeSandbox && !activeCyberLab && (
+          {/* Active Python Lab (Programming & Automation) */}
+          {activePythonLab && (
+            <PythonLab
+              key={`pythonlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+              config={activePythonLab}
+              onLabCompleted={handleMarkComplete}
+            />
+          )}
+
+          {/* Active Digital Literacy Lab (Workplace & Spreadsheets) */}
+          {activeDigitalLiteracyLab && (
+            <DigitalLiteracyLab
+              key={`digitallab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+              config={activeDigitalLiteracyLab}
+              onLabCompleted={handleMarkComplete}
+            />
+          )}
+
+          {!currentHasLab && (
             <div className="bg-white border border-neutral-200 rounded-2xl p-8 text-center space-y-3">
               <BookOpen className="w-10 h-10 text-neutral-400 mx-auto" />
               <h3 className="text-sm font-bold text-neutral-800">Reading & Conceptual Topic</h3>
               <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                This topic covers foundational theory and workplace best practices. Read through the guide on the left and test your knowledge in the quiz.
+                This topic covers foundational workplace knowledge. Read through the guide on the left and test your knowledge in the quiz.
               </p>
             </div>
           )}
         </div>
       </main>
+
+      {/* ─── SLIDE-OUT CURRICULUM DRAWER ─────────────────────────────────── */}
+      {isCurriculumDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsCurriculumDrawerOpen(false)}
+          />
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
+              <div>
+                <h3 className="font-bold text-base text-neutral-900">Course Curriculum</h3>
+                <span className="text-xs text-neutral-500">
+                  {trackLessons.length} Modules in this track
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCurriculumDrawerOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-neutral-100 text-neutral-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+              {trackLessons.map((l) => {
+                const isCurrent = l.id === lesson.id;
+                const isModDone = learnerProgress.completedLessonIds.includes(l.id);
+
+                return (
+                  <Link
+                    key={l.id}
+                    href={`/digihub/lesson/${l.id}`}
+                    onClick={() => setIsCurriculumDrawerOpen(false)}
+                    className={`p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 ${
+                      isCurrent
+                        ? "border-brand-blue bg-blue-50/50"
+                        : "border-neutral-200 hover:border-neutral-300 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
+                          isModDone
+                            ? "bg-emerald-100 text-emerald-700"
+                            : isCurrent
+                            ? "bg-brand-blue text-white"
+                            : "bg-neutral-100 text-neutral-600"
+                        }`}
+                      >
+                        {isModDone ? "✓" : l.moduleNumber}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-neutral-900 truncate">
+                          {cleanNoAsterisks(l.title)}
+                        </div>
+                        <div className="text-[11px] text-neutral-500">
+                          {l.durationMinutes} mins • {l.xpAward} XP
+                        </div>
+                      </div>
+                    </div>
+                    {isCurrent && (
+                      <span className="text-[10px] uppercase font-bold text-brand-blue shrink-0">
+                        Active
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── SLIDE-OUT AI STUDY COACH DRAWER ─────────────────────────────── */}
+      {isCoachDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsCoachDrawerOpen(false)}
+          />
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-neutral-900">DIGI Tutor AI Coach</h3>
+                  <span className="text-[11px] text-neutral-500">
+                    Friendly 24/7 academic coach for {cleanNoAsterisks(lesson.title)}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCoachDrawerOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-neutral-100 text-neutral-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+              <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 leading-relaxed">
+                Hello! I am your DIGI Tutor. I am here to make learning this module easy and fun. Click any prompt below or ask for guidance!
+              </div>
+
+              <div className="space-y-2">
+                <span className="font-bold text-neutral-800 block text-[11px] uppercase tracking-wider">
+                  Quick Study Prompts:
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCoachActiveTopic(
+                      currentTopic?.sections[0]?.analogy ||
+                        "Every web concept starts with real-world foundation: HTML is the structure, CSS is the style, and JS is the interactivity."
+                    )
+                  }
+                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
+                >
+                  💡 Give me an everyday African analogy for this topic!
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCoachActiveTopic(
+                      currentTopic?.hasLab
+                        ? "For this lab: make sure you read the instructions carefully, check your syntax, and look at the simulated browser output on the right pane."
+                        : "Focus on understanding the key takeaways first, then test yourself in the Flashcards tab!"
+                    )
+                  }
+                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
+                >
+                  🎯 How do I pass the interactive lab challenge?
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCoachActiveTopic(
+                      "In Ghana's burgeoning digital ecosystem, employers look for practical problem solvers who understand both defensive cyber hygiene and clean code architecture."
+                    )
+                  }
+                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
+                >
+                  🚀 How is this skill applied in Ghanaian tech jobs?
+                </button>
+              </div>
+
+              {coachActiveTopic && (
+                <div className="p-4 rounded-2xl bg-neutral-900 text-neutral-100 space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-[11px]">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>DIGI Tutor Guidance:</span>
+                  </div>
+                  <p className="leading-relaxed text-xs">{coachActiveTopic}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
