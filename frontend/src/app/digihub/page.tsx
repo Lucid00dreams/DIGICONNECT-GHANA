@@ -253,13 +253,13 @@ export default function DIGIHubPage() {
     return (
       <>
         {currentUser && viewLandingMode && (
-          <div className="bg-[#0056D2] text-white px-4 py-2 flex items-center justify-between text-xs font-semibold sticky top-0 z-50 shadow-sm">
-            <span>Viewing DigiConnect DIGIHub Public Portal as {currentUser.name}</span>
+          <div className="bg-[#0056D2] text-white px-3 sm:px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-semibold sticky top-0 z-50 shadow-sm">
+            <span className="truncate">Viewing Public Portal as {currentUser.name}</span>
             <button
               onClick={() => setViewLandingMode(false)}
-              className="px-3 py-1 bg-white text-[#0056D2] rounded-lg font-bold hover:bg-neutral-100 transition"
+              className="px-3 py-1 bg-white text-[#0056D2] rounded-lg font-bold hover:bg-neutral-100 transition self-start sm:self-auto shrink-0"
             >
-              Back to My Learning Dashboard →
+              Back to My Dashboard →
             </button>
           </div>
         )}
