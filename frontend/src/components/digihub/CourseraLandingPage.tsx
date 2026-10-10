@@ -63,44 +63,6 @@ function getCourseImage(courseId: string): string {
   return COURSE_IMAGES[courseId] || "/images/courses/web-dev.jpg";
 }
 
-const TICKER_ITEMS = [
-  {
-    icon: "🇬🇭",
-    text: "DigiConnect Ghana NGO — 100% Tuition-Free Technical Education for Youth",
-    badge: "Official NGO",
-  },
-  {
-    icon: "✨",
-    text: "“Tech for Youth. Tech for Good.” — Bridging Ghana's Digital Divide",
-    badge: "Mission",
-  },
-  {
-    icon: "💻",
-    text: "Interactive Browser Sandboxes: Practice HTML/CSS, Python & Cyber Defense Live",
-    badge: "Zero Installs",
-  },
-  {
-    icon: "🎓",
-    text: "Faculty-Verified Diplomas & Shareable LinkedIn Credentials with QR Code Validation",
-    badge: "Accredited",
-  },
-  {
-    icon: "🛡️",
-    text: "12 Practical Tracks: Cybersecurity Defense, Web Dev, Python Scripting, Cloud & AI",
-    badge: "12 Curricula",
-  },
-  {
-    icon: "🤝",
-    text: "Free 1-on-1 Mentorship Sessions with Ghanaian Tech Leaders & Senior Engineers",
-    badge: "Free Mentorship",
-  },
-  {
-    icon: "🚀",
-    text: "Over 1,200 Ghanaian Youth Empowered with Employment-Ready Digital Skills",
-    badge: "Impact",
-  },
-];
-
 export function CourseraLandingPage({
   courses,
   onOpenAuth,
@@ -111,7 +73,6 @@ export function CourseraLandingPage({
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [heroCarouselIndex, setHeroCarouselIndex] = useState(0);
 
   const filteredCourses = courses.filter((c) => {
     const matchesFilter =
@@ -138,36 +99,20 @@ export function CourseraLandingPage({
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden">
-      {/* 1. AUTO-ROLLING HEADER TICKER (Continuously rolls on its own, no horizontal scrollbars) */}
-      <div className="relative w-full bg-[#080e1a] text-neutral-300 text-xs font-semibold border-b border-neutral-800 overflow-hidden select-none py-2.5">
-        {/* Left and Right subtle gradient masks so ticker rolls seamlessly in and out */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-[#080e1a] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-[#080e1a] to-transparent z-10 pointer-events-none" />
-
-        <div className="animate-ticker flex items-center gap-8 whitespace-nowrap">
-          {/* Loop Set 1 */}
-          {TICKER_ITEMS.map((item, idx) => (
-            <div key={`ticker-1-${idx}`} className="inline-flex items-center gap-2.5 shrink-0 px-2">
-              <span className="text-sm">{item.icon}</span>
-              <span className="font-bold text-white tracking-wide">{item.text}</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                {item.badge}
-              </span>
-              <span className="text-neutral-600 ml-4 font-bold">•</span>
-            </div>
-          ))}
-
-          {/* Loop Set 2 (for smooth infinite roll) */}
-          {TICKER_ITEMS.map((item, idx) => (
-            <div key={`ticker-2-${idx}`} className="inline-flex items-center gap-2.5 shrink-0 px-2">
-              <span className="text-sm">{item.icon}</span>
-              <span className="font-bold text-white tracking-wide">{item.text}</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                {item.badge}
-              </span>
-              <span className="text-neutral-600 ml-4 font-bold">•</span>
-            </div>
-          ))}
+      {/* 1. QUIET TOP ANNOUNCEMENT BAR (Clean, accessible, no emoji clutter) */}
+      <div className="w-full bg-[#080e1a] text-neutral-300 text-xs py-2 px-3 sm:px-6 border-b border-neutral-800">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+            <span className="font-semibold text-white">DigiConnect Ghana NGO</span>
+            <span className="text-neutral-600 hidden sm:inline">•</span>
+            <span className="hidden sm:inline text-neutral-300">100% Tuition-Free Technical Education for Youth</span>
+          </div>
+          <div className="flex items-center gap-3 shrink-0 text-[11px] text-neutral-400">
+            <span className="hidden md:inline">Accra Innovation Center</span>
+            <span className="hidden md:inline text-neutral-600">•</span>
+            <span className="text-blue-300 font-semibold">Zero Installs Required</span>
+          </div>
         </div>
       </div>
 
@@ -564,61 +509,32 @@ export function CourseraLandingPage({
         )}
       </header>
 
-      {/* 3. DUAL HERO PROMO BANNERS WITH AUTHENTIC LOCAL IMAGES & PATTERNS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 pb-8 sm:pb-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-          {/* Card 1: Left Dark Banner - DigiConnect Ghana NGO Flagship */}
-          <div className="relative rounded-3xl bg-[#091224] text-white p-6 sm:p-8 lg:p-10 overflow-hidden flex flex-col justify-between shadow-xl border border-blue-900/40 bg-dark-grid">
-            {/* Glowing gradient orbs */}
-            <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/25 blur-3xl pointer-events-none" />
-            <div className="absolute right-8 bottom-0 w-48 h-48 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
-
-            <div className="relative z-10">
-              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-wide uppercase bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                  <Heart className="w-3 h-3 text-red-400 fill-red-400" />
-                  DigiConnect Ghana NGO Initiative
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                  100% Tuition-Free
-                </span>
+      {/* 3. UNIFIED EDITORIAL HERO (Anti-slop, fits viewport, single theme lock, zero fluff) */}
+      <section className="relative bg-gradient-to-b from-blue-50/40 via-white to-white border-b border-neutral-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-12 sm:pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Column: Focused Value Proposition */}
+            <div className="lg:col-span-7 space-y-5 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-100/70 text-[#0056D2] border border-blue-200">
+                <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+                <span>DigiConnect Ghana NGO • 100% Tuition-Free</span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight mb-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight leading-[1.15]">
                 Practical Tech Mastery for Ghanaian Youth
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed mb-5">
-                Hands-on training in Web Engineering, Cybersecurity Defense, Data Analytics, Cloud DevOps, and Python Scripting. Built 100% tuition-free by Ghanaian tech educators to bridge the digital divide.
+              </h1>
+
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl">
+                Hands-on software engineering, cybersecurity, and data tracks with interactive in-browser sandboxes and verified credentials.
               </p>
 
-              {/* Authentic Photo Showcase with Glassmorphic Badge */}
-              <div className="relative w-full h-44 sm:h-52 rounded-2xl overflow-hidden mb-6 border border-white/15 shadow-lg group">
-                <Image
-                  src="/images/hero/hero.jpg"
-                  alt="DigiConnect Ghana students learning technology"
-                  fill
-                  className="object-cover group-hover:scale-105 transition duration-500"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#091224] via-transparent to-transparent opacity-85" />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 text-white font-bold">
-                    <Award className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Accra Innovation Center • 1,200+ Youth Trained</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/80 text-white text-[10px] font-bold hidden sm:inline">
-                    Live Workshop
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => onOpenAuth("signup")}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-neutral-100 text-[#0056D2] font-black text-xs sm:text-sm shadow-md transition active:scale-98"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-sm shadow-md transition active:scale-98"
                 >
-                  <span>Explore Academy Tracks</span>
+                  <span>Start Learning Free</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
@@ -627,434 +543,98 @@ export function CourseraLandingPage({
                     const el = document.getElementById("catalog-section");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm border border-white/20 transition"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 font-bold text-sm border border-neutral-300 transition"
                 >
                   <span>Browse 12 Curricula</span>
                 </button>
               </div>
-            </div>
 
-            {/* Bottom impact credential badge */}
-            <div className="relative z-10 mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-300">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-[11px] font-bold">Faculty-Verified Diplomas with QR Code Validation</span>
-              </div>
-              <span className="text-[11px] font-extrabold text-blue-300">Zero Tuition • Open to All</span>
-            </div>
-          </div>
-
-          {/* Card 2: Right Light Banner - In-Browser Hands-On Labs Showcase */}
-          <div className="relative rounded-3xl bg-[#f7faff] border border-blue-200/80 p-6 sm:p-8 lg:p-10 flex flex-col justify-between shadow-md overflow-hidden bg-tech-grid">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide bg-blue-100 text-[#0056D2] border border-blue-200">
-                  <Play className="w-3 h-3 fill-[#0056D2]" />
-                  In-Browser Interactive Labs
+              {/* Quiet Impact Points */}
+              <div className="pt-6 border-t border-neutral-200/80 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-neutral-600 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  Zero tuition or subscriptions
                 </span>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Zero Setup Required
+                <span className="flex items-center gap-1.5">
+                  <Laptop className="w-4 h-4 text-blue-600" />
+                  In-browser coding and cyber labs
                 </span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 tracking-tight leading-snug mb-3">
-                Practice in Live Interactive Workspaces
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed mb-5">
-                Don&apos;t just watch video lectures — write live HTML/CSS/JS in our code sandbox, inspect phishing emails, evaluate password strength, audit cloud IAM permissions, and run Python algorithms right in your browser.
-              </p>
-
-              {/* Authentic Photo of Live Coding on Laptops */}
-              <div className="relative w-full h-44 sm:h-52 rounded-2xl overflow-hidden mb-6 border border-blue-200 shadow-md group">
-                <Image
-                  src="/images/programs/coding-technology.jpg"
-                  alt="Students coding in DigiConnect Technology Lab"
-                  fill
-                  className="object-cover group-hover:scale-105 transition duration-500"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
-                  <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 font-bold">
-                    <Laptop className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Hands-On Sandbox Lab • Live Practice</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-blue-600 text-white text-[10px] font-black hidden sm:inline">
-                    Interactive
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onOpenAuth("signup")}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-black text-xs sm:text-sm shadow-md transition active:scale-98"
-              >
-                <span>Start Interactive Practice Free</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Included Interactive Tools Strip */}
-            <div className="relative z-10 mt-6 pt-4 border-t border-blue-200/80">
-              <span className="text-[11px] font-black text-neutral-600 uppercase tracking-wider block mb-2">
-                Included Hands-on Workspaces:
-              </span>
-              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-neutral-800 shadow-2xs">
-                  <Code2 className="w-3.5 h-3.5 text-blue-600" />
-                  Web Code Sandbox
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-neutral-800 shadow-2xs">
-                  <Shield className="w-3.5 h-3.5 text-red-600" />
-                  Cyber Threat Lab
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-neutral-800 shadow-2xs">
-                  <Terminal className="w-3.5 h-3.5 text-amber-600" />
-                  Python Runner
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-neutral-800 shadow-2xs">
-                  <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
-                  Office Suite Sim
+                <span className="flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-amber-600" />
+                  Faculty-verified certificates
                 </span>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Carousel indicators */}
-        <div className="flex items-center justify-center gap-1.5 mt-5">
-          <button
-            onClick={() => setHeroCarouselIndex(0)}
-            className={`h-2 rounded-full transition-all ${
-              heroCarouselIndex === 0 ? "w-6 bg-[#0056D2]" : "w-2 bg-neutral-300"
-            }`}
-            aria-label="Slide 1"
-          />
-          <button
-            onClick={() => setHeroCarouselIndex(1)}
-            className={`h-2 rounded-full transition-all ${
-              heroCarouselIndex === 1 ? "w-6 bg-[#0056D2]" : "w-2 bg-neutral-300"
-            }`}
-            aria-label="Slide 2"
-          />
-          <button
-            onClick={() => setHeroCarouselIndex(2)}
-            className={`h-2 rounded-full transition-all ${
-              heroCarouselIndex === 2 ? "w-6 bg-[#0056D2]" : "w-2 bg-neutral-300"
-            }`}
-            aria-label="Slide 3"
-          />
-        </div>
-      </section>
-
-      {/* 4. "NEW AND POPULAR" SECTION WITH COURSE THUMBNAILS & FACULTY BRANDING */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-neutral-200/80 bg-dot-pattern">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <div>
-            <span className="text-xs font-black text-[#0056D2] uppercase tracking-wider">
-              Faculty Highlights
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight mt-0.5">
-              New and popular academy tracks
-            </h2>
-          </div>
-          <p className="text-xs text-neutral-500">
-            Verified by DigiConnect Ghana Technical Faculty • Complete in 3–5 weeks
-          </p>
-        </div>
-
-        {/* 3 Columns / Category Subheaders */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {/* Column 1: Most Popular */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-              <div className="flex items-center gap-2">
-                <Flame className="w-4 h-4 text-amber-500" />
-                <h3 className="text-sm font-bold text-neutral-900">Most popular</h3>
-              </div>
-              <button
-                onClick={() => setSelectedFilter("coding")}
-                className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1"
-              >
-                <span>View all</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Course Card 1: Web Development with technical cover */}
-            {courses.find((c) => c.id === "coding") && (
-              <div
-                onClick={() => onOpenCourseModal(courses.find((c) => c.id === "coding")!)}
-                className="rounded-2xl border border-neutral-200/90 bg-white hover:border-[#0056D2] hover:shadow-lg transition cursor-pointer group overflow-hidden"
-              >
-                <div className="relative w-full h-32 overflow-hidden">
+            {/* Right Column: Authentic Learning Moment */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-2xl sm:rounded-3xl border border-neutral-200/90 bg-white p-3 shadow-xl">
+                <div className="relative w-full h-56 sm:h-64 lg:h-72 rounded-xl sm:rounded-2xl overflow-hidden group">
                   <Image
-                    src={getCourseImage("coding")}
-                    alt="Web Development Track"
+                    src="/images/hero/hero.jpg"
+                    alt="DigiConnect Ghana students learning in Accra Innovation Lab"
                     fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition duration-500"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 40vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-blue-600 text-white font-black text-[10px] shadow-sm">
-                    DCG Web Engineering Certificate
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-neutral-600">DigiConnect Software Lab</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-[#0056D2] transition leading-snug">
-                    Foundations of Web Development &amp; Basic Coding
-                  </h4>
-                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span className="text-[11px] text-neutral-500">~6h total • Beginner</span>
-                    <div className="flex items-center gap-1 text-neutral-700 font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>4.9</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 font-bold">
+                      <GraduationCap className="w-4 h-4 text-amber-400" />
+                      <span>Accra Innovation Center • Active Session</span>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Course Card 2: Data Analytics with technical cover */}
-            {courses.find((c) => c.id === "data-analytics") && (
-              <div
-                onClick={() => onOpenCourseModal(courses.find((c) => c.id === "data-analytics")!)}
-                className="rounded-2xl border border-neutral-200/90 bg-white hover:border-[#0056D2] hover:shadow-lg transition cursor-pointer group overflow-hidden"
-              >
-                <div className="relative w-full h-32 overflow-hidden">
-                  <Image
-                    src={getCourseImage("data-analytics")}
-                    alt="Data Analytics Track"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-indigo-600 text-white font-black text-[10px] shadow-sm">
-                    DCG Data &amp; BI Diploma
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-neutral-600">DigiConnect Data Labs</span>
+                {/* Micro Sandbox Indicator */}
+                <div className="mt-3 p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 text-neutral-700 font-semibold truncate">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>In-Browser Sandboxes: Web, Python, Threat Labs</span>
                   </div>
-                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-[#0056D2] transition leading-snug">
-                    Data Analytics &amp; Business Intelligence
-                  </h4>
-                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span className="text-[11px] text-neutral-500">~8h total • Beginner</span>
-                    <div className="flex items-center gap-1 text-neutral-700 font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>4.8</span>
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => onOpenAuth("signup")}
+                    className="text-[#0056D2] font-bold hover:underline shrink-0 text-xs"
+                  >
+                    Try Sandbox →
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Column 2: Hot New Releases */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#0056D2]" />
-                <h3 className="text-sm font-bold text-neutral-900">Hot new releases</h3>
-              </div>
-              <button
-                onClick={() => setSelectedFilter("cybersecurity")}
-                className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1"
-              >
-                <span>View all</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Course Card 3: Cybersecurity Architecture with technical cover */}
-            {courses.find((c) => c.id === "cybersecurity-architecture") && (
-              <div
-                onClick={() => onOpenCourseModal(courses.find((c) => c.id === "cybersecurity-architecture")!)}
-                className="rounded-2xl border border-neutral-200/90 bg-white hover:border-[#0056D2] hover:shadow-lg transition cursor-pointer group overflow-hidden"
-              >
-                <div className="relative w-full h-32 overflow-hidden">
-                  <Image
-                    src={getCourseImage("cybersecurity-architecture")}
-                    alt="Cybersecurity Architecture Track"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-blue-700 text-white font-black text-[10px] shadow-sm">
-                    DCG Cyber Architecture Diploma
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-neutral-600">DigiConnect Cyber Academy</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-[#0056D2] transition leading-snug">
-                    Cybersecurity Architecture &amp; IAM Defense
-                  </h4>
-                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span className="text-[11px] text-neutral-500">~8h total • Zero Trust</span>
-                    <div className="flex items-center gap-1 text-neutral-700 font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>4.9</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Course Card 4: Cloud Architecture with technical cover */}
-            {courses.find((c) => c.id === "cloud-devops") && (
-              <div
-                onClick={() => onOpenCourseModal(courses.find((c) => c.id === "cloud-devops")!)}
-                className="rounded-2xl border border-neutral-200/90 bg-white hover:border-[#0056D2] hover:shadow-lg transition cursor-pointer group overflow-hidden"
-              >
-                <div className="relative w-full h-32 overflow-hidden">
-                  <Image
-                    src={getCourseImage("cloud-devops")}
-                    alt="Cloud Architecture Track"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-amber-600 text-white font-black text-[10px] shadow-sm">
-                    DCG Cloud Architecture Certificate
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-neutral-600">DigiConnect Cloud Academy</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-[#0056D2] transition leading-snug">
-                    Cloud Architecture &amp; DevOps Deployment
-                  </h4>
-                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span className="text-[11px] text-neutral-500">~8h total • Docker &amp; CI/CD</span>
-                    <div className="flex items-center gap-1 text-neutral-700 font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>4.9</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Column 3: Trending AI & Mentorship */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                <h3 className="text-sm font-bold text-neutral-900">Trending AI &amp; Mentorship</h3>
-              </div>
-              <button
-                onClick={() => setSelectedFilter("data-ai")}
-                className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1"
-              >
-                <span>View all</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Course Card 5: Prompt Engineering with technical cover */}
-            {courses.find((c) => c.id === "prompt-engineering") && (
-              <div
-                onClick={() => onOpenCourseModal(courses.find((c) => c.id === "prompt-engineering")!)}
-                className="rounded-2xl border border-neutral-200/90 bg-white hover:border-[#0056D2] hover:shadow-lg transition cursor-pointer group overflow-hidden"
-              >
-                <div className="relative w-full h-32 overflow-hidden">
-                  <Image
-                    src={getCourseImage("prompt-engineering")}
-                    alt="Prompt Engineering Track"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-purple-600 text-white font-black text-[10px] shadow-sm">
-                    DCG Generative AI Credential
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-neutral-600">DigiConnect AI Institute</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-[#0056D2] transition leading-snug">
-                    Generative AI Prompt Engineering for Professionals
-                  </h4>
-                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span className="text-[11px] text-neutral-500">~5h total • LLMs &amp; JSON</span>
-                    <div className="flex items-center gap-1 text-neutral-700 font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>4.9</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Free Mentorship Booking Card with real mentor picture */}
-            <div
-              onClick={() => onOpenAuth("signup")}
-              className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/70 hover:shadow-md transition cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
-                    <Image
-                      src="/images/testimonials/participant-1.jpg"
-                      alt="Tech Mentor"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-[#0056D2] block">
-                      Free 1-on-1 Mentorship
-                    </span>
-                    <span className="text-[11px] text-neutral-600">With Senior Ghanaian Tech Leads</span>
-                  </div>
-                </div>
-                <h4 className="text-xs font-bold text-neutral-900 leading-snug">
-                  Book a live 1-on-1 video guidance session to review code, prepare for tech job interviews, and get direct career advice.
-                </h4>
-              </div>
-
-              <span className="text-[11px] font-black text-[#0056D2] mt-4 inline-flex items-center gap-1 group-hover:gap-2 transition">
-                <span>Free for all registered students →</span>
-              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. FULL CATALOG EXPLORER GRID WITH REAL COURSE IMAGES */}
+      {/* 4. CONSOLIDATED CURRICULUM EXPLORER (No duplicate sections, filterable 12 curricula) */}
       <section
         id="catalog-section"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-neutral-200"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <span className="text-xs font-black text-[#0056D2] uppercase tracking-wider">
-              Comprehensive Curriculum
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight mt-0.5">
-              Explore All Courses &amp; Certifications
+            <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
+              Curriculum Explorer
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-600 mt-1">
-              {courses.length} practical curricula spanning cybersecurity, data analytics, web coding, cloud DevOps, and AI.
+            <p className="text-sm text-neutral-600 mt-1 max-w-xl">
+              12 complete tracks spanning cybersecurity, web engineering, cloud, and AI. Each track includes interactive browser sandboxes and a verified credential.
             </p>
           </div>
 
-          {/* Filter Pills with touch scrolling */}
+          {/* Search Box on Desktop */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search courses or skills..."
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition bg-white"
+            />
+          </div>
+        </div>
+
+        {/* Filter Pills with touch scrolling */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 py-1.5">
             <button
               onClick={() => setSelectedFilter("all")}
@@ -1147,7 +727,6 @@ export function CourseraLandingPage({
               Digital Literacy
             </button>
           </div>
-        </div>
 
         {/* Course Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -1241,10 +820,7 @@ export function CourseraLandingPage({
       <section className="bg-neutral-50 py-16 border-t border-neutral-200 bg-tech-grid relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-black text-[#0056D2] uppercase tracking-wider">
-              Educational Quality &amp; Accessibility
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
               Everything you need to master digital technology
             </h2>
             <p className="text-sm text-neutral-600 mt-2">
@@ -1311,7 +887,7 @@ export function CourseraLandingPage({
 
         <div className="max-w-4xl mx-auto px-4 text-center space-y-5 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold border border-white/20">
-            <span>🇬🇭 Empowering the next generation of Ghanaian tech leaders</span>
+            <span>Empowering Ghanaian youth through free digital education</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
             Start learning today with DigiConnect Ghana
@@ -1325,7 +901,7 @@ export function CourseraLandingPage({
               onClick={() => onOpenAuth("signup")}
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-neutral-100 text-[#0056D2] font-black text-sm shadow-lg transition active:scale-98"
             >
-              Join for Free Today
+              Start Learning Free
             </button>
             <Link
               href="/"
