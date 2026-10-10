@@ -45,22 +45,22 @@ interface CourseraLandingPageProps {
 }
 
 const COURSE_IMAGES: Record<string, string> = {
-  "cybersecurity-architecture": "/images/programs/community-innovation.jpg",
-  "coding": "/images/programs/coding-technology.jpg",
-  "cybersecurity": "/images/programs/community-innovation.jpg",
-  "data-analytics": "/images/programs/career-employability.jpg",
-  "python": "/images/programs/coding-technology.jpg",
-  "cloud-devops": "/images/gallery/gallery-1.jpg",
-  "machine-learning": "/images/gallery/gallery-3.jpg",
-  "prompt-engineering": "/images/gallery/gallery-5.jpg",
-  "mobile-dev": "/images/programs/digital-literacy.jpg",
-  "ethical-hacking": "/images/gallery/gallery-6.jpg",
-  "it-support": "/images/gallery/gallery-2.jpg",
-  "digital-literacy": "/images/programs/digital-literacy.jpg",
+  "cybersecurity-architecture": "/images/courses/cyber-arch.jpg",
+  "coding": "/images/courses/web-dev.jpg",
+  "cybersecurity": "/images/courses/cyber-defense.jpg",
+  "data-analytics": "/images/courses/data-analytics.jpg",
+  "python": "/images/courses/python.jpg",
+  "cloud-devops": "/images/courses/cloud-devops.jpg",
+  "machine-learning": "/images/courses/machine-learning.jpg",
+  "prompt-engineering": "/images/courses/prompt-ai.jpg",
+  "mobile-dev": "/images/courses/mobile-dev.jpg",
+  "ethical-hacking": "/images/courses/ethical-hacking.jpg",
+  "it-support": "/images/courses/it-support.jpg",
+  "digital-literacy": "/images/courses/productivity.jpg",
 };
 
 function getCourseImage(courseId: string): string {
-  return COURSE_IMAGES[courseId] || "/images/programs/coding-technology.jpg";
+  return COURSE_IMAGES[courseId] || "/images/courses/web-dev.jpg";
 }
 
 const TICKER_ITEMS = [
@@ -782,7 +782,7 @@ export function CourseraLandingPage({
               </button>
             </div>
 
-            {/* Course Card 1: Web Development with authentic photo */}
+            {/* Course Card 1: Web Development with technical cover */}
             {courses.find((c) => c.id === "coding") && (
               <div
                 onClick={() => onOpenCourseModal(courses.find((c) => c.id === "coding")!)}
@@ -790,7 +790,7 @@ export function CourseraLandingPage({
               >
                 <div className="relative w-full h-32 overflow-hidden">
                   <Image
-                    src="/images/programs/coding-technology.jpg"
+                    src={getCourseImage("coding")}
                     alt="Web Development Track"
                     fill
                     className="object-cover group-hover:scale-105 transition duration-300"
@@ -819,7 +819,7 @@ export function CourseraLandingPage({
               </div>
             )}
 
-            {/* Course Card 2: Data Analytics with authentic photo */}
+            {/* Course Card 2: Data Analytics with technical cover */}
             {courses.find((c) => c.id === "data-analytics") && (
               <div
                 onClick={() => onOpenCourseModal(courses.find((c) => c.id === "data-analytics")!)}
@@ -827,7 +827,7 @@ export function CourseraLandingPage({
               >
                 <div className="relative w-full h-32 overflow-hidden">
                   <Image
-                    src="/images/programs/career-employability.jpg"
+                    src={getCourseImage("data-analytics")}
                     alt="Data Analytics Track"
                     fill
                     className="object-cover group-hover:scale-105 transition duration-300"
@@ -873,7 +873,7 @@ export function CourseraLandingPage({
               </button>
             </div>
 
-            {/* Course Card 3: Cybersecurity Architecture with authentic photo */}
+            {/* Course Card 3: Cybersecurity Architecture with technical cover */}
             {courses.find((c) => c.id === "cybersecurity-architecture") && (
               <div
                 onClick={() => onOpenCourseModal(courses.find((c) => c.id === "cybersecurity-architecture")!)}
@@ -881,7 +881,7 @@ export function CourseraLandingPage({
               >
                 <div className="relative w-full h-32 overflow-hidden">
                   <Image
-                    src="/images/programs/community-innovation.jpg"
+                    src={getCourseImage("cybersecurity-architecture")}
                     alt="Cybersecurity Architecture Track"
                     fill
                     className="object-cover group-hover:scale-105 transition duration-300"
@@ -910,7 +910,7 @@ export function CourseraLandingPage({
               </div>
             )}
 
-            {/* Course Card 4: Cloud Architecture with authentic photo */}
+            {/* Course Card 4: Cloud Architecture with technical cover */}
             {courses.find((c) => c.id === "cloud-devops") && (
               <div
                 onClick={() => onOpenCourseModal(courses.find((c) => c.id === "cloud-devops")!)}
@@ -918,7 +918,7 @@ export function CourseraLandingPage({
               >
                 <div className="relative w-full h-32 overflow-hidden">
                   <Image
-                    src="/images/gallery/gallery-1.jpg"
+                    src={getCourseImage("cloud-devops")}
                     alt="Cloud Architecture Track"
                     fill
                     className="object-cover group-hover:scale-105 transition duration-300"
@@ -964,7 +964,7 @@ export function CourseraLandingPage({
               </button>
             </div>
 
-            {/* Course Card 5: Prompt Engineering with authentic photo */}
+            {/* Course Card 5: Prompt Engineering with technical cover */}
             {courses.find((c) => c.id === "prompt-engineering") && (
               <div
                 onClick={() => onOpenCourseModal(courses.find((c) => c.id === "prompt-engineering")!)}
@@ -972,7 +972,7 @@ export function CourseraLandingPage({
               >
                 <div className="relative w-full h-32 overflow-hidden">
                   <Image
-                    src="/images/gallery/gallery-3.jpg"
+                    src={getCourseImage("prompt-engineering")}
                     alt="Prompt Engineering Track"
                     fill
                     className="object-cover group-hover:scale-105 transition duration-300"

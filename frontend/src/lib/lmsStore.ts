@@ -230,7 +230,7 @@ export interface LMSUser {
   name: string;
   email: string;
   avatar?: string;
-  provider: "email" | "google";
+  provider: "email" | "google" | "facebook" | "apple" | "github";
   role: "student" | "mentor" | "admin";
   createdAt: string;
   lastActive: string;
@@ -1024,98 +1024,17 @@ export const INITIAL_SESSIONS: MentorshipSession[] = [
   },
 ];
 
-// ─── INITIAL REGISTERED STUDENTS (FOR CONNECTHUB MONITORING) ───────────
+// ─── REGISTERED STUDENTS (PERSISTED IN STORAGE) ─────────────────────────
 
-export const INITIAL_STUDENTS: LMSUser[] = [
-  {
-    id: "stu-1",
-    name: "Emmanuel Adjei",
-    email: "emmanuel.adjei@example.com",
-    avatar: "/images/testimonials/participant-1.jpg",
-    provider: "email",
-    role: "student",
-    createdAt: "2026-09-15T09:00:00Z",
-    lastActive: "2026-10-04T08:15:00Z",
-    completedLessonIds: ["code-101", "code-102"],
-    enrolledTracks: ["coding"],
-    enrolledCourseIds: ["coding"],
-    currentTrackId: "coding",
-    certificateClaimed: false,
-    notes: "Active participant in Accra HTML/CSS workshop cohorts.",
-  },
-  {
-    id: "stu-2",
-    name: "Akosua Mensah",
-    email: "akosua.m@gmail.com",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    provider: "google",
-    role: "student",
-    createdAt: "2026-09-18T14:30:00Z",
-    lastActive: "2026-10-03T18:40:00Z",
-    completedLessonIds: ["cyber-101", "cyber-102", "cyber-103", "code-101"],
-    enrolledTracks: ["cybersecurity", "coding"],
-    enrolledCourseIds: ["cybersecurity", "coding"],
-    currentTrackId: "cybersecurity",
-    certificateClaimed: true,
-    notes: "Completed all 3 cyber threat simulations and earned verified diploma.",
-  },
-  {
-    id: "stu-3",
-    name: "Kweku Frimpong",
-    email: "kweku.frimpong@gmail.com",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    provider: "google",
-    role: "student",
-    createdAt: "2026-09-24T11:20:00Z",
-    lastActive: "2026-10-02T16:05:00Z",
-    completedLessonIds: ["code-101"],
-    enrolledTracks: ["coding"],
-    enrolledCourseIds: ["coding"],
-    currentTrackId: "coding",
-    certificateClaimed: false,
-    notes: "Kumasi high school graduate studying responsive design.",
-  },
-  {
-    id: "stu-4",
-    name: "Blessing Appiah",
-    email: "blessing.appiah@example.com",
-    avatar: "/images/testimonials/participant-3.jpg",
-    provider: "email",
-    role: "student",
-    createdAt: "2026-09-10T10:00:00Z",
-    lastActive: "2026-10-04T07:22:00Z",
-    completedLessonIds: ["code-101", "code-102", "code-103", "cyber-101", "cyber-102"],
-    enrolledTracks: ["coding", "cybersecurity"],
-    enrolledCourseIds: ["coding", "cybersecurity"],
-    currentTrackId: "coding",
-    certificateClaimed: true,
-    notes: "Outstanding progress across both tracks; ready for internship placement.",
-  },
-  {
-    id: "stu-5",
-    name: "Kofi Danso",
-    email: "kofi.danso@gmail.com",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-    provider: "google",
-    role: "student",
-    createdAt: "2026-10-01T15:00:00Z",
-    lastActive: "2026-10-03T09:12:00Z",
-    completedLessonIds: [],
-    enrolledTracks: ["cybersecurity"],
-    enrolledCourseIds: ["cybersecurity"],
-    currentTrackId: "cybersecurity",
-    certificateClaimed: false,
-    notes: "Enrolled recently. Needs onboarding check-in.",
-  },
-];
+export const INITIAL_STUDENTS: LMSUser[] = [];
 
 // ─── LOCAL STORAGE KEYS & STORE HELPERS ────────────────────────────────
 
-const LMS_USERS_KEY = "dcg_digihub_users_v1";
-const LMS_ACTIVE_USER_KEY = "dcg_digihub_active_user_v1";
-const LMS_PROGRESS_KEY = "dcg_digihub_progress_v1";
-const LMS_SESSIONS_KEY = "dcg_digihub_sessions_v1";
-const LMS_LESSONS_KEY = "dcg_digihub_lessons_v1";
+const LMS_USERS_KEY = "dcg_digihub_users_v3";
+const LMS_ACTIVE_USER_KEY = "dcg_digihub_active_user_v3";
+const LMS_PROGRESS_KEY = "dcg_digihub_progress_v3";
+const LMS_SESSIONS_KEY = "dcg_digihub_sessions_v3";
+const LMS_LESSONS_KEY = "dcg_digihub_lessons_v3";
 
 export function getAllLMSUsers(): LMSUser[] {
   if (typeof window === "undefined") return INITIAL_STUDENTS;
@@ -1205,28 +1124,36 @@ export function signUpWithEmail(
   return { success: true, user: newUser };
 }
 
-export function signInWithGoogle(customName?: string, customEmail?: string): LMSUser {
+export function signInWithSocialProvider(
+  provider: "google" | "facebook" | "apple" | "github",
+  customName?: string,
+  customEmail?: string
+): LMSUser {
   const users = getAllLMSUsers();
-  const email = (customEmail || "student.learner@gmail.com").trim().toLowerCase();
-  const name = customName?.trim() || "Google Learner";
+  const email = (customEmail || `learner.${Date.now().toString(36)}@auth.${provider}.com`).trim().toLowerCase();
+  const providerLabel = provider.charAt(0).toUpperCase() + provider.slice(1);
+  const name = customName?.trim() || `${providerLabel} Learner`;
 
-  let user = users.find((u) => u.email.toLowerCase() === email);
-  if (user) {
-    user.lastActive = new Date().toISOString();
-    user.provider = "google";
-    if (!user.enrolledCourseIds || user.enrolledCourseIds.length === 0) {
-      user.enrolledCourseIds = ["cybersecurity-architecture", "coding", "data-analytics"];
+  const existing = users.find((u) => u.email.toLowerCase() === email);
+  let activeUser: LMSUser;
+
+  if (existing) {
+    existing.lastActive = new Date().toISOString();
+    existing.provider = provider;
+    if (!existing.enrolledCourseIds || existing.enrolledCourseIds.length === 0) {
+      existing.enrolledCourseIds = ["cybersecurity-architecture", "coding", "data-analytics"];
     }
-    if (!user.currentTrackId) {
-      user.currentTrackId = "cybersecurity-architecture";
+    if (!existing.currentTrackId) {
+      existing.currentTrackId = "cybersecurity-architecture";
     }
+    activeUser = existing;
   } else {
-    user = {
-      id: `stu-g-${Date.now().toString(36)}`,
+    activeUser = {
+      id: `stu-${provider[0]}-${Date.now().toString(36)}`,
       name,
       email,
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-      provider: "google",
+      provider,
       role: "student",
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),
@@ -1236,12 +1163,16 @@ export function signInWithGoogle(customName?: string, customEmail?: string): LMS
       currentTrackId: "cybersecurity-architecture",
       certificateClaimed: false,
     };
-    users.unshift(user);
+    users.unshift(activeUser);
   }
 
   saveLMSUsers(users);
-  setActiveUser(user);
-  return user;
+  setActiveUser(activeUser);
+  return activeUser;
+}
+
+export function signInWithGoogle(customName?: string, customEmail?: string): LMSUser {
+  return signInWithSocialProvider("google", customName, customEmail);
 }
 
 export function signOutLMS(): void {
@@ -1304,13 +1235,6 @@ export function completeLearnerOnboarding(
   }
 
   return active;
-}
-
-export function loginAsDemoLearner(
-  name = "Gyamwodie Patrick Paul Boateng",
-  email = "patrick.boateng@example.com"
-): LMSUser {
-  return signInWithGoogle(name, email);
 }
 
 export function getLearnerProgress(): LearnerProgress {

@@ -5,8 +5,7 @@ import { X, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
 import {
   signInWithEmail,
   signUpWithEmail,
-  signInWithGoogle,
-  loginAsDemoLearner,
+  signInWithSocialProvider,
   LMSUser,
 } from "@/lib/lmsStore";
 
@@ -78,37 +77,20 @@ export function CourseraAuthModal({
     }
   };
 
-  const handleGoogleAuth = () => {
+  const handleSocialAuth = (provider: "google" | "facebook" | "apple") => {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const user = signInWithGoogle(
-        "Gyamwodie Patrick Paul Boateng",
-        email.trim() || "patrick.boateng@example.com"
+      const user = signInWithSocialProvider(
+        provider,
+        name.trim() || undefined,
+        email.trim() || undefined
       );
       const isNew = !user.onboardingCompleted;
       onAuthenticated(user, isNew);
       onClose();
     } catch {
-      setErrorMessage("Google SSO could not be completed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDemoAuth = () => {
-    setIsLoading(true);
-    try {
-      const user = loginAsDemoLearner(
-        "Gyamwodie Patrick Paul Boateng",
-        "patrick.boateng@example.com"
-      );
-      // Give full access or trigger questionnaire if not completed
-      const isNew = !user.onboardingCompleted;
-      onAuthenticated(user, isNew);
-      onClose();
-    } catch {
-      setErrorMessage("Unable to start demo session.");
+      setErrorMessage(`${provider.toUpperCase()} login could not be completed. Please try again.`);
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +152,7 @@ export function CourseraAuthModal({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Gyamwodie Patrick Paul Boateng"
+                placeholder="e.g. Ama Mensah or Kwame Boateng"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-neutral-900 text-sm placeholder:text-neutral-400 outline-none transition"
               />
             </div>
@@ -223,7 +205,7 @@ export function CourseraAuthModal({
                 <div className="w-full border-t border-neutral-200" />
               </div>
               <span className="relative bg-white px-3 text-xs text-neutral-400 font-medium">
-                or
+                or continue with
               </span>
             </div>
 
@@ -232,7 +214,7 @@ export function CourseraAuthModal({
               {/* Google */}
               <button
                 type="button"
-                onClick={handleGoogleAuth}
+                onClick={() => handleSocialAuth("google")}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
               >
@@ -260,7 +242,7 @@ export function CourseraAuthModal({
               {/* Facebook */}
               <button
                 type="button"
-                onClick={handleGoogleAuth}
+                onClick={() => handleSocialAuth("facebook")}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
               >
@@ -273,7 +255,7 @@ export function CourseraAuthModal({
               {/* Apple */}
               <button
                 type="button"
-                onClick={handleGoogleAuth}
+                onClick={() => handleSocialAuth("apple")}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
               >
@@ -282,30 +264,18 @@ export function CourseraAuthModal({
                 </svg>
                 <span>Continue with Apple</span>
               </button>
-
-              {/* Instant One-Click Demo Student */}
-              <button
-                type="button"
-                onClick={handleDemoAuth}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 rounded-xl text-[#0056D2] text-xs font-semibold transition active:scale-[0.99]"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Instant Demo Learner (Gyamwodie Patrick Paul Boateng)</span>
-              </button>
             </div>
           </>
         )}
 
         {/* Footer links */}
         <div className="mt-6 pt-4 border-t border-neutral-100 text-center space-y-3">
-          <button
-            type="button"
-            onClick={handleDemoAuth}
-            className="text-xs font-semibold text-[#0056D2] hover:underline"
+          <a
+            href="mailto:contact@digiconnectghana.org?subject=Institutional%20Access%20Inquiry"
+            className="text-xs font-semibold text-[#0056D2] hover:underline inline-block"
           >
             Sign up with your organization or school
-          </button>
+          </a>
 
           <p className="text-[11px] text-neutral-500 leading-relaxed">
             I accept DigiConnect&apos;s{" "}
