@@ -131,7 +131,7 @@ export function CourseraLandingPage({
   });
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-20 md:pb-0">
+    <div className="min-h-screen bg-white text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden">
       {/* 1. QUIET TOP ANNOUNCEMENT BAR */}
       <div className="w-full bg-[#080e1a] text-neutral-300 text-xs py-2 px-3 sm:px-6 border-b border-neutral-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
@@ -1051,57 +1051,6 @@ export function CourseraLandingPage({
           </div>
         </div>
       </footer>
-
-      {/* 11. UNIQUE MOBILE BOTTOM NAVIGATION DOCK */}
-      <nav
-        aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 py-2 flex items-center justify-around font-digihub"
-      >
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="flex flex-col items-center gap-1 py-1 px-2.5 text-neutral-600 hover:text-[#0056D2] transition text-[10px] font-semibold active:scale-95"
-        >
-          <Compass className="w-4 h-4 text-neutral-700" />
-          <span>Home</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => document.getElementById("about-digihub")?.scrollIntoView({ behavior: "smooth" })}
-          className="flex flex-col items-center gap-1 py-1 px-2.5 text-neutral-600 hover:text-[#0056D2] transition text-[10px] font-semibold active:scale-95"
-        >
-          <Info className="w-4 h-4 text-neutral-700" />
-          <span>About</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" })}
-          className="flex flex-col items-center gap-1 py-1 px-2.5 text-neutral-600 hover:text-[#0056D2] transition text-[10px] font-semibold active:scale-95"
-        >
-          <BookOpen className="w-4 h-4 text-neutral-700" />
-          <span>Curricula</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => document.getElementById("faq-section")?.scrollIntoView({ behavior: "smooth" })}
-          className="flex flex-col items-center gap-1 py-1 px-2.5 text-neutral-600 hover:text-[#0056D2] transition text-[10px] font-semibold active:scale-95"
-        >
-          <HelpCircle className="w-4 h-4 text-neutral-700" />
-          <span>FAQ</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onOpenAuth("login")}
-          className="flex flex-col items-center gap-1 py-1 px-3 bg-[#0056D2] text-white rounded-xl shadow-xs transition text-[10px] font-bold active:scale-95"
-        >
-          <LogIn className="w-3.5 h-3.5 text-white" />
-          <span>Sign In</span>
-        </button>
-      </nav>
     </div>
   );
 }

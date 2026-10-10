@@ -334,6 +334,8 @@ export default function DIGIHubPage() {
         courses={courses}
         progress={progress}
         certificates={studentCerts}
+        mentors={INITIAL_MENTORS}
+        sessions={sessions}
         onSignOut={() => {
           signOutLMS();
           setCurrentUser(null);
@@ -343,8 +345,13 @@ export default function DIGIHubPage() {
           setSelectedCertificate(cert || null);
           setIsCertificateOpen(true);
         }}
+        onOpenMentorBooking={(mentor) => {
+          setSelectedMentor(mentor || INITIAL_MENTORS[0]);
+          setIsBookingOpen(true);
+        }}
+        onEnrollCourse={handleEnroll}
         onRetakeOnboarding={() => setShowOnboarding(true)}
-        onViewPublicLanding={() => setViewLandingMode(true)}
+        onUpdateStudentName={handleUpdateStudentName}
       />
 
       {/* Course Detail / Syllabus Modal */}
