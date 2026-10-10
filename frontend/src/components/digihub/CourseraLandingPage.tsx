@@ -265,15 +265,15 @@ export function CourseraLandingPage({
           <div className="max-w-2xl space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-amber-300 border border-white/20 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>DIGIHub Academy</span>
+              <span>Interactive Tech Academy • 100% Tuition-Free</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.15] drop-shadow-md">
-              Empowering Young People Through Digital Skills
+              Learn to Code, Defend Systems, and Launch Your Tech Career
             </h1>
 
             <p className="text-base sm:text-lg text-neutral-200 leading-relaxed font-normal max-w-xl drop-shadow-sm">
-              DigiConnect Ghana equips youth, secondary school graduates, and university students across all 16 regions with practical technical skills, browser-based coding labs, and verified credentials for modern careers.
+              Practice software development, cybersecurity, and cloud engineering directly inside your browser. Complete self-paced curricula, build real-world portfolios, and earn verified diplomas at zero cost.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
@@ -842,10 +842,10 @@ export function CourseraLandingPage({
 
         <div className="max-w-4xl mx-auto px-4 text-center space-y-5 relative z-10">
           <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
-            Start learning today with DigiConnect DIGIHub
+            Launch your technical journey on DIGIHub today
           </h2>
           <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto leading-relaxed font-normal">
-            Join thousands of Ghanaian youth and students accelerating their careers. Completely free, self-paced, and credentialed.
+            Enroll in hands-on courses, practice in live browser sandboxes, and graduate with verified diplomas. 100% tuition-free for all Ghanaian youth.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
