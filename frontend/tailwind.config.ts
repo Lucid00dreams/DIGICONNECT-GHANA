@@ -32,6 +32,15 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
+        digihub: [
+          "'Plus Jakarta Sans'",
+          "Outfit",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out both",

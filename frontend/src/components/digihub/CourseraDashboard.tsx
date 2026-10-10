@@ -103,7 +103,7 @@ export function CourseraDashboard({
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-sans selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden">
       {/* 1. SIMPLE, MINIMALIST HEADER (Guaranteed to fit comfortably on all mobile screens) */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/90 shadow-2xs w-full">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 h-16 sm:h-18 flex items-center justify-between gap-2">
@@ -124,14 +124,14 @@ export function CourseraDashboard({
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="text-base sm:text-lg font-black tracking-tight text-neutral-900 leading-none">
+                <span className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 leading-none">
                   DigiConnect
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-[#0056D2] text-white tracking-wide">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#0056D2] text-white tracking-wide">
                   DIGIHub
                 </span>
               </div>
-              <span className="text-[10px] font-bold text-neutral-500 tracking-wider uppercase hidden sm:block">
+              <span className="text-[10px] font-medium text-neutral-500 tracking-wider uppercase hidden sm:block">
                 Learner Dashboard
               </span>
             </div>
@@ -155,7 +155,7 @@ export function CourseraDashboard({
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0056D2] text-white font-black text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs hover:ring-2 hover:ring-[#0056D2]/30 transition"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0056D2] text-white font-bold text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs hover:ring-2 hover:ring-[#0056D2]/30 transition"
                 aria-label="User profile menu"
               >
                 {firstName.charAt(0).toUpperCase()}
@@ -241,7 +241,7 @@ export function CourseraDashboard({
               <span className="text-xs font-bold text-[#0056D2] uppercase tracking-wider block">
                 {timeGreeting}, {firstName} 👋
               </span>
-              <h1 className="text-lg sm:text-2xl font-black text-neutral-900 tracking-tight mt-0.5 break-words">
+              <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
                 {primaryCourse?.title || "Web Engineering & Coding Foundations"}
               </h1>
             </div>
@@ -293,7 +293,7 @@ export function CourseraDashboard({
 
         {/* Quick Launch Sandboxes Strip */}
         <section className="space-y-2.5">
-          <span className="text-xs font-black text-neutral-500 uppercase tracking-wider block">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
             Interactive Learning Workspaces
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">

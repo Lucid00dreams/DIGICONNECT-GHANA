@@ -294,7 +294,7 @@ export function DigitalLiteracyLab({ config, onLabCompleted }: DigitalLiteracyLa
                 {spreadsheetData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-neutral-50/70">
                     <td className="py-2 px-3 text-neutral-400 bg-neutral-50/60 font-bold">{idx + 2}</td>
-                    <td className="py-2 px-3 font-sans font-medium text-neutral-900">{row.item}</td>
+                    <td className="py-2 px-3 font-digihub font-medium text-neutral-900">{row.item}</td>
                     <td className="py-2 px-3 text-neutral-700">{row.unit}</td>
                     <td className="py-2 px-3 text-neutral-700">{row.qty}</td>
                     <td className="py-2 px-3 font-bold text-neutral-900 bg-blue-50/30">{row.total}</td>
@@ -303,11 +303,11 @@ export function DigitalLiteracyLab({ config, onLabCompleted }: DigitalLiteracyLa
                 {/* Total Row */}
                 <tr className="bg-emerald-50/60 font-bold border-t-2 border-emerald-300">
                   <td className="py-2 px-3 text-neutral-400">6</td>
-                  <td className="py-2 px-3 font-sans text-emerald-950" colSpan={3}>
+                  <td className="py-2 px-3 font-digihub text-emerald-950" colSpan={3}>
                     Grand Budget Total (D2:D5):
                   </td>
                   <td className="py-2 px-3 text-emerald-700 text-sm">
-                    {formulaEvaluated !== null ? `GH₵ ${formulaEvaluated}` : "—"}
+                    {formulaEvaluated !== null ? `GH₵ ${formulaEvaluated}` : "-"}
                   </td>
                 </tr>
               </tbody>

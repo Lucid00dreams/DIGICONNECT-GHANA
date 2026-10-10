@@ -234,7 +234,7 @@ export function OnboardingWizard({ currentUser, onComplete, onExit }: Onboarding
   const courses = getAllCourses();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-neutral-900 font-sans">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-neutral-900 font-digihub">
       {/* Top Header */}
       <header className="border-b border-neutral-200 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-30">
         <div className="flex items-center gap-2.5">

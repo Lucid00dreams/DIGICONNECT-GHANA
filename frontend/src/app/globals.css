@@ -47,6 +47,23 @@ body {
   overflow-x: hidden;
 }
 
+/* DIGIHub humanistic, easy-on-the-eye typography (Plus Jakarta Sans + Outfit) */
+.font-digihub {
+  font-family: "Plus Jakarta Sans", "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.font-digihub h1,
+.font-digihub h2,
+.font-digihub h3,
+.font-digihub h4 {
+  font-family: "Plus Jakarta Sans", "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.022em;
+}
+
 /* ─── Focus states & Accessibility ──────────────────── */
 
 :focus-visible {

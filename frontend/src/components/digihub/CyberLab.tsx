@@ -459,7 +459,7 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-blue-50 text-blue-950 rounded-xl border border-blue-200 font-sans space-y-1.5">
+                <div className="p-3.5 bg-blue-50 text-blue-950 rounded-xl border border-blue-200 font-digihub space-y-1.5">
                   <span className="font-bold flex items-center gap-1.5 text-xs text-blue-900">
                     <Lock className="w-3.5 h-3.5 text-blue-600" />
                     How Password Salting Defeats Rainbow Tables:
@@ -545,14 +545,14 @@ export function CyberLab({ config, onLabCompleted }: CyberLabProps) {
                   <div className="space-y-1 text-rose-700">
                     <div>[Record 1] id: 1 • name: &quot;Admin Master&quot; • role: &quot;superadmin&quot; • password_hash: &quot;$2a$12...&quot;</div>
                     <div>[Record 2] id: 2 • name: &quot;Kwame Finance&quot; • role: &quot;auditor&quot; • password_hash: &quot;$2a$12...&quot;</div>
-                    <div className="text-rose-950 font-bold font-sans pt-2 border-t border-rose-200">
+                    <div className="text-rose-950 font-bold font-digihub pt-2 border-t border-rose-200">
                       ⚠️ Breach Confirmed: Injected tautology bypassed auth and dumped all confidential records!
                     </div>
                   </div>
                 ) : (
                   <div className="text-emerald-700 space-y-1">
                     <div>(0 records returned. No user with literal name &ldquo;{sqliInput}&rdquo; exists.)</div>
-                    <div className="text-emerald-950 font-bold font-sans pt-2 border-t border-emerald-200">
+                    <div className="text-emerald-950 font-bold font-digihub pt-2 border-t border-emerald-200">
                       🛡️ Defense Confirmed: Attack payload safely neutralized by prepared statement parameterization.
                     </div>
                   </div>
