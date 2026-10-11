@@ -305,15 +305,21 @@ export function CourseraDashboard({
               <span className="hidden sm:inline">Jargon Buster</span>
             </button>
 
-            {/* AI Study Coach Button */}
+            {/* DIGIHUB AI Study Coach Button */}
             <button
               type="button"
               onClick={() => setCoachOpenSignal((prev) => prev + 1)}
-              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border border-indigo-200 text-xs font-semibold text-indigo-700 transition flex items-center gap-1.5 shadow-2xs hover:scale-105 active:scale-95"
-              title="Ask AI Study Coach anything"
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 border border-cyan-200 text-xs font-bold text-[#0056D2] transition flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95"
+              title="Ask DIGIHUB AI anything"
             >
-              <Bot className="w-3.5 h-3.5 text-indigo-600" />
-              <span className="hidden sm:inline">AI Coach</span>
+              <img
+                src="/images/digihub-ai-robot.png"
+                alt="DIGIHUB AI"
+                width={18}
+                height={18}
+                className="w-4.5 h-4.5 object-contain"
+              />
+              <span className="hidden sm:inline">DIGIHUB AI</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
             </button>
 

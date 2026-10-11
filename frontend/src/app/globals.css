@@ -456,6 +456,34 @@ body {
   animation: pulseGold 2s infinite;
 }
 
+/* ─── DIGIHUB AI Chatbot "Feel Alive" Animations ────── */
+
+@keyframes botFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes botGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(33, 150, 243, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(0, 195, 255, 0.65));
+  }
+}
+
+.bot-float {
+  animation: botFloat 3.2s ease-in-out infinite;
+}
+
+.bot-glow {
+  animation: botGlow 2.8s ease-in-out infinite;
+}
+
 /* ─── Hide Next.js development badges & indicators ──── */
 [data-nextjs-toast],
 [data-nextjs-indicator],
