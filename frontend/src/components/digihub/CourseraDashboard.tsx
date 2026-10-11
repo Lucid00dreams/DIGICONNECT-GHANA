@@ -41,6 +41,7 @@ import {
   Lightbulb,
   MousePointer,
   Bot,
+  Menu,
 } from "lucide-react";
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
@@ -118,6 +119,8 @@ export function CourseraDashboard({
   const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
   const [isBasicsLabOpen, setIsBasicsLabOpen] = useState(false);
   const [coachOpenSignal, setCoachOpenSignal] = useState(0);
+  const [isMobileSectionMenuOpen, setIsMobileSectionMenuOpen] = useState(false);
+  const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
 
   // First name extraction
   const firstName = currentUser.name.split(" ")[0] || "Learner";
@@ -292,20 +295,34 @@ export function CourseraDashboard({
             </button>
           </nav>
 
-          {/* Right: Quick Hub & Profile Controls */}
+          {/* Right: Quick Hub, Tools & Profile Controls */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Jargon Buster Dictionary Button */}
-            <button
-              type="button"
-              onClick={() => setIsJargonModalOpen(true)}
-              className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-semibold text-amber-800 transition flex items-center gap-1.5 shadow-2xs"
-              title="Plain English & Ghanaian analogies for tech terms"
-            >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
-              <span className="hidden sm:inline">Jargon Buster</span>
-            </button>
+            {/* Desktop / Tablet Inline Tools (sm and up) */}
+            <div className="hidden sm:flex items-center gap-2">
+              {/* Jargon Buster Dictionary Button */}
+              <button
+                type="button"
+                onClick={() => setIsJargonModalOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-semibold text-amber-800 transition flex items-center gap-1.5 shadow-2xs"
+                title="Plain English & Ghanaian analogies for tech terms"
+              >
+                <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+                <span>Jargon Buster</span>
+              </button>
 
-            {/* DIGIHUB AI Study Coach Button */}
+              {/* Quick Hub Drawer Button */}
+              <button
+                type="button"
+                onClick={() => setIsQuickDashboardOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-1.5"
+                aria-label="Open Quick Dashboard Hub"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
+                <span>Quick Hub</span>
+              </button>
+            </div>
+
+            {/* DIGIHUB AI Study Coach Button (Always visible) */}
             <button
               type="button"
               onClick={() => setCoachOpenSignal((prev) => prev + 1)}
@@ -323,16 +340,65 @@ export function CourseraDashboard({
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
             </button>
 
-            {/* Quick Hub Drawer Button */}
-            <button
-              type="button"
-              onClick={() => setIsQuickDashboardOpen(true)}
-              className="px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-1.5"
-              aria-label="Open Quick Dashboard Hub"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
-              <span className="hidden sm:inline">Quick Hub</span>
-            </button>
+            {/* Mobile Tools Dropdown (< sm) to prevent header crowding */}
+            <div className="relative sm:hidden">
+              <button
+                type="button"
+                onClick={() => setIsQuickToolsOpen(!isQuickToolsOpen)}
+                className="px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-1"
+                aria-label="Open Quick Tools Menu"
+                aria-expanded={isQuickToolsOpen}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
+                <ChevronDown className="w-3 h-3 text-neutral-400" />
+              </button>
+
+              {isQuickToolsOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
+                    onClick={() => setIsQuickToolsOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 space-y-1 animate-in zoom-in-95 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsQuickToolsOpen(false);
+                        setIsJargonModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-amber-50 hover:text-amber-800 text-left transition"
+                    >
+                      <Lightbulb className="w-4 h-4 text-amber-600" />
+                      <span>Jargon Buster Dictionary</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsQuickToolsOpen(false);
+                        setIsQuickDashboardOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-blue-50 hover:text-[#0056D2] text-left transition"
+                    >
+                      <SlidersHorizontal className="w-4 h-4 text-[#0056D2]" />
+                      <span>Quick Hub Drawer</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsQuickToolsOpen(false);
+                        setIsBasicsLabOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-neutral-100 text-left transition"
+                    >
+                      <MousePointer className="w-4 h-4 text-emerald-600" />
+                      <span>Computer Basics Clinic</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* User Profile Avatar with Dropdown */}
             <div className="relative">
@@ -444,8 +510,149 @@ export function CourseraDashboard({
         </div>
       </header>
 
+      {/* 1.5 MOBILE SECTION SWITCHER BAR (< lg) */}
+      <div className="lg:hidden bg-white/95 backdrop-blur-sm border-b border-neutral-200/90 px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3 sticky top-16 z-30 shadow-2xs">
+        <div className="relative flex-1 max-w-xs">
+          <button
+            type="button"
+            onClick={() => setIsMobileSectionMenuOpen(!isMobileSectionMenuOpen)}
+            className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-900 text-xs font-bold transition border border-neutral-200"
+            aria-label="Select dashboard section"
+            aria-expanded={isMobileSectionMenuOpen}
+          >
+            <div className="flex items-center gap-2 truncate">
+              {activeSection === "learning" && <BookOpen className="w-4 h-4 text-[#0056D2]" />}
+              {activeSection === "catalog" && <Compass className="w-4 h-4 text-[#0056D2]" />}
+              {activeSection === "labs" && <Terminal className="w-4 h-4 text-[#0056D2]" />}
+              {activeSection === "diplomas" && <Award className="w-4 h-4 text-[#0056D2]" />}
+              {activeSection === "mentorship" && <Users className="w-4 h-4 text-[#0056D2]" />}
+              <span className="truncate">
+                {activeSection === "learning" && "My Learning"}
+                {activeSection === "catalog" && "Explore Courses"}
+                {activeSection === "labs" && "Browser Labs"}
+                {activeSection === "diplomas" && `Diplomas (${certificates.length})`}
+                {activeSection === "mentorship" && "Mentorship"}
+              </span>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+          </button>
+
+          {/* Section Selector Dropdown Menu */}
+          {isMobileSectionMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
+                onClick={() => setIsMobileSectionMenuOpen(false)}
+              />
+              <div className="absolute left-0 top-full mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 space-y-1 animate-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection("learning");
+                    setIsMobileSectionMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
+                    activeSection === "learning"
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    <span>My Learning</span>
+                  </div>
+                  {activeSection === "learning" && <Check className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection("catalog");
+                    setIsMobileSectionMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
+                    activeSection === "catalog"
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Compass className="w-4 h-4" />
+                    <span>Explore Courses</span>
+                  </div>
+                  {activeSection === "catalog" && <Check className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection("labs");
+                    setIsMobileSectionMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
+                    activeSection === "labs"
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-4 h-4" />
+                    <span>Browser Labs</span>
+                  </div>
+                  {activeSection === "labs" && <Check className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection("diplomas");
+                    setIsMobileSectionMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
+                    activeSection === "diplomas"
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    <span>Diplomas ({certificates.length})</span>
+                  </div>
+                  {activeSection === "diplomas" && <Check className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection("mentorship");
+                    setIsMobileSectionMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
+                    activeSection === "mentorship"
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>Mentorship</span>
+                  </div>
+                  {activeSection === "mentorship" && <Check className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Small quick status indicator */}
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-neutral-600 shrink-0">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>{progress.xp} XP</span>
+        </div>
+      </div>
+
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-8 tab-content-enter" key="learning">

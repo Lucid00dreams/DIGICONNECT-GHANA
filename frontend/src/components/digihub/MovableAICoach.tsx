@@ -247,7 +247,8 @@ export function MovableAICoach({
     if (!hasLauncherMoved.current) {
       // Calculate chat window position near launcher if not already dragged
       if (!hasInteractedChat && typeof window !== "undefined") {
-        const candidateX = Math.max(12, Math.min(launcherPos.x - 330, window.innerWidth - 425));
+        const chatWidth = window.innerWidth < 640 ? window.innerWidth - 24 : 410;
+        const candidateX = Math.max(12, Math.min(launcherPos.x - 330, window.innerWidth - chatWidth - 12));
         const candidateY = Math.max(12, Math.min(launcherPos.y - 480, window.innerHeight - 580));
         setChatPos({ x: candidateX, y: candidateY });
       }
@@ -281,7 +282,8 @@ export function MovableAICoach({
     const deltaX = e.clientX - chatDragStart.current.startX;
     const deltaY = e.clientY - chatDragStart.current.startY;
 
-    const maxX = Math.max(10, window.innerWidth - 400);
+    const chatWidth = window.innerWidth < 640 ? window.innerWidth - 24 : 410;
+    const maxX = Math.max(10, window.innerWidth - chatWidth - 10);
     const maxY = Math.max(10, window.innerHeight - 500);
 
     const newX = Math.max(10, Math.min(chatDragStart.current.origX + deltaX, maxX));

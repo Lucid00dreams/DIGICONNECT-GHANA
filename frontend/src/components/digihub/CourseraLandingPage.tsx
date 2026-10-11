@@ -30,6 +30,8 @@ import {
   ExternalLink,
   Cpu,
   Globe2,
+  Menu,
+  X,
 } from "lucide-react";
 import { Course } from "@/lib/lmsStore";
 
@@ -108,6 +110,7 @@ export function CourseraLandingPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Initialize scroll-triggered reveal animations
   useScrollReveal();
@@ -258,55 +261,196 @@ export function CourseraLandingPage({
             </nav>
           </div>
 
-          {/* Right: Explore Courses Button & Auth Buttons */}
+          {/* Right: Desktop Actions & Mobile Action / Dropdown Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Prominent Explore Courses Header Button */}
-            <button
-              type="button"
-              onClick={() => {
-                if (showExploreCatalog) {
-                  handleBackToOverview();
-                } else {
-                  handleOpenExplore();
-                }
-              }}
-              className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-2xs active:scale-98 ${
-                showExploreCatalog
-                  ? "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-300"
-                  : "bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-200"
-              }`}
-              aria-label={showExploreCatalog ? "Back to Overview" : "Explore Courses"}
-            >
-              <Compass className="w-4 h-4 text-[#0056D2]" />
-              <span className="hidden sm:inline">
-                {showExploreCatalog ? "← Overview" : "Explore Courses"}
-              </span>
-              <span className="sm:hidden">
-                {showExploreCatalog ? "Overview" : "Courses"}
-              </span>
-              {!showExploreCatalog && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-[#0056D2] text-white font-bold hidden md:inline">
-                  {courses.length}
-                </span>
-              )}
-            </button>
+            {/* Desktop Actions (md and up) */}
+            <div className="hidden md:flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (showExploreCatalog) {
+                    handleBackToOverview();
+                  } else {
+                    handleOpenExplore();
+                  }
+                }}
+                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-2xs active:scale-98 ${
+                  showExploreCatalog
+                    ? "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-300"
+                    : "bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-200"
+                }`}
+                aria-label={showExploreCatalog ? "Back to Overview" : "Explore Courses"}
+              >
+                <Compass className="w-4 h-4 text-[#0056D2]" />
+                <span>{showExploreCatalog ? "← Overview" : "Explore Courses"}</span>
+                {!showExploreCatalog && (
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-[#0056D2] text-white font-bold">
+                    {courses.length}
+                  </span>
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={() => onOpenAuth("login")}
-              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-neutral-700 hover:text-neutral-900 font-semibold text-xs sm:text-sm hover:bg-neutral-100 transition"
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenAuth("signup")}
-              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-98"
-            >
-              Join Free
-            </button>
+              <button
+                type="button"
+                onClick={() => onOpenAuth("login")}
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-neutral-700 hover:text-neutral-900 font-semibold text-xs sm:text-sm hover:bg-neutral-100 transition"
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenAuth("signup")}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-98"
+              >
+                Join Free
+              </button>
+            </div>
+
+            {/* Mobile Actions (< md): Quick CTA + Dropdown Menu Toggle */}
+            <div className="flex md:hidden items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => onOpenAuth("signup")}
+                className="px-3 py-1.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-xs transition active:scale-95"
+              >
+                Join Free
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`p-2 rounded-xl border transition ${
+                  isMobileMenuOpen
+                    ? "bg-neutral-100 border-neutral-300 text-neutral-900"
+                    : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                }`}
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open navigation menu"}
+                aria-expanded={isMobileMenuOpen}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5 text-neutral-800" />
+                ) : (
+                  <Menu className="w-5 h-5 text-neutral-800" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Dropdown Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="md:hidden fixed inset-0 top-[65px] bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Menu Panel */}
+            <div className="md:hidden relative z-50 bg-white border-b border-neutral-200 shadow-2xl p-4 sm:p-5 space-y-4 animate-in slide-in-from-top-2 duration-200">
+              {/* Primary Navigation Buttons */}
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (showExploreCatalog) {
+                      handleBackToOverview();
+                    } else {
+                      handleOpenExplore();
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-50/80 hover:bg-blue-100/80 text-[#0056D2] font-bold text-xs border border-blue-100 transition text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Compass className="w-4 h-4 text-[#0056D2]" />
+                    <span>{showExploreCatalog ? "← Back to Overview" : "Explore All Courses"}</span>
+                  </div>
+                  {!showExploreCatalog && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#0056D2] text-white font-bold">
+                      {courses.length} Tracks
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleBackToOverview("labs-section");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-xl hover:bg-neutral-100 text-neutral-800 font-semibold text-xs transition text-left"
+                >
+                  <Terminal className="w-4 h-4 text-emerald-600" />
+                  <span>Interactive Browser Labs</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleBackToOverview("about-digihub");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-xl hover:bg-neutral-100 text-neutral-800 font-semibold text-xs transition text-left"
+                >
+                  <Info className="w-4 h-4 text-blue-600" />
+                  <span>About DIGIHub Ghana</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleBackToOverview("how-it-works");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-xl hover:bg-neutral-100 text-neutral-800 font-semibold text-xs transition text-left"
+                >
+                  <Cpu className="w-4 h-4 text-amber-600" />
+                  <span>How It Works</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleBackToOverview("faq-section");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-xl hover:bg-neutral-100 text-neutral-800 font-semibold text-xs transition text-left"
+                >
+                  <HelpCircle className="w-4 h-4 text-purple-600" />
+                  <span>Frequently Asked Questions</span>
+                </button>
+              </div>
+
+              {/* Authentication Divider & Buttons */}
+              <div className="pt-3 border-t border-neutral-100 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenAuth("login");
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl border border-neutral-300 hover:bg-neutral-50 text-neutral-800 font-bold text-xs transition text-center flex items-center justify-center gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Sign In to Existing Account</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenAuth("signup");
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-md transition text-center flex items-center justify-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Create Free Scholar Account</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </header>
 
       {/* ───────────────────────────────────────────────────────────────── */}
@@ -360,32 +504,61 @@ export function CourseraLandingPage({
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
-            {[
-              { id: "all", label: `All Tracks (${courses.length})` },
-              { id: "cybersecurity", label: "Cybersecurity" },
-              { id: "coding", label: "Coding & Web" },
-              { id: "data-ai", label: "Data & AI" },
-              { id: "cloud", label: "Cloud & DevOps" },
-              { id: "mobile", label: "Mobile Apps" },
-              { id: "python", label: "Python" },
-              { id: "it", label: "IT Systems" },
-              { id: "literacy", label: "Digital Literacy" },
-            ].map((pill) => (
-              <button
-                key={pill.id}
-                type="button"
-                onClick={() => setSelectedFilter(pill.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition shrink-0 ${
-                  selectedFilter === pill.id
-                    ? "bg-[#0056D2] text-white shadow-2xs"
-                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700"
-                }`}
-              >
-                {pill.label}
-              </button>
-            ))}
+          {/* Category Filter: Mobile Dropdown & Desktop Pills */}
+          <div className="space-y-2">
+            {/* Mobile Dropdown Selector (< sm) to prevent clutter and horizontal overflow */}
+            <div className="sm:hidden">
+              <label htmlFor="mobile-category-select" className="sr-only">
+                Filter by Category
+              </label>
+              <div className="relative">
+                <select
+                  id="mobile-category-select"
+                  value={selectedFilter}
+                  onChange={(e) => setSelectedFilter(e.target.value)}
+                  className="w-full py-2.5 pl-3.5 pr-9 rounded-xl border border-neutral-300 bg-white text-xs font-bold text-neutral-800 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 appearance-none shadow-xs outline-none"
+                >
+                  <option value="all">📚 All Tracks ({courses.length})</option>
+                  <option value="cybersecurity">🛡️ Cybersecurity</option>
+                  <option value="coding">💻 Coding &amp; Web</option>
+                  <option value="data-ai">📊 Data &amp; AI</option>
+                  <option value="cloud">☁️ Cloud &amp; DevOps</option>
+                  <option value="mobile">📱 Mobile Apps</option>
+                  <option value="python">🐍 Python</option>
+                  <option value="it">🖥️ IT Systems</option>
+                  <option value="literacy">⚡ Digital Literacy</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Desktop / Tablet Scrollable Filter Pills */}
+            <div className="hidden sm:flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+              {[
+                { id: "all", label: `All Tracks (${courses.length})` },
+                { id: "cybersecurity", label: "Cybersecurity" },
+                { id: "coding", label: "Coding & Web" },
+                { id: "data-ai", label: "Data & AI" },
+                { id: "cloud", label: "Cloud & DevOps" },
+                { id: "mobile", label: "Mobile Apps" },
+                { id: "python", label: "Python" },
+                { id: "it", label: "IT Systems" },
+                { id: "literacy", label: "Digital Literacy" },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setSelectedFilter(pill.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition shrink-0 ${
+                    selectedFilter === pill.id
+                      ? "bg-[#0056D2] text-white shadow-2xs"
+                      : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Results Summary */}
@@ -560,7 +733,7 @@ export function CourseraLandingPage({
       ) : (
         <>
           {/* 3. FULL-BLEED IMMERSIVE HERO */}
-          <section className="relative min-h-[85vh] sm:min-h-[88vh] flex items-center justify-center overflow-hidden bg-black text-white" id="hero-section">
+          <section className="relative min-h-[85vh] sm:min-h-[88vh] flex items-center justify-center overflow-hidden bg-black text-white pb-28 sm:pb-20" id="hero-section">
         {/* Background Cover Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -577,59 +750,59 @@ export function CourseraLandingPage({
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
-          <div className="max-w-2xl space-y-6 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-amber-300 border border-white/20 backdrop-blur-md animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-float" />
-              <span>Interactive Tech Academy • 100% Tuition-Free</span>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 w-full">
+          <div className="max-w-2xl space-y-5 sm:space-y-6 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold bg-white/10 text-amber-300 border border-white/20 backdrop-blur-md animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-float shrink-0" />
+              <span className="truncate">Interactive Tech Academy • 100% Tuition-Free</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.15] drop-shadow-md animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.18] sm:leading-[1.15] drop-shadow-md animate-fade-in-up break-words" style={{ animationDelay: '200ms' }}>
               Learn to Code, Defend Systems, and Launch Your Tech Career
             </h1>
 
-            <p className="text-base sm:text-lg text-neutral-200 leading-relaxed font-normal max-w-xl drop-shadow-sm animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+            <p className="text-sm sm:text-lg text-neutral-200 leading-relaxed font-normal max-w-xl drop-shadow-sm animate-fade-in-up break-words" style={{ animationDelay: '300ms' }}>
               Practice software development, cybersecurity, and cloud engineering directly inside your browser. Complete self-paced curricula, build real-world portfolios, and earn verified diplomas at zero cost.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
               <button
                 type="button"
                 onClick={() => handleOpenExplore()}
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-xl transition active:scale-98"
+                className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs sm:text-sm shadow-xl transition active:scale-98 text-center"
               >
-                <Compass className="w-4 h-4" />
+                <Compass className="w-4 h-4 shrink-0" />
                 <span>Explore Courses</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
 
               <button
                 type="button"
                 onClick={() => onOpenAuth("signup")}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/25 transition backdrop-blur-sm"
+                className="inline-flex items-center justify-center gap-2 px-6 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/25 transition backdrop-blur-sm text-center"
               >
-                <LogIn className="w-4 h-4" />
+                <LogIn className="w-4 h-4 shrink-0" />
                 <span>Sign In to Access</span>
               </button>
             </div>
 
             {/* Impact Feature Line */}
-            <div className="pt-8 border-t border-white/15 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-neutral-300 font-medium animate-fade-in-up" style={{ animationDelay: '550ms' }}>
+            <div className="pt-6 sm:pt-8 border-t border-white/15 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 sm:gap-y-2 sm:gap-x-6 text-[11px] sm:text-xs text-neutral-300 font-medium animate-fade-in-up" style={{ animationDelay: '550ms' }}>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                12 Technical Curricula
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+                <span>12 Curricula</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Laptop className="w-4 h-4 text-blue-400" />
-                In-Browser Code &amp; Threat Labs
+                <Laptop className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400 shrink-0" />
+                <span>In-Browser Labs</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-amber-400" />
-                Verified Diplomas with QR Codes
+                <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+                <span>Verified Diplomas</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-purple-400" />
-                1-on-1 Faculty Mentorship
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 shrink-0" />
+                <span>1-on-1 Mentors</span>
               </span>
             </div>
           </div>

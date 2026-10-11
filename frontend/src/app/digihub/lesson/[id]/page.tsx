@@ -29,6 +29,8 @@ import {
   HelpCircle,
   Brain,
   MessageCircle,
+  ChevronDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   getLessonById,
@@ -80,6 +82,7 @@ export default function DIGIHubLessonPage() {
   const [coachOpenSignal, setCoachOpenSignal] = useState(0);
   const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
   const [showBasicsLab, setShowBasicsLab] = useState(false);
+  const [isMobileLessonToolsOpen, setIsMobileLessonToolsOpen] = useState(false);
 
   // Flashcards state
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -244,23 +247,32 @@ export default function DIGIHubLessonPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Jargon Buster Quick Dictionary Button */}
-            <button
-              type="button"
-              onClick={() => setIsJargonModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition"
-              title="Look up tech words in plain English & Ghanaian analogies"
-            >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
-              <span className="hidden sm:inline">Jargon Buster</span>
-            </button>
+          {/* Header Action Area */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Desktop / Tablet Inline Tools (sm and up) */}
+            <div className="hidden sm:flex items-center gap-2">
+              {/* Jargon Buster Quick Dictionary Button */}
+              <button
+                type="button"
+                onClick={() => setIsJargonModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition"
+                title="Look up tech words in plain English & Ghanaian analogies"
+              >
+                <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+                <span>Jargon Buster</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
+                <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                <span>{lesson.durationMinutes} mins</span>
+              </div>
+            </div>
 
             {/* DIGIHUB AI Study Coach Button */}
             <button
               type="button"
               onClick={() => setCoachOpenSignal((prev) => prev + 1)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 text-[#0056D2] border border-cyan-200 text-xs font-bold transition shadow-xs hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 text-[#0056D2] border border-cyan-200 text-xs font-bold transition shadow-xs hover:scale-105 active:scale-95"
               title="Open DIGIHUB AI Study Coach"
             >
               <img
@@ -274,45 +286,81 @@ export default function DIGIHubLessonPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
-              <Clock className="w-3.5 h-3.5 text-neutral-400" />
-              <span>{lesson.durationMinutes} mins</span>
+            {/* Mobile Secondary Tools Dropdown (< sm) to prevent button crowding */}
+            <div className="relative sm:hidden">
+              <button
+                type="button"
+                onClick={() => setIsMobileLessonToolsOpen(!isMobileLessonToolsOpen)}
+                className="p-1.5 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-0.5 text-xs font-semibold"
+                aria-label="Open Lesson Options Menu"
+                aria-expanded={isMobileLessonToolsOpen}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
+                <ChevronDown className="w-3 h-3 text-neutral-400" />
+              </button>
+
+              {isMobileLessonToolsOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
+                    onClick={() => setIsMobileLessonToolsOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 space-y-1 animate-in zoom-in-95 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileLessonToolsOpen(false);
+                        setIsJargonModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-amber-50 hover:text-amber-800 text-left transition"
+                    >
+                      <Lightbulb className="w-4 h-4 text-amber-600" />
+                      <span>Jargon Buster Dictionary</span>
+                    </button>
+
+                    <div className="px-3 py-1.5 text-[11px] text-neutral-500 flex items-center gap-1.5 border-t border-neutral-100 mt-1">
+                      <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>Estimated: {lesson.durationMinutes} mins</span>
+                    </div>
+
+                    <Link
+                      href="/digihub"
+                      onClick={() => setIsMobileLessonToolsOpen(false)}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-neutral-100 text-left transition"
+                    >
+                      <BookOpen className="w-4 h-4 text-[#0056D2]" />
+                      <span>All Academy Courses</span>
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
 
+            {/* Primary Action Button (Mark Complete or Next Module) */}
             {isCompleted ? (
-              <span className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="hidden xs:inline">Completed</span>
-              </span>
+              nextLesson ? (
+                <Link
+                  href={`/digihub/lesson/${nextLesson.id}`}
+                  className="inline-flex items-center gap-1 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-gold hover:bg-brand-gold-dark text-neutral-900 shadow-2xs transition active:scale-98"
+                  title={`Continue to Next Module: ${nextLesson.title}`}
+                >
+                  <span className="hidden xs:inline">Next Module</span>
+                  <span className="xs:hidden">Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Done</span>
+                </span>
+              )
             ) : (
               <button
                 onClick={handleMarkComplete}
                 className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs shadow-2xs transition active:scale-[0.98]"
               >
-                <span>Mark Complete</span>
+                <span>Complete</span>
               </button>
-            )}
-
-            {nextLesson ? (
-              <Link
-                href={`/digihub/lesson/${nextLesson.id}`}
-                className={`inline-flex items-center gap-1 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs ${
-                  isCompleted
-                    ? "bg-brand-gold hover:bg-brand-gold-dark text-neutral-900 animate-pulse"
-                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200"
-                }`}
-                title={`Continue to Next Module: ${nextLesson.title}`}
-              >
-                <span>Next Module</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
-            ) : (
-              <Link
-                href="/digihub"
-                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold transition"
-              >
-                <span>All Courses</span>
-              </Link>
             )}
           </div>
         </div>
