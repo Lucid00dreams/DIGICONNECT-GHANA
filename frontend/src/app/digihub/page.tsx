@@ -72,6 +72,7 @@ import { CourseraLandingPage } from "@/components/digihub/CourseraLandingPage";
 import { CourseraAuthModal } from "@/components/digihub/CourseraAuthModal";
 import { OnboardingWizard } from "@/components/digihub/OnboardingWizard";
 import { CourseraDashboard } from "@/components/digihub/CourseraDashboard";
+import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 
 export default function DIGIHubPage() {
   const [activeTab, setActiveTab] = useState<"my-learning" | "catalog" | "certificates" | "mentorship">("my-learning");
@@ -302,6 +303,12 @@ export default function DIGIHubPage() {
             }
           }}
           completedLessonIds={progress.completedLessonIds}
+        />
+
+        {/* Movable AI Study Coach Floating Chatbot */}
+        <MovableAICoach
+          currentLessonTitle="Welcome to DigiConnect Academy"
+          currentModuleTitle="Digital Literacy & Career Skills"
         />
       </>
     );

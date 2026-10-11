@@ -40,9 +40,11 @@ import {
   SlidersHorizontal,
   Lightbulb,
   MousePointer,
+  Bot,
 } from "lucide-react";
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
+import { MovableAICoach } from "./MovableAICoach";
 import {
   LMSUser,
   Course,
@@ -115,6 +117,7 @@ export function CourseraDashboard({
   const [editedName, setEditedName] = useState(progress.studentName || currentUser.name);
   const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
   const [isBasicsLabOpen, setIsBasicsLabOpen] = useState(false);
+  const [coachOpenSignal, setCoachOpenSignal] = useState(0);
 
   // First name extraction
   const firstName = currentUser.name.split(" ")[0] || "Learner";
@@ -300,6 +303,18 @@ export function CourseraDashboard({
             >
               <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
               <span className="hidden sm:inline">Jargon Buster</span>
+            </button>
+
+            {/* AI Study Coach Button */}
+            <button
+              type="button"
+              onClick={() => setCoachOpenSignal((prev) => prev + 1)}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border border-indigo-200 text-xs font-semibold text-indigo-700 transition flex items-center gap-1.5 shadow-2xs hover:scale-105 active:scale-95"
+              title="Ask AI Study Coach anything"
+            >
+              <Bot className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">AI Coach</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
             </button>
 
             {/* Quick Hub Drawer Button */}
@@ -1561,6 +1576,13 @@ export function CourseraDashboard({
           </div>
         </div>
       )}
+      {/* 8. MOVABLE AI STUDY COACH (DRAGGABLE & VIEWPORT-CLAMPED) */}
+      <MovableAICoach
+        currentLessonTitle={nextLesson?.title || primaryCourse?.title}
+        currentModuleTitle={primaryCourse?.title}
+        userProgressXp={progress.xp}
+        openSignal={coachOpenSignal}
+      />
     </div>
   );
 }

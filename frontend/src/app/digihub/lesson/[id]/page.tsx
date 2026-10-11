@@ -49,6 +49,7 @@ import { AuthGate } from "@/components/digihub/AuthGate";
 import { AudioNarrationPlayer } from "@/components/digihub/AudioNarrationPlayer";
 import { JargonBusterModal } from "@/components/digihub/JargonBusterModal";
 import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
+import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 
 // Utility to completely strip markdown asterisks from any text
 function cleanNoAsterisks(text?: string): string {
@@ -76,10 +77,9 @@ export default function DIGIHubLessonPage() {
 
   // Drawer & modal states
   const [isCurriculumDrawerOpen, setIsCurriculumDrawerOpen] = useState(false);
-  const [isCoachDrawerOpen, setIsCoachDrawerOpen] = useState(false);
+  const [coachOpenSignal, setCoachOpenSignal] = useState(0);
   const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
   const [showBasicsLab, setShowBasicsLab] = useState(false);
-  const [coachActiveTopic, setCoachActiveTopic] = useState<string | null>(null);
 
   // Flashcards state
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -259,11 +259,13 @@ export default function DIGIHubLessonPage() {
             {/* Ask AI Study Coach Button */}
             <button
               type="button"
-              onClick={() => setIsCoachDrawerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition"
+              onClick={() => setCoachOpenSignal((prev) => prev + 1)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition shadow-2xs hover:scale-105 active:scale-95"
+              title="Open Movable AI Study Coach"
             >
-              <Bot className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Study Coach</span>
+              <Bot className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">AI Study Coach</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
             </button>
 
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-medium">
@@ -847,97 +849,14 @@ export default function DIGIHubLessonPage() {
         </div>
       )}
 
-      {/* ─── SLIDE-OUT AI STUDY COACH DRAWER ─────────────────────────────── */}
-      {isCoachDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity drawer-overlay"
-            onClick={() => setIsCoachDrawerOpen(false)}
-          />
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4 drawer-panel-right">
-            <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-neutral-900">DIGI Tutor AI Coach</h3>
-                  <span className="text-[11px] text-neutral-500">
-                    Friendly 24/7 academic coach for {cleanNoAsterisks(lesson.title)}
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCoachDrawerOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-neutral-100 text-neutral-500"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
-              <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 leading-relaxed">
-                Hello! I am your DIGI Tutor. I am here to make learning this module easy and fun. Click any prompt below or ask for guidance!
-              </div>
-
-              <div className="space-y-2">
-                <span className="font-bold text-neutral-800 block text-[11px] uppercase tracking-wider">
-                  Quick Study Prompts:
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCoachActiveTopic(
-                      currentTopic?.sections[0]?.analogy ||
-                        "Every web concept starts with real-world foundation: HTML is the structure, CSS is the style, and JS is the interactivity."
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
-                >
-                  💡 Give me an everyday African analogy for this topic!
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCoachActiveTopic(
-                      currentTopic?.hasLab
-                        ? "For this lab: make sure you read the instructions carefully, check your syntax, and look at the simulated browser output on the right pane."
-                        : "Focus on understanding the key takeaways first, then test yourself in the Flashcards tab!"
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
-                >
-                  🎯 How do I pass the interactive lab challenge?
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCoachActiveTopic(
-                      "In Ghana's burgeoning digital ecosystem, employers look for practical problem solvers who understand both defensive cyber hygiene and clean code architecture."
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl border border-neutral-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition text-neutral-800 font-medium"
-                >
-                  🚀 How is this skill applied in Ghanaian tech jobs?
-                </button>
-              </div>
-
-              {coachActiveTopic && (
-                <div className="p-4 rounded-2xl bg-neutral-900 text-neutral-100 space-y-2 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-[11px]">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>DIGI Tutor Guidance:</span>
-                  </div>
-                  <p className="leading-relaxed text-xs">{coachActiveTopic}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ─── MOVABLE AI STUDY COACH (DRAGGABLE & VIEWPORT-CLAMPED) ──────── */}
+      <MovableAICoach
+        currentLessonTitle={cleanNoAsterisks(lesson.title)}
+        currentModuleTitle={cleanNoAsterisks(lesson.moduleTitle)}
+        currentTopicTitle={cleanNoAsterisks(currentTopic?.title)}
+        userProgressXp={learnerProgress.xp}
+        openSignal={coachOpenSignal}
+      />
 
       {/* ─── JARGON BUSTER PLAIN LANGUAGE MODAL ───────────────────────── */}
       <JargonBusterModal
