@@ -46,6 +46,9 @@ import { PythonLab } from "@/components/digihub/PythonLab";
 import { DigitalLiteracyLab } from "@/components/digihub/DigitalLiteracyLab";
 import { QuizWidget } from "@/components/digihub/QuizWidget";
 import { AuthGate } from "@/components/digihub/AuthGate";
+import { AudioNarrationPlayer } from "@/components/digihub/AudioNarrationPlayer";
+import { JargonBusterModal } from "@/components/digihub/JargonBusterModal";
+import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
 
 // Utility to completely strip markdown asterisks from any text
 function cleanNoAsterisks(text?: string): string {
@@ -71,9 +74,11 @@ export default function DIGIHubLessonPage() {
   const [completionToast, setCompletionToast] = useState(false);
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
 
-  // Drawer states
+  // Drawer & modal states
   const [isCurriculumDrawerOpen, setIsCurriculumDrawerOpen] = useState(false);
   const [isCoachDrawerOpen, setIsCoachDrawerOpen] = useState(false);
+  const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
+  const [showBasicsLab, setShowBasicsLab] = useState(false);
   const [coachActiveTopic, setCoachActiveTopic] = useState<string | null>(null);
 
   // Flashcards state
@@ -240,6 +245,17 @@ export default function DIGIHubLessonPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Jargon Buster Quick Dictionary Button */}
+            <button
+              type="button"
+              onClick={() => setIsJargonModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition"
+              title="Look up tech words in plain English & Ghanaian analogies"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+              <span className="hidden sm:inline">Jargon Buster</span>
+            </button>
+
             {/* Ask AI Study Coach Button */}
             <button
               type="button"
@@ -445,6 +461,14 @@ export default function DIGIHubLessonPage() {
                       {cleanNoAsterisks(currentTopic.summary)}
                     </p>
                   </div>
+
+                  {/* 1. Voice Narration Player for Beginners */}
+                  <AudioNarrationPlayer
+                    title={cleanNoAsterisks(currentTopic.title)}
+                    summary={cleanNoAsterisks(currentTopic.summary)}
+                    sections={currentTopic.sections}
+                    keyTakeaways={currentTopic.keyTakeaways}
+                  />
 
                   {/* Topic Sections with Analogies and Clean Snippets */}
                   <div className="space-y-4 pt-2">
@@ -671,56 +695,80 @@ export default function DIGIHubLessonPage() {
           )}
         </div>
 
-        {/* RIGHT PANE: Interactive Labs */}
+        {/* RIGHT PANE: Interactive Labs & Practice Ground */}
         <div
           className={`${
             mobileActiveView === "lab" ? "flex" : "hidden"
           } lg:flex lg:col-span-7 flex-col space-y-3`}
         >
-          {/* Active Sandbox Lab (Web Development) */}
-          {activeSandbox && (
-            <CodeSandbox
-              key={`sandbox-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
-              config={activeSandbox}
-              onLabCompleted={handleMarkComplete}
-            />
-          )}
+          {/* Lab View Switcher for Beginners */}
+          <div className="flex items-center justify-between p-2.5 bg-white rounded-2xl border border-neutral-200 shadow-2xs text-xs">
+            <span className="text-neutral-500 font-medium pl-1 text-[11px]">
+              {showBasicsLab ? "Showing: Zero-Fear PC & Phone Basics" : "Showing: Interactive Module Workspace"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowBasicsLab(!showBasicsLab)}
+              className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] font-bold text-[11px] transition border border-blue-200"
+            >
+              {showBasicsLab ? "← Return to Module Workspace" : "🖱️ Practice PC Basics (Click/Copy/Type)"}
+            </button>
+          </div>
 
-          {/* Active Cyber Lab (Cybersecurity) */}
-          {activeCyberLab && (
-            <CyberLab
-              key={`cyberlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
-              config={activeCyberLab}
-              onLabCompleted={handleMarkComplete}
-            />
-          )}
+          {/* 3. Computer & Phone Basics 101 Sandbox */}
+          {showBasicsLab ? (
+            <ComputerBasicsLab onLabCompleted={handleMarkComplete} />
+          ) : (
+            <>
+              {/* Active Sandbox Lab (Web Development) */}
+              {activeSandbox && (
+                <CodeSandbox
+                  key={`sandbox-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+                  config={activeSandbox}
+                  onLabCompleted={handleMarkComplete}
+                />
+              )}
 
-          {/* Active Python Lab (Programming & Automation) */}
-          {activePythonLab && (
-            <PythonLab
-              key={`pythonlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
-              config={activePythonLab}
-              onLabCompleted={handleMarkComplete}
-            />
-          )}
+              {/* Active Cyber Lab (Cybersecurity) */}
+              {activeCyberLab && (
+                <CyberLab
+                  key={`cyberlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+                  config={activeCyberLab}
+                  onLabCompleted={handleMarkComplete}
+                />
+              )}
 
-          {/* Active Digital Literacy Lab (Workplace & Spreadsheets) */}
-          {activeDigitalLiteracyLab && (
-            <DigitalLiteracyLab
-              key={`digitallab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
-              config={activeDigitalLiteracyLab}
-              onLabCompleted={handleMarkComplete}
-            />
-          )}
+              {/* Active Python Lab (Programming & Automation) */}
+              {activePythonLab && (
+                <PythonLab
+                  key={`pythonlab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+                  config={activePythonLab}
+                  onLabCompleted={handleMarkComplete}
+                />
+              )}
 
-          {!currentHasLab && (
-            <div className="bg-white border border-neutral-200 rounded-2xl p-8 text-center space-y-3">
-              <BookOpen className="w-10 h-10 text-neutral-400 mx-auto" />
-              <h3 className="text-sm font-bold text-neutral-800">Reading & Conceptual Topic</h3>
-              <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                This topic covers foundational workplace knowledge. Read through the guide on the left and test your knowledge in the quiz.
-              </p>
-            </div>
+              {/* Active Digital Literacy Lab (Workplace & Spreadsheets) */}
+              {activeDigitalLiteracyLab && (
+                <DigitalLiteracyLab
+                  key={`digitallab-${currentTopic?.id || lesson.id}-${activeTopicIndex}`}
+                  config={activeDigitalLiteracyLab}
+                  onLabCompleted={handleMarkComplete}
+                />
+              )}
+
+              {!currentHasLab && (
+                <div className="space-y-4">
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-5 text-center space-y-2">
+                    <BookOpen className="w-8 h-8 text-neutral-400 mx-auto" />
+                    <h3 className="text-sm font-bold text-neutral-800">Reading &amp; Conceptual Topic</h3>
+                    <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+                      Use the voice reader on the left to listen to this topic, or practice your digital foundation skills in the sandbox below:
+                    </p>
+                  </div>
+                  <ComputerBasicsLab onLabCompleted={handleMarkComplete} />
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
@@ -890,6 +938,12 @@ export default function DIGIHubLessonPage() {
           </div>
         </div>
       )}
+
+      {/* ─── JARGON BUSTER PLAIN LANGUAGE MODAL ───────────────────────── */}
+      <JargonBusterModal
+        isOpen={isJargonModalOpen}
+        onClose={() => setIsJargonModalOpen(false)}
+      />
     </div>
   );
 }

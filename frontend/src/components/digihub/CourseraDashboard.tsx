@@ -38,7 +38,11 @@ import {
   Video,
   CheckCircle,
   SlidersHorizontal,
+  Lightbulb,
+  MousePointer,
 } from "lucide-react";
+import { JargonBusterModal } from "./JargonBusterModal";
+import { ComputerBasicsLab } from "./ComputerBasicsLab";
 import {
   LMSUser,
   Course,
@@ -109,6 +113,8 @@ export function CourseraDashboard({
   const [isQuickDashboardOpen, setIsQuickDashboardOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(progress.studentName || currentUser.name);
+  const [isJargonModalOpen, setIsJargonModalOpen] = useState(false);
+  const [isBasicsLabOpen, setIsBasicsLabOpen] = useState(false);
 
   // First name extraction
   const firstName = currentUser.name.split(" ")[0] || "Learner";
@@ -285,6 +291,17 @@ export function CourseraDashboard({
 
           {/* Right: Quick Hub & Profile Controls */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* Jargon Buster Dictionary Button */}
+            <button
+              type="button"
+              onClick={() => setIsJargonModalOpen(true)}
+              className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-semibold text-amber-800 transition flex items-center gap-1.5 shadow-2xs"
+              title="Plain English & Ghanaian analogies for tech terms"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+              <span className="hidden sm:inline">Jargon Buster</span>
+            </button>
+
             {/* Quick Hub Drawer Button */}
             <button
               type="button"
@@ -871,6 +888,40 @@ export function CourseraDashboard({
               </p>
             </div>
 
+            {/* Featured Beginner Clinic: Computer & Phone Basics 101 */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-amber-50/80 border-2 border-blue-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 card-lift animate-fade-in-up">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-[#0056D2] text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <MousePointer className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#0056D2] text-[10px] font-bold uppercase tracking-wider">
+                      Beginner Clinic 101
+                    </span>
+                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
+                      Zero Fear
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-base text-neutral-900 mt-0.5">
+                    Computer &amp; Phone Basics: Click, Copy-Paste, &amp; Typing Clinic
+                  </h3>
+                  <p className="text-xs text-neutral-600 max-w-xl mt-1 leading-relaxed">
+                    Never used a mouse or laptop keyboard before? Practice left/double-click, duplicating text safely, typing without fear, and smooth scrolling in a protected sandbox.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsBasicsLabOpen(true)}
+                className="self-start md:self-auto px-5 py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition flex items-center gap-1.5 active:scale-95 shrink-0"
+              >
+                <MousePointer className="w-3.5 h-3.5" />
+                <span>Launch Basics Clinic</span>
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Lab 1 */}
               <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '50ms' }}>
@@ -1307,6 +1358,38 @@ export function CourseraDashboard({
                 Quick Shortcuts
               </span>
 
+              {/* Jargon Buster Shortcut */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsQuickDashboardOpen(false);
+                  setIsJargonModalOpen(true);
+                }}
+                className="w-full text-left p-3 rounded-xl bg-amber-50/70 border border-amber-200 hover:border-amber-300 hover:bg-amber-100/60 transition flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Lightbulb className="w-4 h-4 text-amber-600" />
+                  <span className="font-semibold text-amber-950">Jargon Buster Tech Dictionary</span>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-amber-600" />
+              </button>
+
+              {/* Computer Basics Shortcut */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsQuickDashboardOpen(false);
+                  setIsBasicsLabOpen(true);
+                }}
+                className="w-full text-left p-3 rounded-xl bg-blue-50/70 border border-blue-200 hover:border-[#0056D2] hover:bg-blue-100/60 transition flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2.5">
+                  <MousePointer className="w-4 h-4 text-[#0056D2]" />
+                  <span className="font-semibold text-blue-950">Computer Basics 101 Clinic</span>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-[#0056D2]" />
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -1449,6 +1532,32 @@ export function CourseraDashboard({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. JARGON BUSTER MODAL */}
+      <JargonBusterModal
+        isOpen={isJargonModalOpen}
+        onClose={() => setIsJargonModalOpen(false)}
+      />
+
+      {/* 7. COMPUTER & PHONE BASICS CLINIC MODAL */}
+      {isBasicsLabOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+          <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-2xl p-4 sm:p-6 my-auto">
+            <button
+              onClick={() => setIsBasicsLabOpen(false)}
+              className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition z-10"
+              aria-label="Close Basics Lab"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <ComputerBasicsLab
+              onLabCompleted={() => {
+                setTimeout(() => setIsBasicsLabOpen(false), 2000);
+              }}
+            />
           </div>
         </div>
       )}
