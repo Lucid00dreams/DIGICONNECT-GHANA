@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import {
   X,
   Minimize2,
@@ -12,7 +11,6 @@ import {
   VolumeX,
   RotateCcw,
   Move,
-  GripHorizontal,
   Lightbulb,
   Terminal,
   ShieldCheck,
@@ -20,14 +18,12 @@ import {
   BookOpen,
   Copy,
   Check,
-  HelpCircle,
-  MessageSquare,
   CornerDownLeft,
 } from "lucide-react";
 
-// ─── 3D CYAB ROBOT AVATAR COMPONENT ──────────────────────────────────────────
+// ─── 3D CYAN ROBOT AVATAR COMPONENT ──────────────────────────────────────────
 export function DigiHubBotAvatar({
-  size = 40,
+  size = 38,
   isSpeaking = false,
   isThinking = false,
   className = "",
@@ -46,20 +42,20 @@ export function DigiHubBotAvatar({
       } ${className}`}
       style={{ width: `${size}px`, height: `${size}px` }}
     >
-      {/* Ambient glowing cyan aura */}
+      {/* Soft ambient cyan aura */}
       <div
-        className="absolute -inset-1 rounded-full bg-cyan-400/30 blur-xs pointer-events-none transition-all duration-300"
+        className="absolute -inset-0.5 rounded-full bg-cyan-400/25 blur-xs pointer-events-none transition-all duration-300"
         style={{
           transform: isSpeaking ? "scale(1.2)" : "scale(1.04)",
-          opacity: isSpeaking ? 0.9 : 0.6,
+          opacity: isSpeaking ? 0.9 : 0.5,
         }}
       />
 
-      {/* 3D Cyan Robot Mascot Image matching reference image */}
+      {/* 3D Cyan Robot Mascot matching reference image */}
       {!imageError ? (
         <img
           src="/images/digihub-ai-robot.png"
-          alt="DIGIHUB AI Robot Mascot"
+          alt="DIGIHUB AI"
           width={size}
           height={size}
           className="relative w-full h-full object-contain filter drop-shadow-md transition-transform duration-200 pointer-events-none"
@@ -67,45 +63,31 @@ export function DigiHubBotAvatar({
           draggable={false}
         />
       ) : (
-        /* Vector SVG Fallback with exact mascot geometry */
+        /* Vector SVG Fallback */
         <svg
           viewBox="0 0 100 100"
           className="w-full h-full drop-shadow-md"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Top Antenna */}
           <circle cx="50" cy="14" r="8" fill="#00A3FF" />
           <circle cx="48" cy="12" r="2.5" fill="#FFFFFF" opacity="0.8" />
           <rect x="47" y="20" width="6" height="8" rx="3" fill="#008AD8" />
-          {/* Side Ear Pods */}
           <rect x="8" y="44" width="10" height="26" rx="5" fill="#008AD8" />
           <rect x="82" y="44" width="10" height="26" rx="5" fill="#008AD8" />
-          {/* Outer Helmet */}
-          <rect x="14" y="24" width="72" height="66" rx="30" fill="url(#cyanGrad)" />
-          {/* Inner Visor Screen */}
+          <rect x="14" y="24" width="72" height="66" rx="30" fill="url(#cyanGradFallback)" />
           <rect x="22" y="34" width="56" height="46" rx="20" fill="#0F172A" />
-          {/* Eyes */}
           <circle cx="38" cy="54" r="6" fill="#FFFFFF" />
           <circle cx="62" cy="54" r="6" fill="#FFFFFF" />
-          {/* Smile */}
-          <path
-            d="M40 68 Q50 76 60 68"
-            stroke="#FFFFFF"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
+          <path d="M40 68 Q50 76 60 68" stroke="#FFFFFF" strokeWidth="3.5" strokeLinecap="round" />
           <defs>
-            <linearGradient id="cyanGrad" x1="14" y1="24" x2="86" y2="90" gradientUnits="userSpaceOnUse">
+            <linearGradient id="cyanGradFallback" x1="14" y1="24" x2="86" y2="90" gradientUnits="userSpaceOnUse">
               <stop stopColor="#38BDF8" />
               <stop offset="1" stopColor="#0284C7" />
             </linearGradient>
           </defs>
         </svg>
       )}
-
-      {/* Online Status Pip */}
-      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white shadow-xs" />
     </div>
   );
 }
@@ -140,25 +122,30 @@ export function MovableAICoach({
   const [isSpeakingId, setIsSpeakingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Dragging states (for both launcher and expanded window)
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [hasInteractedWithPosition, setHasInteractedWithPosition] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragMoved, setDragMoved] = useState(false);
+  // Position state for the CIRCULAR LAUNCHER ICON
+  const [launcherPos, setLauncherPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [hasInteractedLauncher, setHasInteractedLauncher] = useState(false);
 
-  const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number }>({
-    mouseX: 0,
-    mouseY: 0,
-    posX: 0,
-    posY: 0,
-  });
+  // Position state for the EXPANDED CHAT WINDOW
+  const [chatPos, setChatPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [hasInteractedChat, setHasInteractedChat] = useState(false);
 
-  const chatWindowRef = useRef<HTMLDivElement>(null);
+  // Launcher drag tracking refs (Pointer Events for ultra-smooth free movement)
+  const isDraggingLauncher = useRef(false);
+  const launcherDragStart = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
+  const hasLauncherMoved = useRef(false);
+  const [isDraggingLauncherUI, setIsDraggingLauncherUI] = useState(false);
+
+  // Window drag tracking refs
+  const isDraggingChat = useRef(false);
+  const chatDragStart = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
+  const [isDraggingChatUI, setIsDraggingChatUI] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  // React to external openSignal (e.g., clicked "AI Coach" button in header)
+  // React to external openSignal (e.g. from top nav button)
   useEffect(() => {
     if (openSignal && openSignal > 0) {
       setIsOpen(true);
@@ -166,142 +153,161 @@ export function MovableAICoach({
     }
   }, [openSignal]);
 
-  // Welcome message
+  // Initial welcome message
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome-1",
       sender: "bot",
-      text: "Akwaaba! 👋 I am DIGIHUB AI, your friendly study coach. Whether you are learning computer basics or building your first web app, remember: you can NEVER break the computer here! Ask me anything or tap a prompt below.",
+      text: "Akwaaba! 👋 I am DIGIHUB AI, your study coach. Whether you are learning computer basics or building websites, you can NEVER break the computer here! Ask me anything or tap any quick prompt below.",
       timestamp: "Just now",
       analogy: "Think of me as a patient Ghanaian elder sibling or tech tutor sitting right beside your desk.",
     },
   ]);
 
-  // Center/Default position on mount
+  // Set default initial positions on client mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const defaultRight = Math.max(16, window.innerWidth - 430);
-      const defaultBottom = Math.max(16, window.innerHeight - 580);
-      setPosition({ x: defaultRight, y: defaultBottom });
+      const defaultLauncherX = Math.max(16, window.innerWidth - 92);
+      const defaultLauncherY = Math.max(16, window.innerHeight - 96);
+      setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
+
+      const defaultChatX = Math.max(16, window.innerWidth - 425);
+      const defaultChatY = Math.max(16, window.innerHeight - 580);
+      setChatPos({ x: defaultChatX, y: defaultChatY });
     }
   }, []);
 
-  // Screen clamping during resize
+  // Screen resize clamping
   useEffect(() => {
     const handleResize = () => {
-      setPosition((prev) => ({
-        x: Math.min(prev.x, Math.max(12, window.innerWidth - 420)),
-        y: Math.min(prev.y, Math.max(12, window.innerHeight - 540)),
+      setLauncherPos((prev) => ({
+        x: Math.min(prev.x, Math.max(10, window.innerWidth - 86)),
+        y: Math.min(prev.y, Math.max(10, window.innerHeight - 86)),
+      }));
+      setChatPos((prev) => ({
+        x: Math.min(prev.x, Math.max(10, window.innerWidth - 420)),
+        y: Math.min(prev.y, Math.max(10, window.innerHeight - 560)),
       }));
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Scroll to bottom
+  // Scroll to bottom of chat
   useEffect(() => {
     if (isOpen && !isMinimized) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen, isMinimized]);
 
-  // ─── DRAG HANDLERS (MOUSE & TOUCH) ─────────────────────────────────────────
-  const startDrag = (clientX: number, clientY: number, target: HTMLElement) => {
-    // Prevent drag when interacting with buttons/inputs
-    if (target.closest("button") || target.closest("input") || target.closest("textarea")) {
+  // ─── FREE DRAGGING FOR CIRCULAR LAUNCHER ICON ──────────────────────────────
+  const handleLauncherPointerDown = (e: React.PointerEvent) => {
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+    isDraggingLauncher.current = true;
+    hasLauncherMoved.current = false;
+    setIsDraggingLauncherUI(true);
+    setHasInteractedLauncher(true);
+    launcherDragStart.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: launcherPos.x,
+      origY: launcherPos.y,
+    };
+  };
+
+  const handleLauncherPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingLauncher.current) return;
+    const deltaX = e.clientX - launcherDragStart.current.startX;
+    const deltaY = e.clientY - launcherDragStart.current.startY;
+
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      hasLauncherMoved.current = true;
+    }
+
+    const maxX = Math.max(10, window.innerWidth - 86);
+    const maxY = Math.max(10, window.innerHeight - 86);
+
+    const newX = Math.max(10, Math.min(launcherDragStart.current.origX + deltaX, maxX));
+    const newY = Math.max(10, Math.min(launcherDragStart.current.origY + deltaY, maxY));
+
+    setLauncherPos({ x: newX, y: newY });
+  };
+
+  const handleLauncherPointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingLauncher.current) return;
+    isDraggingLauncher.current = false;
+    setIsDraggingLauncherUI(false);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+
+    // If tapped without moving, open the chat window!
+    if (!hasLauncherMoved.current) {
+      // Calculate chat window position near launcher if not already dragged
+      if (!hasInteractedChat && typeof window !== "undefined") {
+        const candidateX = Math.max(12, Math.min(launcherPos.x - 330, window.innerWidth - 425));
+        const candidateY = Math.max(12, Math.min(launcherPos.y - 480, window.innerHeight - 580));
+        setChatPos({ x: candidateX, y: candidateY });
+      }
+      setIsOpen(true);
+      setIsMinimized(false);
+    }
+  };
+
+  // ─── FREE DRAGGING FOR EXPANDED CHAT WINDOW HEADER ────────────────────────
+  const handleChatPointerDown = (e: React.PointerEvent) => {
+    // Exclude clicks on header control buttons
+    if ((e.target as HTMLElement).closest("button")) {
       return;
     }
-    setIsDragging(true);
-    setDragMoved(false);
-    setHasInteractedWithPosition(true);
-    dragStartRef.current = {
-      mouseX: clientX,
-      mouseY: clientY,
-      posX: position.x,
-      posY: position.y,
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+    isDraggingChat.current = true;
+    setIsDraggingChatUI(true);
+    setHasInteractedChat(true);
+    chatDragStart.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: chatPos.x,
+      origY: chatPos.y,
     };
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    startDrag(e.clientX, e.clientY, e.target as HTMLElement);
+  const handleChatPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingChat.current) return;
+    const deltaX = e.clientX - chatDragStart.current.startX;
+    const deltaY = e.clientY - chatDragStart.current.startY;
+
+    const maxX = Math.max(10, window.innerWidth - 400);
+    const maxY = Math.max(10, window.innerHeight - 500);
+
+    const newX = Math.max(10, Math.min(chatDragStart.current.origX + deltaX, maxX));
+    const newY = Math.max(10, Math.min(chatDragStart.current.origY + deltaY, maxY));
+
+    setChatPos({ x: newX, y: newY });
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    startDrag(touch.clientX, touch.clientY, e.target as HTMLElement);
+  const handleChatPointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingChat.current) return;
+    isDraggingChat.current = false;
+    setIsDraggingChatUI(false);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
   };
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging) return;
-      const deltaX = e.clientX - dragStartRef.current.mouseX;
-      const deltaY = e.clientY - dragStartRef.current.mouseY;
-
-      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
-        setDragMoved(true);
-      }
-
-      const maxX = Math.max(10, window.innerWidth - 380);
-      const maxY = Math.max(10, window.innerHeight - 500);
-
-      const newX = Math.max(10, Math.min(dragStartRef.current.posX + deltaX, maxX));
-      const newY = Math.max(10, Math.min(dragStartRef.current.posY + deltaY, maxY));
-
-      setPosition({ x: newX, y: newY });
-    },
-    [isDragging]
-  );
-
-  const handleTouchMove = useCallback(
-    (e: TouchEvent) => {
-      if (!isDragging) return;
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - dragStartRef.current.mouseX;
-      const deltaY = touch.clientY - dragStartRef.current.mouseY;
-
-      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
-        setDragMoved(true);
-      }
-
-      const maxX = Math.max(10, window.innerWidth - 360);
-      const maxY = Math.max(10, window.innerHeight - 480);
-
-      const newX = Math.max(10, Math.min(dragStartRef.current.posX + deltaX, maxX));
-      const newY = Math.max(10, Math.min(dragStartRef.current.posY + deltaY, maxY));
-
-      setPosition({ x: newX, y: newY });
-    },
-    [isDragging]
-  );
-
-  const handleEndDrag = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleEndDrag);
-      window.addEventListener("touchmove", handleTouchMove, { passive: false });
-      window.addEventListener("touchend", handleEndDrag);
-    }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleEndDrag);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleEndDrag);
-    };
-  }, [isDragging, handleMouseMove, handleTouchMove, handleEndDrag]);
-
-  const snapToCorner = () => {
+  const snapChatToCorner = () => {
     if (typeof window !== "undefined") {
-      const defaultRight = Math.max(16, window.innerWidth - 430);
-      const defaultBottom = Math.max(16, window.innerHeight - 580);
-      setPosition({ x: defaultRight, y: defaultBottom });
+      const defaultChatX = Math.max(16, window.innerWidth - 425);
+      const defaultChatY = Math.max(16, window.innerHeight - 580);
+      setChatPos({ x: defaultChatX, y: defaultChatY });
     }
   };
 
-  // ─── AUDIO VOICE SYNTHESIS ────────────────────────────────────────────────
+  // ─── AUDIO SPEECH NARRATION ───────────────────────────────────────────────
   const handleSpeak = (msgId: string, text: string, analogy?: string) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (isSpeakingId === msgId) {
@@ -328,29 +334,27 @@ export function MovableAICoach({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // ─── BEGINNER AI REASONING ENGINE ─────────────────────────────────────────
+  // ─── AI REASONING ENGINE (GHANAIAN ANALOGIES & STEP GUIDANCE) ─────────────
   const generateBotResponse = (userQuery: string): { text: string; analogy?: string; hintSteps?: string[] } => {
     const q = userQuery.toLowerCase().trim();
 
-    // 1. Fear of breaking the computer
     if (q.includes("break") || q.includes("mistake") || q.includes("damage") || q.includes("scared") || q.includes("afraid") || q.includes("wrong")) {
       return {
-        text: "You can NEVER permanently break your computer by clicking buttons, typing words, or making a code mistake here! If code doesn't work, we simply press Backspace or refresh the browser. That is how real software engineers learn every day.",
+        text: "You can NEVER permanently break your computer by clicking buttons, typing words, or making a code mistake here! If code doesn't work, we simply press Backspace or refresh the browser. That is how real engineers learn every day.",
         analogy: "Like writing with a pencil on paper. If you write the wrong letter, you just use the eraser and try again. The paper doesn't catch fire!",
         hintSteps: [
           "If you make a typo, press the 'Backspace' key to erase it.",
-          "If a page gets stuck, press the Refresh button in your browser.",
+          "If a page gets stuck, press the circle arrow button (Refresh) in your browser.",
           "Every mistake teaches your brain something new!"
         ],
       };
     }
 
-    // 2. Analogy request
     if (q.includes("analogy") || q.includes("ghana") || q.includes("simple") || q.includes("explain") || q.includes("like i'm 10") || q.includes("relatable")) {
-      const topicContext = currentTopicTitle || currentLessonTitle || "Web Technology";
+      const topicContext = currentTopicTitle || currentLessonTitle || "Digital Skills";
       return {
         text: `Here is the simplest way to understand "${topicContext}": In the digital world, every complex screen is just built from 3 simple ideas: the structure (like cement blocks), the look (like wall paint), and the actions (like light switches).`,
-        analogy: "Think of preparing a delicious pot of Jollof Rice in Ghana: HTML is the rice and tomatoes in the pot; CSS is the aroma, plating, and garnish; JavaScript is the stove flame turning on and off when you turn the knob.",
+        analogy: "Think of preparing Jollof Rice in Ghana: HTML is the rice and tomatoes in the pot; CSS is the aroma, plating, and garnish; JavaScript is the stove flame turning on and off when you turn the knob.",
         hintSteps: [
           "Don't worry about memorizing big definitions right away.",
           "Focus on what the button or tag actually DOES on screen.",
@@ -359,7 +363,6 @@ export function MovableAICoach({
       };
     }
 
-    // 3. Lab exercise help / hints
     if (q.includes("lab") || q.includes("code") || q.includes("solve") || q.includes("exercise") || q.includes("stuck") || q.includes("challenge") || q.includes("how do i")) {
       return {
         text: "To solve this hands-on exercise with zero stress, follow these 3 calm steps:",
@@ -372,7 +375,6 @@ export function MovableAICoach({
       };
     }
 
-    // 4. Tech jobs / earning in Ghana
     if (q.includes("job") || q.includes("career") || q.includes("money") || q.includes("income") || q.includes("earn") || q.includes("salary") || q.includes("work")) {
       return {
         text: "Across Ghana (from Accra and Tema to Kumasi and Takoradi), businesses, schools, hospitals, and churches are moving records online. They urgently need young people who know how to protect computers, build clean websites, and manage spreadsheets.",
@@ -385,7 +387,6 @@ export function MovableAICoach({
       };
     }
 
-    // 5. Digital vocabulary terms
     if (q.includes("browser") || q.includes("url") || q.includes("html") || q.includes("css") || q.includes("cloud") || q.includes("phishing")) {
       return {
         text: "Great question! We also have a 1-click 'Jargon Buster' dictionary in your top bar that translates these terms into plain language anytime.",
@@ -396,7 +397,6 @@ export function MovableAICoach({
       };
     }
 
-    // 6. Default encouraging coach response
     return {
       text: `That's a thoughtful question! When learning ${currentTopicTitle || "digital skills"}, the secret is to be patient with yourself. You are building digital intuition step by step.`,
       analogy: "Learning technology is like learning to ride a bicycle. The first time your hands feel shaky, but after a few practices, your fingers remember naturally.",
@@ -445,7 +445,7 @@ export function MovableAICoach({
     }
   };
 
-  // Quick prompt chips with flat Lucide icons
+  // Quick prompt chips with Flat Lucide Icons
   const quickPrompts = [
     { label: "Simple Analogy", icon: Lightbulb, query: "Give me an everyday Ghanaian analogy for this topic" },
     { label: "Lab Challenge Hint", icon: Terminal, query: "How do I solve the lab exercise step by step?" },
@@ -455,90 +455,77 @@ export function MovableAICoach({
 
   return (
     <>
-      {/* ─── MOVABLE FLOATING LAUNCHER PILL ──────────────────────────────── */}
+      {/* ─── 1. COMPACT CIRCULAR LAUNCHER (FREELY MOVABLE ANYWHERE) ───────── */}
       {!isOpen && (
         <div
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
+          onPointerDown={handleLauncherPointerDown}
+          onPointerMove={handleLauncherPointerMove}
+          onPointerUp={handleLauncherPointerUp}
+          onPointerCancel={handleLauncherPointerUp}
           style={{
             position: "fixed",
-            left: hasInteractedWithPosition ? `${position.x}px` : undefined,
-            top: hasInteractedWithPosition ? `${position.y}px` : undefined,
-            right: hasInteractedWithPosition ? undefined : "20px",
-            bottom: hasInteractedWithPosition ? undefined : "20px",
+            left: `${launcherPos.x}px`,
+            top: `${launcherPos.y}px`,
             zIndex: 9999,
+            touchAction: "none",
           }}
-          className={`animate-in fade-in zoom-in-95 duration-200 select-none ${
-            isDragging ? "cursor-grabbing scale-105" : "cursor-grab"
+          className={`select-none transition-shadow ${
+            isDraggingLauncherUI ? "cursor-grabbing scale-105" : "cursor-grab"
           }`}
+          title="DIGIHUB AI • Drag to move freely, tap to open"
         >
-          <div
-            onClick={() => {
-              if (!dragMoved) {
-                setIsOpen(true);
-                setIsMinimized(false);
-              }
-            }}
-            className="group relative flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/95 hover:bg-white text-neutral-900 shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 border-2 border-cyan-400/80 backdrop-blur-md active:scale-95"
-            title="DIGIHUB AI Study Coach • Click to open or drag to move anywhere"
-          >
-            {/* Robot Mascot with Alive Floating Bob */}
-            <div className="relative bot-float">
-              <DigiHubBotAvatar size={44} />
+          {/* Circular Button containing ONLY the Mascot Icon & DIGIHUB AI name */}
+          <div className="relative group w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] rounded-full bg-white/95 hover:bg-white border-2 border-cyan-400/90 shadow-xl hover:shadow-cyan-500/35 flex flex-col items-center justify-center p-1 backdrop-blur-md active:scale-95 transition-transform duration-150">
+            {/* Ambient Cyan Glow Aura */}
+            <div className="absolute -inset-1 rounded-full bg-cyan-400/25 blur-xs group-hover:bg-cyan-400/40 transition pointer-events-none" />
+
+            {/* Robot Mascot Head with Breathing Float */}
+            <div className="relative bot-float -mt-1 shrink-0">
+              <DigiHubBotAvatar size={38} />
             </div>
 
-            {/* Prominent "DIGIHUB AI" title written beside it */}
-            <div className="text-left pr-1.5 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-black tracking-tight text-neutral-950 font-digihub">
-                  DIGIHUB AI
-                </span>
-                <span className="text-[10px] uppercase font-extrabold tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-[#0056D2] to-cyan-500 text-white shadow-xs">
-                  24/7 Coach
-                </span>
-              </div>
-              <p className="text-[11px] text-neutral-500 font-medium truncate max-w-[150px] sm:max-w-[200px]">
-                Ask anything • Drag to move
-              </p>
-            </div>
+            {/* DIGIHUB AI Name in Circle */}
+            <span className="relative text-[9px] sm:text-[9.5px] font-black tracking-tight text-neutral-900 leading-none mt-0.5 font-digihub group-hover:text-[#0056D2] transition-colors shrink-0">
+              DIGIHUB AI
+            </span>
 
-            {/* Flat drag indicator icon */}
-            <div className="pl-1 text-neutral-400 group-hover:text-cyan-600 transition-colors">
-              <GripHorizontal className="w-4 h-4" />
-            </div>
+            {/* Online Status Green Indicator */}
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white shadow-xs animate-pulse" />
           </div>
         </div>
       )}
 
-      {/* ─── MOVABLE & EXPANDED CHAT WINDOW ──────────────────────────────── */}
+      {/* ─── 2. EXPANDED MOVABLE CHAT WINDOW ──────────────────────────────── */}
       {isOpen && (
         <div
-          ref={chatWindowRef}
           style={{
             position: "fixed",
-            left: `${position.x}px`,
-            top: `${position.y}px`,
+            left: `${chatPos.x}px`,
+            top: `${chatPos.y}px`,
             zIndex: 9999,
           }}
           className={`w-[calc(100vw-24px)] sm:w-[410px] ${
             isMinimized ? "h-auto" : "h-[560px] max-h-[86vh]"
-          } bg-white rounded-3xl shadow-2xl border-2 border-neutral-200/90 flex flex-col overflow-hidden transition-all duration-150 select-none animate-in zoom-in-95 ${
-            isDragging ? "shadow-cyan-500/30 ring-2 ring-cyan-500 cursor-grabbing" : "shadow-2xl"
+          } bg-white rounded-3xl shadow-2xl border-2 border-neutral-200/90 flex flex-col overflow-hidden select-none animate-in zoom-in-95 duration-150 ${
+            isDraggingChatUI ? "shadow-cyan-500/30 ring-2 ring-cyan-500 cursor-grabbing" : "shadow-2xl"
           }`}
         >
-          {/* DRAGGABLE WINDOW HEADER */}
+          {/* DRAGGABLE HEADER */}
           <div
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
+            onPointerDown={handleChatPointerDown}
+            onPointerMove={handleChatPointerMove}
+            onPointerUp={handleChatPointerUp}
+            onPointerCancel={handleChatPointerUp}
+            style={{ touchAction: "none" }}
             className={`px-4 py-3 bg-gradient-to-r from-[#0056D2] via-blue-600 to-cyan-600 text-white flex items-center justify-between gap-2.5 cursor-grab active:cursor-grabbing border-b border-white/10 ${
-              isDragging ? "cursor-grabbing" : ""
+              isDraggingChatUI ? "cursor-grabbing" : ""
             }`}
-            title="Click and drag anywhere on this header to reposition DIGIHUB AI"
+            title="Drag anywhere on this header to move DIGIHUB AI window freely"
           >
-            {/* Left: 3D Robot Mascot + "DIGIHUB AI" Written Beside It */}
+            {/* Header Mascot + DIGIHUB AI Name */}
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative bot-float">
-                <DigiHubBotAvatar size={36} isSpeaking={isSpeakingId !== null} isThinking={isTyping} />
+                <DigiHubBotAvatar size={34} isSpeaking={isSpeakingId !== null} isThinking={isTyping} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -554,20 +541,18 @@ export function MovableAICoach({
               </div>
             </div>
 
-            {/* Flat Window Controls from Lucide */}
+            {/* Flat Controls from Lucide Icons */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Flat Snap / Reset Button */}
               <button
                 type="button"
-                onClick={snapToCorner}
+                onClick={snapChatToCorner}
                 className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition text-xs"
-                title="Reset position to bottom-right"
+                title="Reset position to corner"
                 aria-label="Reset position"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
 
-              {/* Flat Minimize / Expand Button */}
               <button
                 type="button"
                 onClick={() => setIsMinimized(!isMinimized)}
@@ -578,12 +563,11 @@ export function MovableAICoach({
                 {isMinimized ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
               </button>
 
-              {/* Flat Close Button */}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 rounded-lg bg-white/10 hover:bg-rose-500 text-white transition text-xs"
-                title="Close chatbot"
+                title="Close chat"
                 aria-label="Close window"
               >
                 <X className="w-4 h-4" />
@@ -594,7 +578,7 @@ export function MovableAICoach({
           {/* CHAT BODY (Hidden when minimized) */}
           {!isMinimized && (
             <>
-              {/* Context banner if on a lesson/topic */}
+              {/* Active Topic Banner */}
               {(currentTopicTitle || currentLessonTitle) && (
                 <div className="px-3.5 py-1.5 bg-blue-50/90 border-b border-blue-100 flex items-center justify-between text-[11px] text-neutral-600">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -618,10 +602,9 @@ export function MovableAICoach({
                       msg.sender === "user" ? "justify-end" : "justify-start"
                     } animate-fade-in-up`}
                   >
-                    {/* Bot Mascot Avatar beside bot bubble */}
                     {msg.sender === "bot" && (
                       <div className="mt-1">
-                        <DigiHubBotAvatar size={28} isSpeaking={isSpeakingId === msg.id} />
+                        <DigiHubBotAvatar size={26} isSpeaking={isSpeakingId === msg.id} />
                       </div>
                     )}
 
@@ -661,7 +644,6 @@ export function MovableAICoach({
                       {msg.sender === "bot" && (
                         <div className="pt-1.5 flex items-center justify-between border-t border-neutral-100 text-[10px]">
                           <div className="flex items-center gap-3">
-                            {/* Flat Voice Narration */}
                             <button
                               type="button"
                               onClick={() => handleSpeak(msg.id, msg.text, msg.analogy)}
@@ -684,7 +666,6 @@ export function MovableAICoach({
                               )}
                             </button>
 
-                            {/* Flat Copy Button */}
                             <button
                               type="button"
                               onClick={() => handleCopy(msg.id, msg.text)}
@@ -713,7 +694,7 @@ export function MovableAICoach({
                 {/* Animated Typing Indicator */}
                 {isTyping && (
                   <div className="flex items-center gap-2.5 text-neutral-500 text-xs bg-white px-3.5 py-2.5 rounded-2xl border border-neutral-200/90 shadow-xs w-max animate-pulse">
-                    <DigiHubBotAvatar size={24} isThinking={true} />
+                    <DigiHubBotAvatar size={22} isThinking={true} />
                     <span className="font-medium">DIGIHUB AI is thinking...</span>
                   </div>
                 )}
@@ -739,7 +720,7 @@ export function MovableAICoach({
                 })}
               </div>
 
-              {/* Flat Chat Input Bar */}
+              {/* Chat Input Bar */}
               <div className="p-3 bg-white border-t border-neutral-200 flex items-center gap-2">
                 <div className="relative flex-1">
                   <input
@@ -747,7 +728,7 @@ export function MovableAICoach({
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask DIGIHUB AI anything (e.g., 'What is a URL?')..."
+                    placeholder="Ask DIGIHUB AI anything (e.g. 'What is a URL?')..."
                     className="w-full pl-3.5 pr-8 py-2.5 rounded-xl border border-neutral-200 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/15 text-xs text-neutral-900 outline-none transition"
                   />
                   <CornerDownLeft className="w-3.5 h-3.5 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
