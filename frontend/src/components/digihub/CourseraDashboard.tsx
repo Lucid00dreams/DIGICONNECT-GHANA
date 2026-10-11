@@ -239,8 +239,8 @@ export function CourseraDashboard({
                   : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Explore Curricula</span>
+              <Compass className="w-3.5 h-3.5" />
+              <span>Explore Courses</span>
             </button>
 
             <button
@@ -310,7 +310,7 @@ export function CourseraDashboard({
               {/* User Dropdown Menu */}
               {isUserMenuOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2.5 z-50 animate-scale-in"
                   onMouseLeave={() => setIsUserMenuOpen(false)}
                 >
                   <div className="px-3 py-2 border-b border-neutral-100">
@@ -333,8 +333,8 @@ export function CourseraDashboard({
                       }}
                       className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
                     >
-                      <Layers className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Browse Curricula</span>
+                      <Compass className="w-3.5 h-3.5 text-[#0056D2]" />
+                      <span>Explore Courses</span>
                     </button>
 
                     <button
@@ -410,9 +410,9 @@ export function CourseraDashboard({
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
-          <div className="space-y-8">
+          <div className="space-y-8 tab-content-enter" key="learning">
             {/* Greeting & Active Course Hero */}
-            <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
+            <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-5 animate-fade-in-up">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <span className="text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
@@ -435,7 +435,7 @@ export function CourseraDashboard({
                 </div>
                 <div className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden">
                   <div
-                    className="h-full bg-[#0056D2] rounded-full transition-all duration-500"
+                    className="h-full bg-[#0056D2] rounded-full progress-animated progress-shimmer"
                     style={{ width: `${Math.max(primaryProgress.percentage, 15)}%` }}
                   />
                 </div>
@@ -443,7 +443,7 @@ export function CourseraDashboard({
 
               {/* Next Lesson Action Banner */}
               {nextLesson && (
-                <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0056D2] uppercase tracking-wide">
                       <Play className="w-3.5 h-3.5 fill-[#0056D2]" />
@@ -486,7 +486,8 @@ export function CourseraDashboard({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <Link
                   href="/digihub/lesson/coding-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs transition text-left flex items-center gap-2.5 group"
+                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
+                  style={{ animationDelay: '50ms' }}
                 >
                   <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Code2 className="w-4 h-4" />
@@ -499,7 +500,8 @@ export function CourseraDashboard({
 
                 <Link
                   href="/digihub/lesson/cyber-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs transition text-left flex items-center gap-2.5 group"
+                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
+                  style={{ animationDelay: '100ms' }}
                 >
                   <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
                     <Shield className="w-4 h-4" />
@@ -512,7 +514,8 @@ export function CourseraDashboard({
 
                 <Link
                   href="/digihub/lesson/py-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs transition text-left flex items-center gap-2.5 group"
+                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
+                  style={{ animationDelay: '150ms' }}
                 >
                   <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <Terminal className="w-4 h-4" />
@@ -526,7 +529,8 @@ export function CourseraDashboard({
                 <button
                   type="button"
                   onClick={() => setActiveSection("diplomas")}
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs transition text-left flex items-center gap-2.5 group"
+                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
+                  style={{ animationDelay: '200ms' }}
                 >
                   <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                     <Award className="w-4 h-4" />
@@ -579,7 +583,8 @@ export function CourseraDashboard({
                     return (
                       <div
                         key={course.id}
-                        className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 shadow-2xs transition space-y-3"
+                        className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 shadow-2xs card-lift space-y-3 animate-fade-in-up"
+                        style={{ animationDelay: `${Math.min(inProgressCourses.indexOf(course) * 80, 300)}ms` }}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                           <div>
@@ -597,7 +602,7 @@ export function CourseraDashboard({
 
                         <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
                           <div
-                            className="h-full bg-[#0056D2] rounded-full"
+                            className="h-full bg-[#0056D2] rounded-full progress-animated"
                             style={{ width: `${Math.max(cp.percentage, 10)}%` }}
                           />
                         </div>
@@ -639,8 +644,8 @@ export function CourseraDashboard({
                       onClick={() => setActiveSection("catalog")}
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
                     >
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Explore 12 Curricula</span>
+                      <Compass className="w-3.5 h-3.5" />
+                      <span>Explore Courses</span>
                     </button>
                   </div>
                 </div>
@@ -686,11 +691,19 @@ export function CourseraDashboard({
 
         {/* ─── SECTION 2: DEDICATED COURSE CATALOG ───────────────────────── */}
         {activeSection === "catalog" && (
-          <div className="space-y-6">
+          <div className="space-y-6 tab-content-enter" key="catalog">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection("learning")}
+                  className="text-xs font-bold text-[#0056D2] hover:underline flex items-center gap-1 mb-2 group"
+                >
+                  <span className="group-hover:-translate-x-0.5 transition">←</span>
+                  <span>Back to My Learning</span>
+                </button>
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                  DIGIHub Curricula Catalog
+                  Explore All Courses
                 </h2>
                 <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-xl font-normal">
                   12 structured career tracks. Instant enrollment with 100% tuition-free access.
@@ -747,7 +760,8 @@ export function CourseraDashboard({
                 return (
                   <div
                     key={course.id}
-                    className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md transition flex flex-col justify-between overflow-hidden group"
+                    className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md card-lift flex flex-col justify-between overflow-hidden group animate-fade-in-up"
+                    style={{ animationDelay: `${Math.min(filteredCatalogCourses.indexOf(course) * 50, 350)}ms` }}
                   >
                     {/* Visual Banner */}
                     <div className="relative w-full h-32 overflow-hidden">
@@ -847,7 +861,7 @@ export function CourseraDashboard({
 
         {/* ─── SECTION 3: DEDICATED BROWSER LABS ─────────────────────────── */}
         {activeSection === "labs" && (
-          <div className="space-y-6">
+          <div className="space-y-6 tab-content-enter" key="labs">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
                 Interactive Browser Workspaces
@@ -859,7 +873,7 @@ export function CourseraDashboard({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Lab 1 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '50ms' }}>
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0056D2] flex items-center justify-center">
                     <Code2 className="w-5 h-5" />
@@ -884,7 +898,7 @@ export function CourseraDashboard({
               </div>
 
               {/* Lab 2 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '120ms' }}>
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
                     <Shield className="w-5 h-5" />
@@ -909,7 +923,7 @@ export function CourseraDashboard({
               </div>
 
               {/* Lab 3 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '190ms' }}>
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <Terminal className="w-5 h-5" />
@@ -934,7 +948,7 @@ export function CourseraDashboard({
               </div>
 
               {/* Lab 4 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '260ms' }}>
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
                     <Laptop className="w-5 h-5" />
@@ -963,7 +977,7 @@ export function CourseraDashboard({
 
         {/* ─── SECTION 4: DEDICATED DIPLOMAS & CERTIFICATES ─────────────── */}
         {activeSection === "diplomas" && (
-          <div className="space-y-6">
+          <div className="space-y-6 tab-content-enter" key="diplomas">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
@@ -977,7 +991,7 @@ export function CourseraDashboard({
               <button
                 type="button"
                 onClick={() => setIsEditingName(true)}
-                className="self-start sm:self-auto px-3.5 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition flex items-center gap-1.5"
+                className="self-start sm:self-auto px-3.5 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition flex items-center gap-1.5 active:scale-95"
               >
                 <Edit2 className="w-3.5 h-3.5 text-[#0056D2]" />
                 <span>Verify Legal Name</span>
@@ -986,7 +1000,7 @@ export function CourseraDashboard({
 
             {/* Diplomas List */}
             {certificates.length === 0 ? (
-              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-neutral-200 space-y-3">
+              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-neutral-200 space-y-3 animate-fade-in-up">
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
                   <Award className="w-6 h-6" />
                 </div>
@@ -1008,10 +1022,11 @@ export function CourseraDashboard({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {certificates.map((cert) => (
+                {certificates.map((cert, certIdx) => (
                   <div
                     key={cert.id}
-                    className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4"
+                    className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 card-lift animate-fade-in-up"
+                    style={{ animationDelay: `${certIdx * 80}ms` }}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -1051,7 +1066,7 @@ export function CourseraDashboard({
 
         {/* ─── SECTION 5: DEDICATED MENTORSHIP ───────────────────────────── */}
         {activeSection === "mentorship" && (
-          <div className="space-y-6">
+          <div className="space-y-6 tab-content-enter" key="mentorship">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
                 1-on-1 Faculty Mentorship
@@ -1063,10 +1078,11 @@ export function CourseraDashboard({
 
             {/* Mentors Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {mentors.map((mentor) => (
+              {mentors.map((mentor, mentorIdx) => (
                 <div
                   key={mentor.id}
-                  className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs flex flex-col justify-between space-y-4 card-lift animate-fade-in-up"
+                  style={{ animationDelay: `${mentorIdx * 70}ms` }}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
@@ -1104,7 +1120,7 @@ export function CourseraDashboard({
                   <button
                     type="button"
                     onClick={() => onOpenMentorBooking && onOpenMentorBooking(mentor)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition flex items-center justify-center gap-1.5 active:scale-98"
                   >
                     <Calendar className="w-3.5 h-3.5" />
                     <span>Schedule 1-on-1 Session</span>
@@ -1172,12 +1188,12 @@ export function CourseraDashboard({
         <button
           type="button"
           onClick={() => setActiveSection("catalog")}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 transition text-[10px] font-semibold active:scale-95 ${
+          className={`flex flex-col items-center gap-1 py-1 px-2 transition text-[10px] font-semibold active:scale-95 ${
             activeSection === "catalog" ? "text-[#0056D2]" : "text-neutral-600 hover:text-neutral-900"
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Catalog</span>
+          <Compass className="w-4 h-4" />
+          <span className="text-center leading-tight">Explore Courses</span>
         </button>
 
         <button
@@ -1290,6 +1306,21 @@ export function CourseraDashboard({
               <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block px-1">
                 Quick Shortcuts
               </span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSection("catalog");
+                  setIsQuickDashboardOpen(false);
+                }}
+                className="w-full text-left p-3 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:bg-blue-50/30 transition flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Compass className="w-4 h-4 text-[#0056D2]" />
+                  <span className="font-semibold text-neutral-800">Explore All 12 Courses</span>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />
+              </button>
 
               <button
                 type="button"

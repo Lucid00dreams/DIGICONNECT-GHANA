@@ -279,18 +279,19 @@ export function OnboardingWizard({ currentUser, onComplete, onExit }: Onboarding
 
             {/* 4 Fluid Wave Goal Cards (Screenshot 3) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-10">
-              {GOALS.map((goal) => {
+              {GOALS.map((goal, goalIdx) => {
                 const isSelected = selectedGoal === goal.title;
                 return (
                   <button
                     key={goal.id}
                     type="button"
                     onClick={() => setSelectedGoal(goal.title)}
-                    className={`group relative text-left rounded-2xl border-2 transition overflow-hidden flex flex-col bg-white shadow-xs hover:shadow-md ${
+                    className={`group relative text-left rounded-2xl border-2 transition overflow-hidden flex flex-col bg-white shadow-xs hover:shadow-md card-lift active:scale-98 animate-fade-in-up ${
                       isSelected
                         ? "border-[#0056D2] ring-2 ring-[#0056D2]/20"
                         : "border-neutral-200 hover:border-neutral-300"
                     }`}
+                    style={{ animationDelay: `${goalIdx * 80}ms` }}
                   >
                     {/* Blue wave graphic banner */}
                     <div className="relative h-28 sm:h-32 bg-[#0056D2] flex items-center justify-center overflow-hidden">
@@ -367,18 +368,19 @@ export function OnboardingWizard({ currentUser, onComplete, onExit }: Onboarding
 
             {/* Role Cards Grid (3 Columns) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
-              {displayedRoles.map((role) => {
+              {displayedRoles.map((role, roleIdx) => {
                 const isSelected = selectedRole === role.title;
                 return (
                   <button
                     key={role.id}
                     type="button"
                     onClick={() => setSelectedRole(role.title)}
-                    className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition text-left ${
+                    className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition text-left card-lift active:scale-98 animate-fade-in-up ${
                       isSelected
                         ? "border-[#0056D2] bg-blue-50/50 ring-1 ring-[#0056D2]"
                         : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"
                     }`}
+                    style={{ animationDelay: `${Math.min(roleIdx * 40, 250)}ms` }}
                   >
                     <div className="flex items-center gap-3 pr-2 min-w-0">
                       <div
@@ -474,18 +476,19 @@ export function OnboardingWizard({ currentUser, onComplete, onExit }: Onboarding
 
             {/* Skills Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
-              {filteredSkills.map((skill) => {
+              {filteredSkills.map((skill, skillIdx) => {
                 const isSelected = selectedSkills.includes(skill.title);
                 return (
                   <button
                     key={skill.id}
                     type="button"
                     onClick={() => toggleSkill(skill.title)}
-                    className={`flex items-center justify-between p-4 rounded-xl border transition text-left ${
+                    className={`flex items-center justify-between p-4 rounded-xl border transition text-left card-lift active:scale-98 animate-fade-in-up ${
                       isSelected
                         ? "border-[#0056D2] bg-blue-50/50 ring-1 ring-[#0056D2]"
                         : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"
                     }`}
+                    style={{ animationDelay: `${Math.min(skillIdx * 40, 250)}ms` }}
                   >
                     <span
                       className={`text-xs sm:text-sm font-semibold pr-2 leading-snug ${
@@ -554,18 +557,19 @@ export function OnboardingWizard({ currentUser, onComplete, onExit }: Onboarding
                 "Bachelor's degree (e.g., BA, AB, BS)",
                 "Master's degree (e.g., MA, MS, MEng, MEd, MSW, MBA)",
                 "Doctorate or professional degree (e.g., PhD, MD, JD)",
-              ].map((level) => {
+              ].map((level, lvlIdx) => {
                 const isSelected = selectedEducation === level;
                 return (
                   <button
                     key={level}
                     type="button"
                     onClick={() => setSelectedEducation(level)}
-                    className={`w-full py-3.5 px-6 rounded-full border text-center text-xs sm:text-sm font-semibold transition shadow-2xs ${
+                    className={`w-full py-3.5 px-6 rounded-full border text-center text-xs sm:text-sm font-semibold transition shadow-2xs hover:scale-[1.01] active:scale-98 animate-fade-in-up ${
                       isSelected
                         ? "border-[#0056D2] bg-blue-50/70 text-[#0056D2] ring-2 ring-[#0056D2]/20 font-bold"
                         : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-400 hover:bg-neutral-50/50"
                     }`}
+                    style={{ animationDelay: `${lvlIdx * 50}ms` }}
                   >
                     <span>{level}</span>
                   </button>

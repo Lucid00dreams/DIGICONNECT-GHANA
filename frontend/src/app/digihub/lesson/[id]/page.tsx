@@ -433,7 +433,7 @@ export default function DIGIHubLessonPage() {
 
               {/* Active Topic Content */}
               {currentTopic ? (
-                <div className="space-y-4">
+                <div key={`topic-${activeTopicIndex}`} className="space-y-4 topic-enter">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-brand-blue tracking-wider">
                       Topic 0{currentTopic.topicNumber}
@@ -590,32 +590,35 @@ export default function DIGIHubLessonPage() {
               {/* 3D Flip Flashcard */}
               <div
                 onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className="cursor-pointer min-h-[220px] rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between select-none shadow-xs text-center"
-                style={{
-                  backgroundColor: isCardFlipped ? "#0f172a" : "#f8fafc",
-                  color: isCardFlipped ? "#f8fafc" : "#0f172a",
-                  borderColor: isCardFlipped ? "#38bdf8" : "#cbd5e1",
-                }}
+                className="cursor-pointer min-h-[220px] h-60 perspective-1000 select-none group"
               >
-                <div className="text-[11px] uppercase font-bold tracking-wider opacity-60">
-                  {isCardFlipped ? "✓ Answer & Explanation" : "? Question / Concept"}
-                </div>
-
-                <div className="py-4 text-sm sm:text-base font-bold leading-relaxed">
-                  {isCardFlipped
-                    ? flashcards[activeCardIndex]?.back
-                    : flashcards[activeCardIndex]?.front}
-                </div>
-
-                {isCardFlipped && flashcards[activeCardIndex]?.analogy && (
-                  <div className="text-xs text-amber-300 italic">
-                    💡 Analogy: {flashcards[activeCardIndex].analogy}
+                <div
+                  className={`w-full h-full flashcard-inner rounded-3xl p-6 border-2 shadow-xs flex flex-col justify-between text-center transition-transform duration-500 ${
+                    isCardFlipped
+                      ? "rotate-y-180 bg-neutral-900 text-white border-sky-400"
+                      : "bg-neutral-50/90 text-neutral-900 border-neutral-200 hover:border-brand-blue/50"
+                  }`}
+                >
+                  <div className="text-[11px] uppercase font-bold tracking-wider opacity-60">
+                    {isCardFlipped ? "✓ Answer & Explanation" : "? Question / Concept"}
                   </div>
-                )}
 
-                <div className="text-[11px] opacity-50 flex items-center justify-center gap-1">
-                  <RotateCw className="w-3 h-3" />
-                  <span>Click to flip card</span>
+                  <div className="py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-32">
+                    {isCardFlipped
+                      ? flashcards[activeCardIndex]?.back
+                      : flashcards[activeCardIndex]?.front}
+                  </div>
+
+                  {isCardFlipped && flashcards[activeCardIndex]?.analogy && (
+                    <div className="text-xs text-amber-300 italic">
+                      💡 Analogy: {flashcards[activeCardIndex].analogy}
+                    </div>
+                  )}
+
+                  <div className="text-[11px] opacity-60 flex items-center justify-center gap-1.5 group-hover:opacity-100 transition">
+                    <RotateCw className="w-3 h-3" />
+                    <span>Click to flip card</span>
+                  </div>
                 </div>
               </div>
 
@@ -726,10 +729,10 @@ export default function DIGIHubLessonPage() {
       {isCurriculumDrawerOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div
-            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity drawer-overlay"
             onClick={() => setIsCurriculumDrawerOpen(false)}
           />
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4">
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4 drawer-panel">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
               <div>
                 <h3 className="font-bold text-base text-neutral-900">Course Curriculum</h3>
@@ -800,10 +803,10 @@ export default function DIGIHubLessonPage() {
       {isCoachDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
-            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs transition-opacity drawer-overlay"
             onClick={() => setIsCoachDrawerOpen(false)}
           />
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4">
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 z-10 space-y-4 drawer-panel-right">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
