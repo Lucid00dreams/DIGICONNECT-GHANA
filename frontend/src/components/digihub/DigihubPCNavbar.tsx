@@ -544,6 +544,17 @@ export function DigihubPCNavbar({
                     <button
                       type="button"
                       onClick={() => {
+                        setStreakModalOpen(true);
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
+                    >
+                      <Flame className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Study Streak (4 Days)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         handleExportData();
                         setIsUserMenuOpen(false);
                       }}
@@ -572,131 +583,6 @@ export function DigihubPCNavbar({
           </div>
         </div>
       </header>
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. LEFT CURVED DOCK PANEL (Desktop PC View)
-          Faithful reproduction of Image 1 Left Curved Sidebar:
-          - Sits on the left side with a rich periwinkle/indigo accent shape
-          - Top Squircle Tile: Active icon in a crisp white rounded-2xl square tile
-          - Vertical stack of icons:
-            1. Dashboard (active tile)
-            2. Profile / Student ID
-            3. Clock / Streak with tiny green "PRO" badge
-            4. Notifications bell
-            5. Mentorship Calendar
-            6. Jargon Buster with yellow dot indicator
-            7. Interactive Labs
-            8. DIGIHUB AI Chat bubble
-          ───────────────────────────────────────────────────────────── */}
-      <aside
-        aria-label="PC Left Dock"
-        className="hidden lg:flex fixed left-3 top-24 bottom-6 z-30 flex-col items-center justify-between w-16 bg-gradient-to-b from-[#626FE6] to-[#4F46E5] rounded-[28px] py-4 shadow-[0_12px_32px_rgba(79,70,229,0.28)] border border-white/20 select-none"
-      >
-        {/* Top Active Tile (Image 1 Squircle: White rounded-2xl tile for Diplomas & Credentials) */}
-        <div className="flex flex-col items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => onSelectSection("diplomas")}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "diplomas"
-                ? "bg-white text-[#5B67E2] shadow-[0_6px_16px_rgba(0,0,0,0.12)] font-bold"
-                : "bg-white/20 text-white hover:bg-white/30"
-            }`}
-            title="My Diplomas & Verified Credentials"
-          >
-            <Award className="w-5 h-5 stroke-[2.2]" />
-            <span className="sr-only">Diplomas</span>
-            {/* Tooltip */}
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              My Diplomas ({certificates.length})
-            </span>
-          </button>
-
-          {/* Browser Labs Sandbox */}
-          <button
-            type="button"
-            onClick={() => onSelectSection("labs")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "labs"
-                ? "bg-white/30 text-white font-bold"
-                : "text-white/80 hover:text-white hover:bg-white/15"
-            }`}
-            title="Browser Labs & Sandboxes"
-          >
-            <Terminal className="w-4.5 h-4.5 stroke-[2]" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Browser Labs & Code Sandbox
-            </span>
-          </button>
-
-          {/* Mentorship Calendar */}
-          <button
-            type="button"
-            onClick={() => onSelectSection("mentorship")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "mentorship"
-                ? "bg-white/30 text-white font-bold"
-                : "text-white/80 hover:text-white hover:bg-white/15"
-            }`}
-            title="Mentorship Calendar"
-          >
-            <Calendar className="w-4.5 h-4.5 stroke-[2]" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Mentorship Calendar
-            </span>
-          </button>
-
-          {/* Jargon Buster / Notes with Yellow Dot (Image 1 replica) */}
-          <button
-            type="button"
-            onClick={onOpenJargonModal}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 group relative"
-            title="Jargon Buster & Notes"
-          >
-            <Bookmark className="w-4.5 h-4.5 stroke-[2]" />
-            {/* Bright Yellow Dot Indicator */}
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FACC15] ring-1 ring-[#5B67E2]" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Jargon Buster (Glossary)
-            </span>
-          </button>
-
-          {/* Streak / Clock with Green PRO/LMS Badge (Image 1 replica) */}
-          <div className="relative group">
-            <button
-              type="button"
-              onClick={() => setStreakModalOpen(!streakModalOpen)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 relative"
-              title="Study Streak (4 Days Active)"
-            >
-              <Clock className="w-4.5 h-4.5 stroke-[2]" />
-              {/* Neon Green PRO badge */}
-              <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-[#10B981] text-neutral-950 font-black text-[8px] uppercase tracking-tighter shadow-2xs">
-                PRO
-              </span>
-            </button>
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              4-Day Study Streak (PRO)
-            </span>
-          </div>
-        </div>
-
-        {/* Bottom AI Chat Bubble (Triggers Movable AI Coach) */}
-        <div className="flex flex-col items-center">
-          <button
-            type="button"
-            onClick={onOpenCoach}
-            className="w-11 h-11 rounded-2xl bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative shadow-xs"
-            title="Ask DIGIHUB AI Tutor"
-          >
-            <MessageSquare className="w-5 h-5 stroke-[2]" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#5B67E2] animate-pulse" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              DIGIHUB AI Tutor
-            </span>
-          </button>
-        </div>
-      </aside>
 
       {/* Streak Details Modal */}
       {streakModalOpen && (

@@ -239,7 +239,7 @@ export function DigihubDashboard({
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:pl-24 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-8 tab-content-enter" key="learning">
