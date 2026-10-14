@@ -46,6 +46,8 @@ import {
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
 import { MovableAICoach } from "./MovableAICoach";
+import { DigihubPCNavbar } from "./DigihubPCNavbar";
+import { DigihubMobileNavbar } from "./DigihubMobileNavbar";
 import {
   LMSUser,
   Course,
@@ -56,7 +58,7 @@ import {
   getCourseProgress,
 } from "@/lib/lmsStore";
 
-interface CourseraDashboardProps {
+interface DigihubDashboardProps {
   currentUser: LMSUser;
   courses: Course[];
   progress: LearnerProgress;
@@ -93,7 +95,7 @@ function getCourseImage(courseId: string): string {
 
 type DashboardSection = "learning" | "catalog" | "labs" | "diplomas" | "mentorship";
 
-export function CourseraDashboard({
+export function DigihubDashboard({
   currentUser,
   courses,
   progress,
@@ -107,7 +109,7 @@ export function CourseraDashboard({
   onEnrollCourse,
   onRetakeOnboarding,
   onUpdateStudentName,
-}: CourseraDashboardProps) {
+}: DigihubDashboardProps) {
   const [activeSection, setActiveSection] = useState<DashboardSection>("learning");
   const [learningTab, setLearningTab] = useState<"in-progress" | "completed">("in-progress");
   const [catalogFilter, setCatalogFilter] = useState<string>("all");
@@ -194,465 +196,46 @@ export function CourseraDashboard({
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-24 md:pb-8">
-      {/* 1. TOP STUDENT HEADER */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/90 shadow-2xs w-full">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 sm:h-18 flex items-center justify-between gap-3">
-          {/* Left: Brand Logo & Title */}
-          <Link
-            href="/digihub"
-            className="flex items-center gap-2 sm:gap-2.5 shrink-0 group focus:outline-none"
-          >
-            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-white shadow-2xs border border-blue-100 flex items-center justify-center p-0.5 shrink-0">
-              <Image
-                src="/logo.png"
-                alt="DigiConnect Ghana"
-                width={36}
-                height={36}
-                className="w-full h-full object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 leading-none">
-                  DigiConnect
-                </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#0056D2] text-white tracking-wide">
-                  DIGIHub
-                </span>
-              </div>
-              <span className="text-[10px] font-medium text-neutral-500 tracking-wider uppercase hidden sm:block">
-                Learner Portal
-              </span>
-            </div>
-          </Link>
+      {/* 1. PC VIEW NAVBAR (Image 1 top horizontal bar + left docked icon rail) */}
+      <DigihubPCNavbar
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        currentUser={currentUser}
+        courses={courses}
+        certificates={certificates}
+        sessions={sessions}
+        onSignOut={onSignOut}
+        onOpenJargonModal={() => setIsJargonModalOpen(true)}
+        onOpenQuickHub={() => setIsQuickDashboardOpen(true)}
+        onOpenCoach={() => setCoachOpenSignal((prev) => prev + 1)}
+        onOpenCourseModal={onOpenCourseModal}
+        onOpenMentorBooking={() => {
+          if (onOpenMentorBooking) {
+            onOpenMentorBooking(mentors[0] || undefined);
+          }
+        }}
+        onSearchQuery={(q) => {
+          setCatalogSearch(q);
+          setActiveSection('catalog');
+        }}
+      />
 
-          {/* Center (Desktop Navigation Tabs) */}
-          <nav aria-label="Desktop Dashboard Navigation" className="hidden lg:flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setActiveSection("learning")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                activeSection === "learning"
-                  ? "bg-[#0056D2] text-white shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>My Learning</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSection("catalog")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                activeSection === "catalog"
-                  ? "bg-[#0056D2] text-white shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Explore Courses</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSection("labs")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                activeSection === "labs"
-                  ? "bg-[#0056D2] text-white shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
-              }`}
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Browser Labs</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSection("diplomas")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                activeSection === "diplomas"
-                  ? "bg-[#0056D2] text-white shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>Diplomas ({certificates.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSection("mentorship")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                activeSection === "mentorship"
-                  ? "bg-[#0056D2] text-white shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Mentorship</span>
-            </button>
-          </nav>
-
-          {/* Right: Quick Hub, Tools & Profile Controls */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Desktop / Tablet Inline Tools (sm and up) */}
-            <div className="hidden sm:flex items-center gap-2">
-              {/* Jargon Buster Dictionary Button */}
-              <button
-                type="button"
-                onClick={() => setIsJargonModalOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-semibold text-amber-800 transition flex items-center gap-1.5 shadow-2xs"
-                title="Plain English & Ghanaian analogies for tech terms"
-              >
-                <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
-                <span>Jargon Buster</span>
-              </button>
-
-              {/* Quick Hub Drawer Button */}
-              <button
-                type="button"
-                onClick={() => setIsQuickDashboardOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-1.5"
-                aria-label="Open Quick Dashboard Hub"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
-                <span>Quick Hub</span>
-              </button>
-            </div>
-
-            {/* DIGIHUB AI Study Coach Button (Always visible) */}
-            <button
-              type="button"
-              onClick={() => setCoachOpenSignal((prev) => prev + 1)}
-              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 border border-cyan-200 text-xs font-bold text-[#0056D2] transition flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95"
-              title="Ask DIGIHUB AI anything"
-            >
-              <img
-                src="/images/digihub-ai-robot.png"
-                alt="DIGIHUB AI"
-                width={18}
-                height={18}
-                className="w-4.5 h-4.5 object-contain"
-              />
-              <span className="hidden sm:inline">DIGIHUB AI</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
-            </button>
-
-            {/* Mobile Tools Dropdown (< sm) to prevent header crowding */}
-            <div className="relative sm:hidden">
-              <button
-                type="button"
-                onClick={() => setIsQuickToolsOpen(!isQuickToolsOpen)}
-                className="px-2.5 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition flex items-center gap-1"
-                aria-label="Open Quick Tools Menu"
-                aria-expanded={isQuickToolsOpen}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0056D2]" />
-                <ChevronDown className="w-3 h-3 text-neutral-400" />
-              </button>
-
-              {isQuickToolsOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
-                    onClick={() => setIsQuickToolsOpen(false)}
-                  />
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 space-y-1 animate-in zoom-in-95 duration-150">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsQuickToolsOpen(false);
-                        setIsJargonModalOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-amber-50 hover:text-amber-800 text-left transition"
-                    >
-                      <Lightbulb className="w-4 h-4 text-amber-600" />
-                      <span>Jargon Buster Dictionary</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsQuickToolsOpen(false);
-                        setIsQuickDashboardOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-blue-50 hover:text-[#0056D2] text-left transition"
-                    >
-                      <SlidersHorizontal className="w-4 h-4 text-[#0056D2]" />
-                      <span>Quick Hub Drawer</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsQuickToolsOpen(false);
-                        setIsBasicsLabOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-neutral-100 text-left transition"
-                    >
-                      <MousePointer className="w-4 h-4 text-emerald-600" />
-                      <span>Computer Basics Clinic</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* User Profile Avatar with Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0056D2] text-white font-bold text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs hover:ring-2 hover:ring-[#0056D2]/30 transition"
-                aria-label="User profile menu"
-              >
-                {firstName.charAt(0).toUpperCase()}
-              </button>
-
-              {/* User Dropdown Menu */}
-              {isUserMenuOpen && (
-                <div
-                  className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2.5 z-50 animate-scale-in"
-                  onMouseLeave={() => setIsUserMenuOpen(false)}
-                >
-                  <div className="px-3 py-2 border-b border-neutral-100">
-                    <div className="text-xs font-bold text-neutral-900 truncate">
-                      {progress.studentName || currentUser.name}
-                    </div>
-                    <div className="text-[11px] text-neutral-500 truncate">{currentUser.email}</div>
-                    <div className="mt-1 text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span>Free Scholar Account</span>
-                    </div>
-                  </div>
-
-                  <div className="py-1 text-xs space-y-0.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveSection("catalog");
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
-                    >
-                      <Compass className="w-3.5 h-3.5 text-[#0056D2]" />
-                      <span>Explore Courses</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveSection("labs");
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
-                    >
-                      <Terminal className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Interactive Browser Labs</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveSection("mentorship");
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
-                    >
-                      <Users className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Book Faculty Mentor</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEditingName(true);
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Update Certificate Name</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onRetakeOnboarding();
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-neutral-700 font-medium flex items-center gap-2"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Retake Onboarding</span>
-                    </button>
-                  </div>
-
-                  <div className="pt-1 border-t border-neutral-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onSignOut();
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 font-semibold text-xs flex items-center gap-2"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* 1.5 MOBILE SECTION SWITCHER BAR (< lg) */}
-      <div className="lg:hidden bg-white/95 backdrop-blur-sm border-b border-neutral-200/90 px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3 sticky top-16 z-30 shadow-2xs">
-        <div className="relative flex-1 max-w-xs">
-          <button
-            type="button"
-            onClick={() => setIsMobileSectionMenuOpen(!isMobileSectionMenuOpen)}
-            className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-900 text-xs font-bold transition border border-neutral-200"
-            aria-label="Select dashboard section"
-            aria-expanded={isMobileSectionMenuOpen}
-          >
-            <div className="flex items-center gap-2 truncate">
-              {activeSection === "learning" && <BookOpen className="w-4 h-4 text-[#0056D2]" />}
-              {activeSection === "catalog" && <Compass className="w-4 h-4 text-[#0056D2]" />}
-              {activeSection === "labs" && <Terminal className="w-4 h-4 text-[#0056D2]" />}
-              {activeSection === "diplomas" && <Award className="w-4 h-4 text-[#0056D2]" />}
-              {activeSection === "mentorship" && <Users className="w-4 h-4 text-[#0056D2]" />}
-              <span className="truncate">
-                {activeSection === "learning" && "My Learning"}
-                {activeSection === "catalog" && "Explore Courses"}
-                {activeSection === "labs" && "Browser Labs"}
-                {activeSection === "diplomas" && `Diplomas (${certificates.length})`}
-                {activeSection === "mentorship" && "Mentorship"}
-              </span>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
-          </button>
-
-          {/* Section Selector Dropdown Menu */}
-          {isMobileSectionMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
-                onClick={() => setIsMobileSectionMenuOpen(false)}
-              />
-              <div className="absolute left-0 top-full mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 space-y-1 animate-in zoom-in-95 duration-150">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveSection("learning");
-                    setIsMobileSectionMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                    activeSection === "learning"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    <span>My Learning</span>
-                  </div>
-                  {activeSection === "learning" && <Check className="w-3.5 h-3.5" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveSection("catalog");
-                    setIsMobileSectionMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                    activeSection === "catalog"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Compass className="w-4 h-4" />
-                    <span>Explore Courses</span>
-                  </div>
-                  {activeSection === "catalog" && <Check className="w-3.5 h-3.5" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveSection("labs");
-                    setIsMobileSectionMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                    activeSection === "labs"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4" />
-                    <span>Browser Labs</span>
-                  </div>
-                  {activeSection === "labs" && <Check className="w-3.5 h-3.5" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveSection("diplomas");
-                    setIsMobileSectionMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                    activeSection === "diplomas"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    <span>Diplomas ({certificates.length})</span>
-                  </div>
-                  {activeSection === "diplomas" && <Check className="w-3.5 h-3.5" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveSection("mentorship");
-                    setIsMobileSectionMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                    activeSection === "mentorship"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>Mentorship</span>
-                  </div>
-                  {activeSection === "mentorship" && <Check className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Small quick status indicator */}
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-neutral-600 shrink-0">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>{progress.xp} XP</span>
-        </div>
-      </div>
+      {/* 1.5 MOBILE VIEW NAVBAR (Image 2 top compact bar + floating scooped bottom nav) */}
+      <DigihubMobileNavbar
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        currentUser={currentUser}
+        unreadNotificationsCount={2}
+        onOpenNotifications={() => {}}
+        onOpenSearch={() => {
+          setActiveSection("catalog");
+        }}
+        onOpenCoach={() => setCoachOpenSignal((prev) => prev + 1)}
+        onOpenProfile={() => setActiveSection("diplomas")}
+      />
 
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:pl-24 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-8 tab-content-enter" key="learning">
@@ -1799,3 +1382,6 @@ export function CourseraDashboard({
     </div>
   );
 }
+
+export { DigihubDashboard as CourseraDashboard };
+

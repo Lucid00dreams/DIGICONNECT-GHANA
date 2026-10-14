@@ -71,7 +71,7 @@ import { CourseDetailModal } from "@/components/digihub/CourseDetailModal";
 import { CourseraLandingPage } from "@/components/digihub/CourseraLandingPage";
 import { CourseraAuthModal } from "@/components/digihub/CourseraAuthModal";
 import { OnboardingWizard } from "@/components/digihub/OnboardingWizard";
-import { CourseraDashboard } from "@/components/digihub/CourseraDashboard";
+import { DigihubDashboard } from "@/components/digihub/DigihubDashboard";
 import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 
 export default function DIGIHubPage() {
@@ -336,7 +336,7 @@ export default function DIGIHubPage() {
         </div>
       )}
 
-      <CourseraDashboard
+      <DigihubDashboard
         currentUser={currentUser}
         courses={courses}
         progress={progress}

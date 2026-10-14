@@ -1,0 +1,254 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  Home,
+  BookOpen,
+  Terminal,
+  Users,
+  Award,
+  Sparkles,
+  Search,
+  Bell,
+  X,
+  ExternalLink,
+  CheckCircle2,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { LMSUser } from "@/lib/lmsStore";
+
+export type MobileTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
+
+interface DigihubMobileNavbarProps {
+  activeSection: MobileTab;
+  onSelectSection: (section: MobileTab) => void;
+  currentUser?: LMSUser | null;
+  unreadNotificationsCount?: number;
+  onOpenNotifications?: () => void;
+  onOpenSearch?: () => void;
+  onOpenCoach?: () => void;
+  onOpenProfile?: () => void;
+}
+
+interface NavItemConfig {
+  id: MobileTab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const NAV_ITEMS: NavItemConfig[] = [
+  { id: "learning", label: "Home", icon: Home },
+  { id: "catalog", label: "Courses", icon: BookOpen },
+  { id: "labs", label: "Labs", icon: Terminal },
+  { id: "mentorship", label: "Mentors", icon: Users },
+  { id: "diplomas", label: "Profile", icon: Award },
+];
+
+export function DigihubMobileNavbar({
+  activeSection,
+  onSelectSection,
+  currentUser,
+  unreadNotificationsCount = 2,
+  onOpenNotifications,
+  onOpenSearch,
+  onOpenCoach,
+  onOpenProfile,
+}: DigihubMobileNavbarProps) {
+  const activeIndex = Math.max(
+    0,
+    NAV_ITEMS.findIndex((item) => item.id === activeSection)
+  );
+
+  return (
+    <>
+      {/* ─────────────────────────────────────────────────────────────
+          1. COMPACT MOBILE TOP APP BAR (< lg)
+          Clean, distraction-free header replacing the clunky dropdown switcher
+          ───────────────────────────────────────────────────────────── */}
+      <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 px-3.5 py-2.5 shadow-2xs">
+        <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
+          {/* Brand Logo & DIGIHub Badge */}
+          <Link href="/digihub" className="flex items-center gap-2 shrink-0 group focus:outline-none">
+            <div className="relative w-8 h-8 rounded-xl overflow-hidden bg-white shadow-2xs border border-blue-100 flex items-center justify-center p-0.5 shrink-0">
+              <Image
+                src="/logo.png"
+                alt="DigiConnect Ghana"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-bold tracking-tight text-neutral-900 leading-none">
+                DIGIHub
+              </span>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#5B67E2] text-white tracking-wide uppercase">
+                LMS
+              </span>
+            </div>
+          </Link>
+
+          {/* Quick Header Actions */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Quick Search */}
+            {onOpenSearch && (
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+                aria-label="Search courses"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Notification Bell */}
+            {onOpenNotifications && (
+              <button
+                type="button"
+                onClick={onOpenNotifications}
+                className="relative w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+                aria-label="View notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#E02629] ring-2 ring-white" />
+                )}
+              </button>
+            )}
+
+            {/* DIGIHUB AI Tutor Quick Launch */}
+            {onOpenCoach && (
+              <button
+                type="button"
+                onClick={onOpenCoach}
+                className="px-2 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 text-[#5B67E2] text-xs font-bold flex items-center gap-1 shadow-2xs hover:scale-105 active:scale-95 transition"
+                title="Ask DIGIHUB AI"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#5B67E2]" />
+                <span className="text-[11px]">AI Coach</span>
+              </button>
+            )}
+
+            {/* User Avatar */}
+            {currentUser && onOpenProfile && (
+              <button
+                type="button"
+                onClick={onOpenProfile}
+                className="w-7 h-7 rounded-full bg-[#5B67E2] text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-indigo-100 shadow-2xs ml-0.5 hover:opacity-90 transition"
+                aria-label="User account"
+              >
+                {currentUser.name.charAt(0).toUpperCase()}
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. FLOATING SCOOPED BOTTOM NAVIGATION BAR (< lg)
+          Faithful reproduction of Image 2 (Mobile Navigation Bar)
+          Features:
+          - Floating white container with large pill corners
+          - Dynamic sliding white dome notch
+          - Elevated circular badge with vibrant indigo outline & soft fill
+          - Bold active label
+          - iOS home indicator bar
+          ───────────────────────────────────────────────────────────── */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="lg:hidden fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-6 sm:right-6 z-50 max-w-md mx-auto select-none pointer-events-auto"
+      >
+        <div className="relative bg-white/98 backdrop-blur-lg rounded-[28px] sm:rounded-[32px] shadow-[0_12px_40px_rgba(25,20,90,0.18)] border border-neutral-200/80 pt-1.5 pb-2 px-1">
+          {/* Dynamic Sliding Dome Notch + Elevated Circular Active Indicator */}
+          <div
+            className="absolute -top-[20px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            style={{
+              left: `${activeIndex * 20}%`,
+              width: "20%",
+            }}
+          >
+            <div className="relative w-full flex flex-col items-center">
+              {/* White Scooped Dome Contour (seamlessly extends the white bar upward) */}
+              <svg
+                width="84"
+                height="24"
+                viewBox="0 0 84 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="absolute -bottom-[1px] text-white"
+                style={{
+                  filter: "drop-shadow(0 -3px 3px rgba(0, 0, 0, 0.03))",
+                }}
+              >
+                <path
+                  d="M 0 24 C 18 24 22 1 42 1 C 62 1 66 24 84 24 Z"
+                  fill="white"
+                />
+                <path
+                  d="M 0 24 C 18 24 22 1 42 1 C 62 1 66 24 84 24"
+                  stroke="#E2E8F0"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                />
+              </svg>
+
+              {/* Elevated Circular Badge with periwinkle/indigo border & soft fill */}
+              <div className="relative z-10 w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-full bg-[#EEF2FF] border-[2.5px] border-[#5B67E2] shadow-[0_8px_18px_rgba(91,103,226,0.38)] flex items-center justify-center text-[#5B67E2] animate-in zoom-in-75 duration-200">
+                {React.createElement(NAV_ITEMS[activeIndex].icon, {
+                  className: "w-6 h-6 stroke-[2.2] text-[#5B67E2]",
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 5 Navigation Item Slots */}
+          <div className="relative z-10 grid grid-cols-5 items-end">
+            {NAV_ITEMS.map((item, index) => {
+              const isActive = index === activeIndex;
+              const IconComponent = item.icon;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectSection(item.id)}
+                  className="flex flex-col items-center justify-end h-[52px] sm:h-[56px] pb-1 pt-1 group focus:outline-none transition-colors"
+                  aria-label={item.label}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {/* Icon for inactive state (hidden when elevated circle is active in this slot) */}
+                  <div
+                    className={`transition-all duration-200 ${
+                      isActive
+                        ? "opacity-0 scale-75 -translate-y-2 pointer-events-none h-4"
+                        : "opacity-100 scale-100 group-hover:scale-110 text-neutral-400 group-hover:text-neutral-700"
+                    }`}
+                  >
+                    <IconComponent className="w-5 h-5 stroke-[1.8]" />
+                  </div>
+
+                  {/* Label (Bold when active, subtle medium when inactive) */}
+                  <span
+                    className={`text-[11px] tracking-tight leading-tight transition-all duration-200 ${
+                      isActive
+                        ? "font-bold text-neutral-900 mt-1 scale-105"
+                        : "font-medium text-neutral-500 group-hover:text-neutral-800 mt-1"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* iOS Style Home Indicator Bar */}
+          <div className="w-24 sm:w-28 h-1 bg-neutral-300 rounded-full mx-auto mt-1 mb-0.5" />
+        </div>
+      </nav>
+    </>
+  );
+}

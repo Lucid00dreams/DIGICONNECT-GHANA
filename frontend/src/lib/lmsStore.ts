@@ -1026,7 +1026,25 @@ export const INITIAL_SESSIONS: MentorshipSession[] = [
 
 // ─── REGISTERED STUDENTS (PERSISTED IN STORAGE) ─────────────────────────
 
-export const INITIAL_STUDENTS: LMSUser[] = [];
+export const DEFAULT_DEMO_STUDENT: LMSUser = {
+  id: "student-james",
+  name: "James Mensah",
+  email: "james.mensah@digiconnect.org.gh",
+  provider: "email",
+  role: "student",
+  enrolledTracks: ["coding", "cybersecurity"],
+  enrolledCourseIds: ["coding", "cybersecurity", "python"],
+  currentTrackId: "coding",
+  completedLessonIds: ["web-1", "web-2"],
+  certificateClaimed: false,
+  createdAt: "2026-01-10T08:00:00Z",
+  lastActive: "2026-10-14T05:00:00Z",
+  onboardingCompleted: true,
+  targetSkills: ["HTML/CSS", "JavaScript", "Python"],
+  educationLevel: "Tertiary",
+};
+
+export const INITIAL_STUDENTS: LMSUser[] = [DEFAULT_DEMO_STUDENT];
 
 // ─── LOCAL STORAGE KEYS & STORE HELPERS ────────────────────────────────
 
@@ -1060,7 +1078,11 @@ export function getActiveUser(): LMSUser | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(LMS_ACTIVE_USER_KEY);
-    if (!raw) return null;
+    if (!raw) {
+      // Default to demo student James so dashboard is immediately interactive
+      localStorage.setItem(LMS_ACTIVE_USER_KEY, JSON.stringify(DEFAULT_DEMO_STUDENT));
+      return DEFAULT_DEMO_STUDENT;
+    }
     return JSON.parse(raw);
   } catch {
     return null;
