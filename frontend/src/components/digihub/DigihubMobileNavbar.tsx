@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { LMSUser } from "@/lib/lmsStore";
+import { LMSUser, CertificateRecord, MentorshipSession } from "@/lib/lmsStore";
+import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
 export type MobileTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
 
@@ -31,6 +32,12 @@ interface DigihubMobileNavbarProps {
   onOpenCoach?: () => void;
   onOpenProfile?: () => void;
   onOpenMenu?: () => void;
+  onSignOut?: () => void;
+  onOpenJargonModal?: () => void;
+  onOpenQuickHub?: () => void;
+  onOpenStreak?: () => void;
+  onExportData?: () => void;
+  isExporting?: boolean;
 }
 
 interface NavItemConfig {
@@ -57,7 +64,14 @@ export function DigihubMobileNavbar({
   onOpenCoach,
   onOpenProfile,
   onOpenMenu,
+  onSignOut,
+  onOpenJargonModal,
+  onOpenQuickHub,
+  onOpenStreak,
+  onExportData,
+  isExporting = false,
 }: DigihubMobileNavbarProps) {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const activeIndex = Math.max(
     0,
     NAV_ITEMS.findIndex((item) => item.id === activeSection)
@@ -109,16 +123,57 @@ export function DigihubMobileNavbar({
               </button>
             )}
 
-            {/* User Avatar */}
-            {currentUser && onOpenProfile && (
-              <button
-                type="button"
-                onClick={onOpenProfile}
-                className="w-8 h-8 rounded-full bg-[#5B67E2] text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-100 shadow-2xs hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
-                aria-label="User account & profile"
-              >
-                {currentUser.name.charAt(0).toUpperCase()}
-              </button>
+            {/* User Avatar with Profile Dropdown Menu */}
+            {currentUser && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="w-8 h-8 rounded-full bg-[#5B67E2] text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-100 shadow-2xs hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
+                  aria-label="Student account & profile"
+                  aria-expanded={isUserMenuOpen}
+                >
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </button>
+
+                {/* Compact User Menu Card on Mobile View */}
+                {isUserMenuOpen && (
+                  <DigihubUserMenuDropdown
+                    currentUser={currentUser}
+                    onSelectSection={(sec) => {
+                      onSelectSection(sec);
+                      setIsUserMenuOpen(false);
+                    }}
+                    onOpenJargonModal={() => {
+                      if (onOpenJargonModal) onOpenJargonModal();
+                      setIsUserMenuOpen(false);
+                    }}
+                    onOpenCoach={() => {
+                      if (onOpenCoach) onOpenCoach();
+                      setIsUserMenuOpen(false);
+                    }}
+                    onOpenStreak={() => {
+                      if (onOpenStreak) onOpenStreak();
+                      setIsUserMenuOpen(false);
+                    }}
+                    onOpenQuickHub={() => {
+                      if (onOpenQuickHub) onOpenQuickHub();
+                      setIsUserMenuOpen(false);
+                    }}
+                    onExportData={() => {
+                      if (onExportData) onExportData();
+                      setIsUserMenuOpen(false);
+                    }}
+                    isExporting={isExporting}
+                    onSignOut={() => {
+                      if (onSignOut) onSignOut();
+                      setIsUserMenuOpen(false);
+                    }}
+                    onClose={() => setIsUserMenuOpen(false)}
+                    className="absolute right-0 top-full mt-2"
+                  />
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -202,6 +202,27 @@ export function DigihubDashboard({
     }
   };
 
+  const handleExportData = () => {
+    try {
+      const data = {
+        student: currentUser.name,
+        email: currentUser.email,
+        date: new Date().toISOString(),
+        certificates: certificates,
+        sessions: sessions,
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `digiconnect-transcript-${currentUser.id || "student"}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {}
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-36 sm:pb-24 md:pb-12">
       {/* 1. PC VIEW NAVBAR (Image 1 top horizontal bar + left docked icon rail) */}
@@ -244,6 +265,10 @@ export function DigihubDashboard({
         onOpenCoach={() => setCoachOpenSignal((prev) => prev + 1)}
         onOpenProfile={() => setActiveSection("diplomas")}
         onOpenMenu={() => setIsMenuModalOpen(true)}
+        onSignOut={onSignOut}
+        onOpenJargonModal={() => setIsJargonModalOpen(true)}
+        onOpenQuickHub={() => setIsQuickDashboardOpen(true)}
+        onExportData={handleExportData}
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
@@ -535,110 +560,136 @@ export function DigihubDashboard({
             </div>
 
             {/* Course Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-              {filteredCatalogCourses.map((course) => {
-                const isEnrolled = enrolledCourseIds.includes(course.id);
-                const cp = getCourseProgress(course.id, progress.completedLessonIds);
-
-                return (
-                  <div
-                    key={course.id}
-                    className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md card-lift flex flex-col justify-between overflow-hidden group animate-fade-in-up"
-                    style={{ animationDelay: `${Math.min(filteredCatalogCourses.indexOf(course) * 50, 350)}ms` }}
+            {filteredCatalogCourses.length === 0 ? (
+              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-neutral-200/90 shadow-2xs space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto">
+                  <Search className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-neutral-800 text-sm sm:text-base">
+                  No Courses Found
+                </h3>
+                <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
+                  We couldn&apos;t find any curriculum matching &ldquo;{catalogSearch || catalogFilter}&rdquo;. Try clearing filters or searching for terms like &ldquo;coding&rdquo;, &ldquo;python&rdquo;, or &ldquo;cyber&rdquo;.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatalogSearch("");
+                      setCatalogFilter("all");
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-semibold text-xs shadow-2xs transition"
                   >
-                    {/* Visual Banner */}
-                    <div className="relative w-full h-32 overflow-hidden">
-                      <Image
-                        src={getCourseImage(course.id)}
-                        alt={course.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition duration-300"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-                      <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between text-xs text-white">
-                        <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider">
-                          {course.category}
-                        </span>
-                        {isEnrolled ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">
-                            <Check className="w-2.5 h-2.5" />
-                            Enrolled
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/90 text-white text-[10px] font-bold">
-                            Free Track
-                          </span>
-                        )}
-                      </div>
-                      <div className="absolute bottom-2 left-2.5 right-2.5 text-white">
-                        <h3 className="font-bold text-xs leading-snug line-clamp-2 drop-shadow-sm">
-                          {course.title}
-                        </h3>
-                      </div>
-                    </div>
+                    Reset Search &amp; Filters
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                {filteredCatalogCourses.map((course) => {
+                  const isEnrolled = enrolledCourseIds.includes(course.id);
+                  const cp = getCourseProgress(course.id, progress.completedLessonIds);
 
-                    {/* Card Body */}
-                    <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-semibold text-neutral-600 truncate max-w-[160px] text-[11px]">
-                            {course.organization}
+                  return (
+                    <div
+                      key={course.id}
+                      className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md card-lift flex flex-col justify-between overflow-hidden group animate-fade-in-up"
+                      style={{ animationDelay: `${Math.min(filteredCatalogCourses.indexOf(course) * 50, 350)}ms` }}
+                    >
+                      {/* Visual Banner */}
+                      <div className="relative w-full h-32 overflow-hidden">
+                        <Image
+                          src={getCourseImage(course.id)}
+                          alt={course.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+                        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between text-xs text-white">
+                          <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider">
+                            {course.category}
                           </span>
-                          <div className="flex items-center gap-1 font-bold text-neutral-800 text-[11px] shrink-0">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                            <span>{course.rating}</span>
-                          </div>
+                          {isEnrolled ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">
+                              <Check className="w-2.5 h-2.5" />
+                              Enrolled
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/90 text-white text-[10px] font-bold">
+                              Free Track
+                            </span>
+                          )}
                         </div>
-                        <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
-                          {course.headline}
-                        </p>
+                        <div className="absolute bottom-2 left-2.5 right-2.5 text-white">
+                          <h3 className="font-bold text-xs leading-snug line-clamp-2 drop-shadow-sm">
+                            {course.title}
+                          </h3>
+                        </div>
                       </div>
 
-                      {/* Course Meta Info */}
-                      <div className="flex items-center gap-3 text-[11px] text-neutral-500 font-medium">
-                        <span className="flex items-center gap-1">
-                          <GraduationCap className="w-3 h-3 text-neutral-400" />
-                          <span>{course.level}</span>
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-neutral-400" />
-                          <span>{course.durationWeeks} Wks</span>
-                        </span>
-                      </div>
+                      {/* Card Body */}
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="font-semibold text-neutral-600 truncate max-w-[160px] text-[11px]">
+                              {course.organization}
+                            </span>
+                            <div className="flex items-center gap-1 font-bold text-neutral-800 text-[11px] shrink-0">
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                              <span>{course.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
+                            {course.headline}
+                          </p>
+                        </div>
 
-                      {/* Action Buttons */}
-                      <div className="pt-2.5 border-t border-neutral-100 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onOpenCourseModal(course)}
-                          className="flex-1 py-1.5 px-2.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition text-center"
-                        >
-                          Syllabus
-                        </button>
-                        {isEnrolled ? (
-                          <Link
-                            href={`/digihub/lesson/${course.lessons[0]?.id || "coding-1"}`}
-                            className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center"
-                          >
-                            Continue
-                          </Link>
-                        ) : (
+                        {/* Course Meta Info */}
+                        <div className="flex items-center gap-3 text-[11px] text-neutral-500 font-medium">
+                          <span className="flex items-center gap-1">
+                            <GraduationCap className="w-3 h-3 text-neutral-400" />
+                            <span>{course.level}</span>
+                          </span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-neutral-400" />
+                            <span>{course.durationWeeks} Wks</span>
+                          </span>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="pt-2.5 border-t border-neutral-100 flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => onEnrollCourse && onEnrollCourse(course.id)}
-                            className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs text-center"
+                            onClick={() => onOpenCourseModal(course)}
+                            className="flex-1 py-1.5 px-2.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition text-center"
                           >
-                            Enroll Free
+                            Syllabus
                           </button>
-                        )}
+                          {isEnrolled ? (
+                            <Link
+                              href={`/digihub/lesson/${course.lessons[0]?.id || "coding-1"}`}
+                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center"
+                            >
+                              Continue
+                            </Link>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onEnrollCourse && onEnrollCourse(course.id)}
+                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs text-center"
+                            >
+                              Enroll Free
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

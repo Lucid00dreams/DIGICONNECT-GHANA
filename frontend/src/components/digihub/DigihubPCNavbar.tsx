@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { LMSUser, Course, CertificateRecord, MentorshipSession } from "@/lib/lmsStore";
 import { DigihubMenuModal } from "./DigihubMenuModal";
+import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
 export type PCTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
 
@@ -476,93 +477,19 @@ export function DigihubPCNavbar({
 
               {/* Profile Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 animate-in zoom-in-95 duration-150">
-                  <div className="px-3 py-2 border-b border-neutral-100">
-                    <p className="text-xs font-bold text-neutral-900 truncate">{currentUser.name}</p>
-                    <p className="text-[10px] text-neutral-500 truncate">{currentUser.email}</p>
-                  </div>
-                  <div className="py-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onSelectSection("diplomas");
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <Award className="w-3.5 h-3.5 text-[#5B67E2]" />
-                      <span>My Diplomas</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenJargonModal();
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <Bookmark className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Jargon Buster</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenCoach();
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
-                      <span>DIGIHUB AI Tutor</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStreakModalOpen(true);
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <Flame className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Study Streak (4 Days)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenQuickHub();
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-600" />
-                      <span>Settings &amp; Quick Hub</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleExportData();
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <Download className="w-3.5 h-3.5 text-indigo-500" />
-                      <span>{isExporting ? "Exporting..." : "Export Transcript (.json)"}</span>
-                    </button>
-                  </div>
-                  <div className="pt-1 border-t border-neutral-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onSignOut();
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-red-50 text-red-600 text-xs font-semibold flex items-center gap-2"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </div>
+                <DigihubUserMenuDropdown
+                  currentUser={currentUser}
+                  onSelectSection={onSelectSection}
+                  onOpenJargonModal={onOpenJargonModal}
+                  onOpenCoach={onOpenCoach}
+                  onOpenStreak={() => setStreakModalOpen(true)}
+                  onOpenQuickHub={onOpenQuickHub}
+                  onExportData={handleExportData}
+                  isExporting={isExporting}
+                  onSignOut={onSignOut}
+                  onClose={() => setIsUserMenuOpen(false)}
+                  className="absolute right-0 top-full mt-2"
+                />
               )}
             </div>
           </div>

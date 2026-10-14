@@ -12,6 +12,9 @@ import { CookiePreferencesModal } from "@/components/ui/CookiePreferencesModal";
 import { CookieTriggerButton } from "@/components/ui/CookieTriggerButton";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://digiconnectghana.org"
+  ),
   title: "DigiConnect Ghana | Tech for Youth. Tech for Good.",
   description:
     "DigiConnect Ghana empowers young people through digital skills, technology education, mentorship and opportunities for a better digital future.",
@@ -27,16 +30,26 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DigiConnect Ghana | Tech for Youth. Tech for Good.",
     description:
-      "DigiConnect Ghana empowers young people through digital skills, technology education, mentorship and opportunities for a better digital future.",
-    type: "website",
-    locale: "en_GH",
+      "Empowering Ghana's youth through certified digital skills, hands-on coding, cybersecurity labs, and free tech education.",
+    url: "https://digiconnectghana.org",
     siteName: "DigiConnect Ghana",
+    locale: "en_GH",
+    type: "website",
+    images: [
+      {
+        url: "/og-preview.jpg",
+        width: 1200,
+        height: 630,
+        alt: "DigiConnect Ghana - Official Learning Hub & Digital Skills Platform Sneak Peek",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "DigiConnect Ghana | Tech for Youth. Tech for Good.",
     description:
       "Empowering young people through digital skills, technology education, mentorship and opportunities.",
+    images: ["/og-preview.jpg"],
   },
 };
 
