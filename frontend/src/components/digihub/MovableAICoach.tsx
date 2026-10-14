@@ -164,12 +164,13 @@ export function MovableAICoach({
     },
   ]);
 
-  // Set default initial positions on client mount (safe above mobile navigation dock)
+  // Set default initial positions on client mount (bottom-right corner)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const isMobile = window.innerWidth < 1024;
-      const defaultLauncherX = Math.max(16, window.innerWidth - (isMobile ? 76 : 92));
-      const defaultLauncherY = Math.max(16, window.innerHeight - (isMobile ? 154 : 96));
+      const isMobile = window.innerWidth < 640;
+      // Bottom-right corner placement
+      const defaultLauncherX = Math.max(12, window.innerWidth - (isMobile ? 58 : 68));
+      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 62 : 72));
       setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
 
       const defaultChatX = isMobile ? 12 : Math.max(16, window.innerWidth - 425);
@@ -181,10 +182,12 @@ export function MovableAICoach({
   // Screen resize clamping
   useEffect(() => {
     const handleResize = () => {
-      const isMobile = window.innerWidth < 1024;
+      const isMobile = window.innerWidth < 640;
+      const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
+      const maxY = Math.max(10, window.innerHeight - (isMobile ? 60 : 68));
       setLauncherPos((prev) => ({
-        x: Math.min(prev.x, Math.max(10, window.innerWidth - (isMobile ? 74 : 86))),
-        y: Math.min(prev.y, Math.max(10, window.innerHeight - (isMobile ? 146 : 86))),
+        x: Math.min(prev.x, maxX),
+        y: Math.min(prev.y, maxY),
       }));
       setChatPos((prev) => ({
         x: Math.min(prev.x, Math.max(8, window.innerWidth - (isMobile ? 360 : 420))),
@@ -228,8 +231,9 @@ export function MovableAICoach({
       hasLauncherMoved.current = true;
     }
 
-    const maxX = Math.max(10, window.innerWidth - 86);
-    const maxY = Math.max(10, window.innerHeight - 86);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+    const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
+    const maxY = Math.max(10, window.innerHeight - (isMobile ? 60 : 68));
 
     const newX = Math.max(10, Math.min(launcherDragStart.current.origX + deltaX, maxX));
     const newY = Math.max(10, Math.min(launcherDragStart.current.origY + deltaY, maxY));
@@ -459,7 +463,7 @@ export function MovableAICoach({
 
   return (
     <>
-      {/* ─── 1. COMPACT CIRCULAR LAUNCHER (FREELY MOVABLE ANYWHERE) ───────── */}
+      {/* ─── 1. COMPACT TRANSPARENT CIRCULAR LAUNCHER (BOTTOM-RIGHT CORNER) ── */}
       {!isOpen && (
         <div
           onPointerDown={handleLauncherPointerDown}
@@ -473,28 +477,31 @@ export function MovableAICoach({
             zIndex: 9999,
             touchAction: "none",
           }}
-          className={`select-none transition-shadow ${
-            isDraggingLauncherUI ? "cursor-grabbing scale-105" : "cursor-grab"
+          className={`select-none ${
+            isDraggingLauncherUI ? "cursor-grabbing scale-105 opacity-100" : "cursor-grab"
           }`}
           title="DIGIHUB AI • Drag to move freely, tap to open"
         >
-          {/* Circular Button containing ONLY the Mascot Icon & DIGIHUB AI name */}
-          <div className="relative group w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] rounded-full bg-white/95 hover:bg-white border-2 border-cyan-400/90 shadow-xl hover:shadow-cyan-500/35 flex flex-col items-center justify-center p-1 backdrop-blur-md active:scale-95 transition-transform duration-150">
-            {/* Ambient Cyan Glow Aura */}
-            <div className="absolute -inset-1 rounded-full bg-cyan-400/25 blur-xs group-hover:bg-cyan-400/40 transition pointer-events-none" />
+          {/* Smaller, transparent glassmorphic circular button */}
+          <div className="relative group w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/45 hover:bg-white/95 border border-cyan-400/50 hover:border-cyan-400 shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(6,182,212,0.25)] flex items-center justify-center p-1 backdrop-blur-md opacity-75 hover:opacity-100 active:scale-95 transition-all duration-200">
+            {/* Subtle Ambient Cyan Aura */}
+            <div className="absolute -inset-0.5 rounded-full bg-cyan-400/20 blur-xs group-hover:bg-cyan-400/40 transition-opacity pointer-events-none" />
 
             {/* Robot Mascot Head with Breathing Float */}
-            <div className="relative bot-float -mt-1 shrink-0">
-              <DigiHubBotAvatar size={38} />
+            <div className="relative bot-float shrink-0">
+              <DigiHubBotAvatar size={24} className="sm:hidden" />
+              <DigiHubBotAvatar size={26} className="hidden sm:block" />
             </div>
 
-            {/* DIGIHUB AI Name in Circle */}
-            <span className="relative text-[9px] sm:text-[9.5px] font-black tracking-tight text-neutral-900 leading-none mt-0.5 font-digihub group-hover:text-[#0056D2] transition-colors shrink-0">
-              DIGIHUB AI
-            </span>
-
             {/* Online Status Green Indicator */}
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white shadow-xs animate-pulse" />
+            <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-white shadow-xs animate-pulse" />
+
+            {/* Quick Hover Tooltip on desktop */}
+            <div className="absolute right-full mr-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:flex items-center">
+              <span className="bg-neutral-900/90 backdrop-blur-xs text-white text-[10px] font-bold py-1 px-2 rounded-lg shadow-sm whitespace-nowrap">
+                Ask DIGIHUB AI
+              </span>
+            </div>
           </div>
         </div>
       )}
