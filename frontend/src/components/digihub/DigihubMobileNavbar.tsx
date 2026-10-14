@@ -49,7 +49,6 @@ interface NavItemConfig {
 const NAV_ITEMS: NavItemConfig[] = [
   { id: "learning", label: "Home", icon: LayoutGrid },
   { id: "catalog", label: "Courses", icon: BookOpen },
-  { id: "labs", label: "Labs", icon: Terminal },
   { id: "mentorship", label: "Mentors", icon: Users },
   { id: "diplomas", label: "Diplomas", icon: Award },
 ];
@@ -198,8 +197,8 @@ export function DigihubMobileNavbar({
           <div
             className="absolute -top-[20px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
             style={{
-              left: `${activeIndex * 20}%`,
-              width: "20%",
+              left: `${activeIndex * 25}%`,
+              width: "25%",
             }}
           >
             <div className="relative w-full flex flex-col items-center">
@@ -229,15 +228,16 @@ export function DigihubMobileNavbar({
 
               {/* Elevated Circular Badge with periwinkle/indigo border & soft fill */}
               <div className="relative z-10 w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-full bg-[#EEF2FF] border-[2.5px] border-[#5B67E2] shadow-[0_8px_18px_rgba(91,103,226,0.38)] flex items-center justify-center text-[#5B67E2] animate-in zoom-in-75 duration-200">
-                {React.createElement(NAV_ITEMS[activeIndex].icon, {
-                  className: "w-6 h-6 stroke-[2.2] text-[#5B67E2]",
-                })}
+                {NAV_ITEMS[activeIndex] &&
+                  React.createElement(NAV_ITEMS[activeIndex].icon, {
+                    className: "w-6 h-6 stroke-[2.2] text-[#5B67E2]",
+                  })}
               </div>
             </div>
           </div>
 
-          {/* 5 Navigation Item Slots */}
-          <div className="relative z-10 grid grid-cols-5 items-end">
+          {/* 4 Navigation Item Slots */}
+          <div className="relative z-10 grid grid-cols-4 items-end">
             {NAV_ITEMS.map((item, index) => {
               const isActive = index === activeIndex;
               const IconComponent = item.icon;

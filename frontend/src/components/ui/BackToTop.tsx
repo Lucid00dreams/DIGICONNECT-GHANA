@@ -30,7 +30,7 @@ export function BackToTop() {
     });
   };
 
-  if (!visible || pathname.startsWith("/connecthub")) return null;
+  if (!visible || pathname.startsWith("/connecthub") || pathname.startsWith("/digihub")) return null;
 
   const radius = 18;
   const circumference = 2 * Math.PI * radius;

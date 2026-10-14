@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Cookie, Settings2, Check, X } from "lucide-react";
 import { useCookieConsent } from "@/context/CookieContext";
 import { useToast } from "@/context/ToastContext";
@@ -10,8 +11,10 @@ export function CookieConsentBanner() {
   const { showBanner, acceptAll, rejectNonEssential, openPreferences } = useCookieConsent();
   const { showToast } = useToast();
   const [isDismissed, setIsDismissed] = useState(false);
+  const pathname = usePathname();
 
-  if (!showBanner || isDismissed) return null;
+  // Hide inside the LMS/classroom views to avoid obstructing learning navigation
+  if (!showBanner || isDismissed || pathname?.startsWith("/digihub")) return null;
 
   const handleAcceptAll = () => {
     setIsDismissed(true);

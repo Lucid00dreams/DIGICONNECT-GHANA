@@ -279,44 +279,63 @@ export function DigihubDashboard({
             {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
             <section className="p-4 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-4 sm:space-y-5 animate-fade-in-up">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                <div>
+                <div className="min-w-0 flex-1">
                   <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
                     {timeGreeting}, {firstName} 👋
                   </span>
                   <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
                     {primaryCourse?.title || "Web Engineering & Coding Foundations"}
                   </h1>
+                  {nextLesson && (
+                    <p className="text-xs text-neutral-500 mt-1 flex items-center gap-1.5 truncate">
+                      <span className="font-semibold text-neutral-600 shrink-0">Up Next:</span>
+                      <span className="text-neutral-800 font-medium truncate">{nextLesson.title}</span>
+                    </p>
+                  )}
                 </div>
 
-                {/* 7-Day Study Streak Indicator (Duolingo/GitHub style) */}
-                <div className="flex items-center gap-2.5 sm:gap-3 self-start sm:self-auto bg-neutral-50 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 shrink-0">
-                    <Flame className="w-4 h-4 fill-emerald-500 text-emerald-500" />
-                    <span>4d Streak</span>
-                  </div>
-                  <div className="h-3.5 w-px bg-neutral-200" />
-                  <div className="flex items-center gap-1">
-                    {[
-                      { day: "M", done: true },
-                      { day: "T", done: true },
-                      { day: "W", done: true },
-                      { day: "T", done: true },
-                      { day: "F", done: false },
-                      { day: "S", done: false },
-                      { day: "S", done: false },
-                    ].map((d, i) => (
-                      <div
-                        key={i}
-                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold transition ${
-                          d.done
-                            ? "bg-emerald-500 text-white shadow-2xs"
-                            : "bg-neutral-200/80 text-neutral-500"
-                        }`}
-                        title={`${d.day}: ${d.done ? "Active study day completed" : "Upcoming study day"}`}
-                      >
-                        {d.day}
-                      </div>
-                    ))}
+                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 self-start sm:self-auto">
+                  {/* Primary Resume Lesson CTA (Single source of truth for resuming active lesson) */}
+                  {nextLesson && (
+                    <Link
+                      href={`/digihub/lesson/${nextLesson.id}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs sm:text-sm font-bold shadow-2xs hover:shadow transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 shrink-0"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Resume Lesson</span>
+                    </Link>
+                  )}
+
+                  {/* 7-Day Study Streak Indicator (Duolingo/GitHub style) */}
+                  <div className="flex items-center gap-2 sm:gap-2.5 bg-neutral-50 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
+                    <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 shrink-0">
+                      <Flame className="w-4 h-4 fill-emerald-500 text-emerald-500" />
+                      <span className="hidden sm:inline">4d</span>
+                    </div>
+                    <div className="h-3 w-px bg-neutral-200" />
+                    <div className="flex items-center gap-1">
+                      {[
+                        { day: "M", done: true },
+                        { day: "T", done: true },
+                        { day: "W", done: true },
+                        { day: "T", done: true },
+                        { day: "F", done: false },
+                        { day: "S", done: false },
+                        { day: "S", done: false },
+                      ].map((d, i) => (
+                        <div
+                          key={i}
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold transition ${
+                            d.done
+                              ? "bg-emerald-500 text-white shadow-2xs"
+                              : "bg-neutral-200/80 text-neutral-500"
+                          }`}
+                          title={`${d.day}: ${d.done ? "Active study day completed" : "Upcoming study day"}`}
+                        >
+                          {d.day}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -344,13 +363,16 @@ export function DigihubDashboard({
             {/* Clean, Minimalist Enrolled Courses (2x2 Card Grid faithfully reproducing Image 2) */}
             <section className="space-y-3.5 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center gap-1.5">
                   <h2 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
                     My Enrolled Courses
                   </h2>
-                  <p className="text-xs text-neutral-500">
-                    Track your curriculum progress and earn verified diplomas.
-                  </p>
+                  <span
+                    className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                    title="Track your curriculum progress and earn verified diplomas."
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -366,6 +388,7 @@ export function DigihubDashboard({
               <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                 {dashboardGridCourses.map((course) => {
                   const isEnrolled = enrolledCourseIds.includes(course.id);
+                  const isPrimaryTrack = primaryCourse?.id === course.id;
                   const cp = getCourseProgress(course.id, progress.completedLessonIds);
                   const currentLesson =
                     course.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
@@ -418,7 +441,7 @@ export function DigihubDashboard({
                         </div>
                       </div>
 
-                      {/* Bottom Action Buttons: Two buttons side by side matching Image 2 */}
+                      {/* Bottom Action Buttons: Clear track differentiation with zero CTA competition */}
                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-3 border-t border-neutral-100">
                         <button
                           type="button"
@@ -431,14 +454,24 @@ export function DigihubDashboard({
                         </button>
 
                         {isEnrolled && currentLesson ? (
-                          <Link
-                            href={`/digihub/lesson/${currentLesson.id}`}
-                            className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
-                            title="Continue this course"
-                          >
-                            <span className="truncate">Continue</span>
-                            <ArrowRight className="w-3 h-3 shrink-0" />
-                          </Link>
+                          isPrimaryTrack ? (
+                            <span
+                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate"
+                              title="Currently active track on your hero banner"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse" />
+                              <span className="truncate">Active Track</span>
+                            </span>
+                          ) : (
+                            <Link
+                              href={`/digihub/lesson/${currentLesson.id}`}
+                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
+                              title="Switch to this track"
+                            >
+                              <span className="truncate">Switch Track</span>
+                              <ArrowRight className="w-3 h-3 shrink-0" />
+                            </Link>
+                          )
                         ) : (
                           <button
                             type="button"
@@ -453,7 +486,6 @@ export function DigihubDashboard({
                             title="Enroll in this course track"
                           >
                             <span className="truncate">Enroll</span>
-                            <ArrowRight className="w-3 h-3 shrink-0" />
                           </button>
                         )}
                       </div>
@@ -505,17 +537,22 @@ export function DigihubDashboard({
                 <button
                   type="button"
                   onClick={() => setActiveSection("learning")}
-                  className="text-xs font-bold text-[#0056D2] hover:underline flex items-center gap-1 mb-2 group"
+                  className="text-xs font-bold text-[#0056D2] hover:underline flex items-center gap-1 mb-1.5 group"
                 >
                   <span className="group-hover:-translate-x-0.5 transition">←</span>
                   <span>Back to My Learning</span>
                 </button>
-                <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                  Explore All Courses
-                </h2>
-                <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-xl font-normal">
-                  12 structured career tracks. Instant enrollment with 100% tuition-free access.
-                </p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
+                    Course Catalog
+                  </h2>
+                  <span
+                    className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                    title="12 structured career tracks with 100% tuition-free enrollment."
+                  >
+                    <Info className="w-4 h-4" />
+                  </span>
+                </div>
               </div>
 
               {/* Search Box */}
@@ -529,6 +566,36 @@ export function DigihubDashboard({
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition bg-white"
                 />
               </div>
+            </div>
+
+            {/* Beginner Clinic 101 Sandbox Banner */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-amber-50/80 border border-blue-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#0056D2] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <MousePointer className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#0056D2] text-[9px] font-bold uppercase tracking-wider">
+                      Beginner Clinic
+                    </span>
+                    <span className="text-[9px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
+                      Zero Fear
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-xs sm:text-sm text-neutral-900 mt-0.5">
+                    Computer &amp; Phone Basics: Click, Copy-Paste, &amp; Typing Clinic
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBasicsLabOpen(true)}
+                className="self-start sm:self-auto px-4 py-2 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition flex items-center gap-1.5 active:scale-95 shrink-0"
+              >
+                <MousePointer className="w-3.5 h-3.5" />
+                <span>Launch Clinic</span>
+              </button>
             </div>
 
             {/* Filter Pills */}
@@ -693,167 +760,20 @@ export function DigihubDashboard({
           </div>
         )}
 
-        {/* ─── SECTION 3: DEDICATED BROWSER LABS ─────────────────────────── */}
-        {activeSection === "labs" && (
-          <div className="space-y-6 tab-content-enter" key="labs">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                Interactive Browser Workspaces
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-xl font-normal">
-                Full client-side development environments with zero local setup. Practice on any standard PC, laptop, or community center workstation.
-              </p>
-            </div>
-
-            {/* Featured Beginner Clinic: Computer & Phone Basics 101 */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-amber-50/80 border-2 border-blue-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 card-lift animate-fade-in-up">
-              <div className="flex items-start sm:items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-[#0056D2] text-white flex items-center justify-center shrink-0 shadow-sm">
-                  <MousePointer className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#0056D2] text-[10px] font-bold uppercase tracking-wider">
-                      Beginner Clinic 101
-                    </span>
-                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
-                      Zero Fear
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-base text-neutral-900 mt-0.5">
-                    Computer &amp; Phone Basics: Click, Copy-Paste, &amp; Typing Clinic
-                  </h3>
-                  <p className="text-xs text-neutral-600 max-w-xl mt-1 leading-relaxed">
-                    Never used a mouse or laptop keyboard before? Practice left/double-click, duplicating text safely, typing without fear, and smooth scrolling in a protected sandbox.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsBasicsLabOpen(true)}
-                className="self-start md:self-auto px-5 py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition flex items-center gap-1.5 active:scale-95 shrink-0"
-              >
-                <MousePointer className="w-3.5 h-3.5" />
-                <span>Launch Basics Clinic</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Lab 1 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '50ms' }}>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0056D2] flex items-center justify-center">
-                    <Code2 className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-base text-neutral-900">Web Dev Code Sandbox</h3>
-                  <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-                    Complete HTML5, modern CSS, and JavaScript editor with real-time DOM rendering, error highlighting, and automated challenge verification.
-                  </p>
-                  <div className="text-[11px] text-neutral-500 space-y-1 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                    <div>• Instant live DOM preview window</div>
-                    <div>• Automated keyword and syntax checks</div>
-                    <div>• Local storage autosave for your project code</div>
-                  </div>
-                </div>
-                <Link
-                  href="/digihub/lesson/coding-1"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
-                >
-                  <span>Launch Web Sandbox</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Lab 2 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '120ms' }}>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
-                    <Shield className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-base text-neutral-900">Cyber Incident Simulator</h3>
-                  <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-                    Real-world threat analysis suite covering spoofed email headers, dictionary brute-force crack tests, SHA-256 digests, and SQL injection sanitization.
-                  </p>
-                  <div className="text-[11px] text-neutral-500 space-y-1 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                    <div>• Realistic phishing header parser</div>
-                    <div>• Password entropy &amp; brute-force time calculator</div>
-                    <div>• Interactive database injection defense testbed</div>
-                  </div>
-                </div>
-                <Link
-                  href="/digihub/lesson/cyber-1"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-2xs transition"
-                >
-                  <span>Launch Cyber Defense Lab</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Lab 3 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '190ms' }}>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <Terminal className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-base text-neutral-900">Python Terminal Shell</h3>
-                  <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-                    Interactive Python environment executing standard loops, mathematical formulas, data filters, and string algorithms without local interpreter installations.
-                  </p>
-                  <div className="text-[11px] text-neutral-500 space-y-1 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                    <div>• Standard output streaming and runtime logs</div>
-                    <div>• Variable state inspections</div>
-                    <div>• Built-in practice challenges and test assertions</div>
-                  </div>
-                </div>
-                <Link
-                  href="/digihub/lesson/py-1"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition"
-                >
-                  <span>Launch Python Runner</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Lab 4 */}
-              <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 flex flex-col justify-between card-lift animate-fade-in-up" style={{ animationDelay: '260ms' }}>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <Laptop className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-base text-neutral-900">Digital Office Simulator</h3>
-                  <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-                    Interactive workplace productivity challenge evaluating spreadsheet formulas, budget calculations, and cloud file permission auditing.
-                  </p>
-                  <div className="text-[11px] text-neutral-500 space-y-1 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                    <div>• Live spreadsheet formula calculation engine</div>
-                    <div>• Enterprise cloud permission safety audits</div>
-                    <div>• Essential workplace digital literacy scenarios</div>
-                  </div>
-                </div>
-                <Link
-                  href="/digihub/lesson/literacy-1"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-2xs transition"
-                >
-                  <span>Launch Office Simulator</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── SECTION 4: DEDICATED DIPLOMAS & CERTIFICATES ─────────────── */}
+        {/* ─── SECTION 3: DIPLOMAS & CERTIFICATES ─────────────── */}
         {activeSection === "diplomas" && (
           <div className="space-y-6 tab-content-enter" key="diplomas">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
+              <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                  Verified Diplomas &amp; Academic Credentials
+                  My Diplomas
                 </h2>
-                <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-xl font-normal">
-                  Official certificates issued by DigiConnect Ghana NGO. Equipped with unique cryptographic serials and live QR validation records.
-                </p>
+                <span
+                  className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                  title="Official certificates issued with verifiable cryptographic serials and live QR validation records."
+                >
+                  <Info className="w-4 h-4" />
+                </span>
               </div>
 
               <button
@@ -932,16 +852,19 @@ export function DigihubDashboard({
           </div>
         )}
 
-        {/* ─── SECTION 5: DEDICATED MENTORSHIP ───────────────────────────── */}
+        {/* ─── SECTION 4: 1-ON-1 FACULTY MENTORSHIP ─────────────────────── */}
         {activeSection === "mentorship" && (
           <div className="space-y-6 tab-content-enter" key="mentorship">
-            <div>
+            <div className="flex items-center gap-2">
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
                 1-on-1 Faculty Mentorship
               </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-xl font-normal">
-                Schedule free virtual 1-on-1 sessions with volunteer Ghanaian senior developers and cybersecurity specialists.
-              </p>
+              <span
+                className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                title="Schedule free virtual 1-on-1 sessions with volunteer Ghanaian senior developers and cybersecurity specialists."
+              >
+                <Info className="w-4 h-4" />
+              </span>
             </div>
 
             {/* Mentors Grid */}
@@ -1036,69 +959,6 @@ export function DigihubDashboard({
           </div>
         )}
       </main>
-
-      {/* 3. MOBILE BOTTOM NAVIGATION DOCK (Appears ONLY after login) */}
-      <nav
-        aria-label="Student Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 py-2 flex items-center justify-around font-digihub"
-      >
-        <button
-          type="button"
-          onClick={() => setActiveSection("learning")}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 transition text-[10px] font-semibold active:scale-95 ${
-            activeSection === "learning" ? "text-[#0056D2]" : "text-neutral-600 hover:text-neutral-900"
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span>Learning</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveSection("catalog")}
-          className={`flex flex-col items-center gap-1 py-1 px-2 transition text-[10px] font-semibold active:scale-95 ${
-            activeSection === "catalog" ? "text-[#0056D2]" : "text-neutral-600 hover:text-neutral-900"
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-          <span className="text-center leading-tight">Explore Courses</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveSection("labs")}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 transition text-[10px] font-semibold active:scale-95 ${
-            activeSection === "labs" ? "text-[#0056D2]" : "text-neutral-600 hover:text-neutral-900"
-          }`}
-        >
-          <Terminal className="w-4 h-4" />
-          <span>Labs</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveSection("diplomas")}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 transition text-[10px] font-semibold active:scale-95 ${
-            activeSection === "diplomas" ? "text-[#0056D2]" : "text-neutral-600 hover:text-neutral-900"
-          }`}
-        >
-          <Award className="w-4 h-4" />
-          <span>Diplomas</span>
-        </button>
-
-        {/* Three Dots ("More" / Quick Dashboard Popup Trigger) */}
-        <button
-          type="button"
-          onClick={() => setIsQuickDashboardOpen(true)}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 transition text-[10px] font-bold active:scale-95 ${
-            isQuickDashboardOpen ? "text-[#0056D2]" : "text-neutral-700 hover:text-neutral-950"
-          }`}
-          aria-label="Open Quick Dashboard controls"
-        >
-          <MoreHorizontal className="w-4 h-4" />
-          <span>More</span>
-        </button>
-      </nav>
 
       {/* 4. POPUP QUICK DASHBOARD DRAWER (Triggered by the Three Dots "...") */}
       {isQuickDashboardOpen && (
