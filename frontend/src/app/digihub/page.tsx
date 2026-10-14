@@ -78,7 +78,7 @@ export default function DIGIHubPage() {
   const [activeTab, setActiveTab] = useState<"my-learning" | "catalog" | "certificates" | "mentorship">("my-learning");
   const [progress, setProgress] = useState<LearnerProgress>(() => getLearnerProgress());
   const [sessions, setSessions] = useState<MentorshipSession[]>(() => getBookedSessions());
-  const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<LMSUser | null>(() => getActiveUser());
   const [authChecked, setAuthChecked] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup" | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -232,6 +232,17 @@ export default function DIGIHubPage() {
   };
 
   // 1. If active user is undergoing the 4-Step Onboarding Questionnaire (Screenshots 3, 4, 5)
+  // Guard: wait until client-side authentication is verified from localStorage to avoid flashing landing page on refresh
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
+        <div className="w-9 h-9 border-3 border-[#0056D2] border-t-transparent rounded-full animate-spin mb-3" />
+        <span className="text-xs font-semibold text-neutral-500 tracking-tight">Loading DIGIHub LMS...</span>
+      </div>
+    );
+  }
+
+  // 1. If showing first-time onboarding wizard
   if (currentUser && showOnboarding) {
     return (
       <OnboardingWizard

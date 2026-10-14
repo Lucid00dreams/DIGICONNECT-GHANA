@@ -164,15 +164,16 @@ export function MovableAICoach({
     },
   ]);
 
-  // Set default initial positions on client mount
+  // Set default initial positions on client mount (safe above mobile navigation dock)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const defaultLauncherX = Math.max(16, window.innerWidth - 92);
-      const defaultLauncherY = Math.max(16, window.innerHeight - 96);
+      const isMobile = window.innerWidth < 1024;
+      const defaultLauncherX = Math.max(16, window.innerWidth - (isMobile ? 76 : 92));
+      const defaultLauncherY = Math.max(16, window.innerHeight - (isMobile ? 154 : 96));
       setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
 
-      const defaultChatX = Math.max(16, window.innerWidth - 425);
-      const defaultChatY = Math.max(16, window.innerHeight - 580);
+      const defaultChatX = isMobile ? 12 : Math.max(16, window.innerWidth - 425);
+      const defaultChatY = isMobile ? 60 : Math.max(16, window.innerHeight - 580);
       setChatPos({ x: defaultChatX, y: defaultChatY });
     }
   }, []);
@@ -180,13 +181,14 @@ export function MovableAICoach({
   // Screen resize clamping
   useEffect(() => {
     const handleResize = () => {
+      const isMobile = window.innerWidth < 1024;
       setLauncherPos((prev) => ({
-        x: Math.min(prev.x, Math.max(10, window.innerWidth - 86)),
-        y: Math.min(prev.y, Math.max(10, window.innerHeight - 86)),
+        x: Math.min(prev.x, Math.max(10, window.innerWidth - (isMobile ? 74 : 86))),
+        y: Math.min(prev.y, Math.max(10, window.innerHeight - (isMobile ? 146 : 86))),
       }));
       setChatPos((prev) => ({
-        x: Math.min(prev.x, Math.max(10, window.innerWidth - 420)),
-        y: Math.min(prev.y, Math.max(10, window.innerHeight - 560)),
+        x: Math.min(prev.x, Math.max(8, window.innerWidth - (isMobile ? 360 : 420))),
+        y: Math.min(prev.y, Math.max(10, window.innerHeight - (isMobile ? 520 : 560))),
       }));
     };
     window.addEventListener("resize", handleResize);

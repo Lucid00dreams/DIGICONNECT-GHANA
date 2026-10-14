@@ -163,6 +163,13 @@ export function DigihubDashboard({
     return cp.isCompleted;
   });
 
+  // Ensure dashboard grid displays at least 4 courses to match the 2x2 grid in Image 2
+  const dashboardGridCourses = [...inProgressCourses];
+  if (dashboardGridCourses.length < 4) {
+    const additional = courses.filter((c) => !dashboardGridCourses.some((dc) => dc.id === c.id));
+    dashboardGridCourses.push(...additional.slice(0, 4 - dashboardGridCourses.length));
+  }
+
   // Filter courses for catalog
   const filteredCatalogCourses = courses.filter((c) => {
     const matchesFilter =
@@ -196,7 +203,7 @@ export function DigihubDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-24 md:pb-8">
+    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-36 sm:pb-24 md:pb-12">
       {/* 1. PC VIEW NAVBAR (Image 1 top horizontal bar + left docked icon rail) */}
       <DigihubPCNavbar
         activeSection={activeSection}
@@ -240,29 +247,29 @@ export function DigihubDashboard({
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 pb-32 sm:pb-20 space-y-8">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-36 sm:pb-24 space-y-6 sm:space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
-          <div className="space-y-8 tab-content-enter" key="learning">
+          <div className="space-y-6 sm:space-y-8 tab-content-enter" key="learning">
             {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
-            <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-5 animate-fade-in-up">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <section className="p-4 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-4 sm:space-y-5 animate-fade-in-up">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div>
-                  <span className="text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
+                  <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
                     {timeGreeting}, {firstName} 👋
                   </span>
-                  <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
+                  <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
                     {primaryCourse?.title || "Web Engineering & Coding Foundations"}
                   </h1>
                 </div>
 
                 {/* 7-Day Study Streak Indicator (Duolingo/GitHub style) */}
-                <div className="flex items-center gap-3 self-start sm:self-auto bg-neutral-50 px-3.5 py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                <div className="flex items-center gap-2.5 sm:gap-3 self-start sm:self-auto bg-neutral-50 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 shrink-0">
                     <Flame className="w-4 h-4 fill-emerald-500 text-emerald-500" />
                     <span>4d Streak</span>
                   </div>
-                  <div className="h-4 w-px bg-neutral-200" />
+                  <div className="h-3.5 w-px bg-neutral-200" />
                   <div className="flex items-center gap-1">
                     {[
                       { day: "M", done: true },
@@ -275,7 +282,7 @@ export function DigihubDashboard({
                     ].map((d, i) => (
                       <div
                         key={i}
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition ${
+                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold transition ${
                           d.done
                             ? "bg-emerald-500 text-white shadow-2xs"
                             : "bg-neutral-200/80 text-neutral-500"
@@ -294,13 +301,13 @@ export function DigihubDashboard({
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-neutral-600">Curriculum Progress</span>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[10px]">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
                       ~2.5 hrs to Diploma
                     </span>
                   </div>
                   <span className="font-bold text-[#0056D2]">{primaryProgress.percentage}% complete</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden">
+                <div className="w-full h-1.5 sm:h-2 rounded-full bg-neutral-100 overflow-hidden">
                   <div
                     className="h-full bg-[#0056D2] rounded-full progress-animated progress-shimmer"
                     style={{ width: `${Math.max(primaryProgress.percentage, 15)}%` }}
@@ -309,8 +316,8 @@ export function DigihubDashboard({
               </div>
             </section>
 
-            {/* Clean, Minimalist Enrolled Courses (Zero tab clutter) */}
-            <section className="space-y-4">
+            {/* Clean, Minimalist Enrolled Courses (2x2 Card Grid faithfully reproducing Image 2) */}
+            <section className="space-y-3.5 sm:space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
@@ -330,95 +337,137 @@ export function DigihubDashboard({
                 </button>
               </div>
 
-              {/* Course Cards List */}
-              <div className="space-y-3">
-                {inProgressCourses.map((course) => {
+              {/* 2x2 Grid of Course Cards (Image 2 sketch reproduction: 2 columns with 2 bottom buttons each) */}
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                {dashboardGridCourses.map((course) => {
+                  const isEnrolled = enrolledCourseIds.includes(course.id);
                   const cp = getCourseProgress(course.id, progress.completedLessonIds);
                   const currentLesson =
                     course.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
                     course.lessons[0];
+                  const hoursLeft = Math.max(1, (course.lessons.length - (isEnrolled ? cp.completed : 0)) * 0.75).toFixed(1);
 
                   return (
                     <div
                       key={course.id}
-                      className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 shadow-2xs card-lift space-y-3 animate-fade-in-up"
+                      className="flex flex-col justify-between p-3 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs card-lift transition-all duration-200 min-h-[210px] sm:min-h-[235px]"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                              {course.organization}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px]">
-                              ~{Math.max(1, (course.lessons.length - cp.completed) * 0.75).toFixed(1)} hrs left
+                      {/* Top Meta: Org + Hours left */}
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1 sm:mb-2">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider truncate max-w-[65%]">
+                            {course.organization || "DigiConnect Ghana"}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[8px] sm:text-[9px] shrink-0">
+                            ~{hoursLeft} hrs
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xs sm:text-base font-bold text-neutral-900 leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] break-words">
+                          {course.title}
+                        </h3>
+
+                        {/* Progress */}
+                        <div className="mt-2 sm:mt-2.5 space-y-1">
+                          <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                            <span className="text-neutral-500 font-medium">Curriculum</span>
+                            <span className="font-bold text-[#0056D2]">
+                              {isEnrolled ? `${cp.percentage}%` : "Ready"}
                             </span>
                           </div>
-                          <h3 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug break-words">
-                            {course.title}
-                          </h3>
-                        </div>
-                        <span className="text-xs font-bold text-[#0056D2]">
-                          {cp.percentage}% complete
-                        </span>
-                      </div>
-
-                      <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                        <div
-                          className="h-full bg-[#0056D2] rounded-full progress-animated"
-                          style={{ width: `${Math.max(cp.percentage, 10)}%` }}
-                        />
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                        <div className="text-xs text-neutral-600">
-                          Next: <span className="font-semibold text-neutral-900">{currentLesson?.title || "Lesson 1"}</span>
+                          <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                            <div
+                              className="h-full bg-[#0056D2] rounded-full progress-animated"
+                              style={{ width: `${isEnrolled ? Math.max(cp.percentage, 8) : 5}%` }}
+                            />
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        {/* Next lesson info */}
+                        <div className="text-[10px] sm:text-xs text-neutral-500 truncate mt-2">
+                          <span className="text-neutral-400">Next:</span>{" "}
+                          <span className="font-semibold text-neutral-800">
+                            {currentLesson?.title || "Lesson 1"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Action Buttons: Two buttons side by side matching Image 2 */}
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-3 border-t border-neutral-100">
+                        <button
+                          type="button"
+                          onClick={() => onOpenCourseModal(course)}
+                          className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl border border-neutral-200/90 hover:bg-neutral-50 text-neutral-700 font-semibold text-[10px] sm:text-xs transition flex items-center justify-center gap-1 shadow-2xs active:scale-95 text-center truncate"
+                          title="View course syllabus"
+                        >
+                          <BookOpen className="w-3 h-3 text-neutral-400 shrink-0 hidden sm:inline" />
+                          <span className="truncate">Syllabus</span>
+                        </button>
+
+                        {isEnrolled && currentLesson ? (
+                          <Link
+                            href={`/digihub/lesson/${currentLesson.id}`}
+                            className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
+                            title="Continue this course"
+                          >
+                            <span className="truncate">Continue</span>
+                            <ArrowRight className="w-3 h-3 shrink-0" />
+                          </Link>
+                        ) : (
                           <button
                             type="button"
-                            onClick={() => onOpenCourseModal(course)}
-                            className="px-3.5 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition"
+                            onClick={() => {
+                              if (onEnrollCourse) {
+                                onEnrollCourse(course.id);
+                              } else {
+                                onOpenCourseModal(course);
+                              }
+                            }}
+                            className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
+                            title="Enroll in this course track"
                           >
-                            Syllabus
+                            <span className="truncate">Enroll</span>
+                            <ArrowRight className="w-3 h-3 shrink-0" />
                           </button>
-                          {currentLesson && (
-                            <Link
-                              href={`/digihub/lesson/${currentLesson.id}`}
-                              className="px-4 py-1.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
-                            >
-                              Continue
-                            </Link>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   );
                 })}
-
-                {/* If user has any completed courses, show them cleanly without requiring a tab switch */}
-                {completedCourses.map((c) => (
-                  <div
-                    key={c.id}
-                    className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
-                  >
-                    <div>
-                      <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Completed Track</span>
-                      </div>
-                      <h4 className="text-sm font-bold text-neutral-900 mt-0.5">{c.title}</h4>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveSection("diplomas")}
-                      className="px-4 py-2 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
-                    >
-                      View Diploma
-                    </button>
-                  </div>
-                ))}
               </div>
+
+              {/* If user has any completed courses, show them cleanly */}
+              {completedCourses.length > 0 && (
+                <div className="pt-2 space-y-2">
+                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
+                    Completed Diplomas
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {completedCourses.map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-3.5 sm:p-4 rounded-2xl bg-white border border-neutral-200/90 flex items-center justify-between gap-3 shadow-2xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>Completed Track</span>
+                          </div>
+                          <h4 className="text-xs sm:text-sm font-bold text-neutral-900 mt-0.5 truncate">{c.title}</h4>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setActiveSection("diplomas")}
+                          className="px-3 py-1.5 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
+                        >
+                          Diploma
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
           </div>
         )}
