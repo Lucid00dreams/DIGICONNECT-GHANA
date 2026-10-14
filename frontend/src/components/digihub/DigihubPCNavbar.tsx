@@ -384,35 +384,20 @@ export function DigihubPCNavbar({
 
           {/* Right Action Cluster (Exact layout of Image 1) */}
           <div className="flex items-center gap-2 xl:gap-3 shrink-0">
-            {/* Theme Toggle Pill [ ☀️ Light | 🌙 Dark ] from Image 1 */}
-            <div className="flex items-center bg-[#F3F4F8] border border-neutral-200/80 rounded-full p-0.5 text-xs font-semibold shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setThemeMode("light")}
-                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all duration-200 text-[11px] hover:scale-105 active:scale-95 ${
-                  themeMode === "light"
-                    ? "bg-white text-neutral-900 shadow-2xs font-bold"
-                    : "text-neutral-500 hover:text-neutral-800"
-                }`}
-                title="Light mode active"
-              >
-                <Sun className="w-3 h-3 text-amber-500" />
-                <span>Light</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setThemeMode("dark")}
-                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all duration-200 text-[11px] hover:scale-105 active:scale-95 ${
-                  themeMode === "dark"
-                    ? "bg-neutral-900 text-white shadow-2xs font-bold"
-                    : "text-neutral-500 hover:text-neutral-800"
-                }`}
-                title="Toggle Dark Mode"
-              >
-                <Moon className="w-3 h-3 text-indigo-400" />
-                <span>Dark</span>
-              </button>
-            </div>
+            {/* Theme Toggle Button (Single sleek Sun/Moon button) */}
+            <button
+              type="button"
+              onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
+              className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 hover:shadow-xs shadow-2xs"
+              title={themeMode === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              aria-label="Toggle theme mode"
+            >
+              {themeMode === "light" ? (
+                <Moon className="w-4 h-4 text-indigo-500 stroke-[2]" />
+              ) : (
+                <Sun className="w-4 h-4 text-amber-500 stroke-[2]" />
+              )}
+            </button>
 
             {/* Notification Bell Button with Unread Badge */}
             <div ref={notifRef} className="relative">
@@ -467,17 +452,6 @@ export function DigihubPCNavbar({
                 </div>
               )}
             </div>
-
-            {/* Settings / Quick Hub Gear Button */}
-            <button
-              type="button"
-              onClick={onOpenQuickHub}
-              className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 hover:shadow-xs shadow-2xs"
-              title="Open Quick Hub drawer & settings"
-              aria-label="Open Quick Hub"
-            >
-              <SlidersHorizontal className="w-4 h-4 stroke-[2]" />
-            </button>
 
             {/* User Profile Pill & Dropdown Menu */}
             <div ref={userMenuRef} className="relative pl-1">
@@ -551,6 +525,17 @@ export function DigihubPCNavbar({
                     >
                       <Flame className="w-3.5 h-3.5 text-emerald-500" />
                       <span>Study Streak (4 Days)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onOpenQuickHub();
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-600" />
+                      <span>Settings &amp; Quick Hub</span>
                     </button>
                     <button
                       type="button"

@@ -42,6 +42,7 @@ import {
   MousePointer,
   Bot,
   Menu,
+  Flame,
 } from "lucide-react";
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
@@ -243,9 +244,9 @@ export function DigihubDashboard({
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-8 tab-content-enter" key="learning">
-            {/* Greeting & Active Course Hero */}
+            {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
             <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-5 animate-fade-in-up">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
                     {timeGreeting}, {firstName} 👋
@@ -254,15 +255,49 @@ export function DigihubDashboard({
                     {primaryCourse?.title || "Web Engineering & Coding Foundations"}
                   </h1>
                 </div>
-                <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#0056D2] shrink-0 border border-blue-100">
-                  {primaryCourse?.organization || "DigiConnect Academy"}
-                </span>
+
+                {/* 7-Day Study Streak Indicator (Duolingo/GitHub style) */}
+                <div className="flex items-center gap-3 self-start sm:self-auto bg-neutral-50 px-3.5 py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                    <Flame className="w-4 h-4 fill-emerald-500 text-emerald-500" />
+                    <span>4d Streak</span>
+                  </div>
+                  <div className="h-4 w-px bg-neutral-200" />
+                  <div className="flex items-center gap-1">
+                    {[
+                      { day: "M", done: true },
+                      { day: "T", done: true },
+                      { day: "W", done: true },
+                      { day: "T", done: true },
+                      { day: "F", done: false },
+                      { day: "S", done: false },
+                      { day: "S", done: false },
+                    ].map((d, i) => (
+                      <div
+                        key={i}
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition ${
+                          d.done
+                            ? "bg-emerald-500 text-white shadow-2xs"
+                            : "bg-neutral-200/80 text-neutral-500"
+                        }`}
+                        title={`${d.day}: ${d.done ? "Active study day completed" : "Upcoming study day"}`}
+                      >
+                        {d.day}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Progress Bar */}
+              {/* Progress Bar & Time Remaining Badge */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-neutral-600">Curriculum Progress</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-neutral-600">Curriculum Progress</span>
+                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[10px]">
+                      ~2.5 hrs to Diploma
+                    </span>
+                  </div>
                   <span className="font-bold text-[#0056D2]">{primaryProgress.percentage}% complete</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden">
@@ -272,32 +307,6 @@ export function DigihubDashboard({
                   />
                 </div>
               </div>
-
-              {/* Next Lesson Action Banner */}
-              {nextLesson && (
-                <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0056D2] uppercase tracking-wide">
-                      <Play className="w-3.5 h-3.5 fill-[#0056D2]" />
-                      <span>Up Next</span>
-                    </div>
-                    <h2 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug break-words">
-                      {nextLesson.title}
-                    </h2>
-                    <p className="text-xs text-neutral-600">
-                      In-Browser Interactive Lab • {nextLesson.durationMinutes} min
-                    </p>
-                  </div>
-
-                  <Link
-                    href={`/digihub/lesson/${nextLesson.id}`}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs sm:text-sm shadow-sm transition active:scale-98 shrink-0 text-center"
-                  >
-                    <span>Resume Learning</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              )}
             </section>
 
             {/* Clean, Minimalist Enrolled Courses (Zero tab clutter) */}
@@ -336,9 +345,14 @@ export function DigihubDashboard({
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                         <div>
-                          <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                            {course.organization}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                              {course.organization}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px]">
+                              ~{Math.max(1, (course.lessons.length - cp.completed) * 0.75).toFixed(1)} hrs left
+                            </span>
+                          </div>
                           <h3 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug break-words">
                             {course.title}
                           </h3>

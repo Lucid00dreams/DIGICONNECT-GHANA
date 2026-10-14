@@ -93,14 +93,14 @@ export function DigihubMobileNavbar({
             </div>
           </Link>
 
-          {/* Quick Header Actions */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Streamlined Mobile Header Actions (Clean, minimal, zero crowding) */}
+          <div className="flex items-center gap-2 shrink-0">
             {/* Explore Menu Button */}
             {onOpenMenu && (
               <button
                 type="button"
                 onClick={onOpenMenu}
-                className="px-2.5 py-1 rounded-full bg-indigo-50/90 hover:bg-indigo-100 border border-indigo-200/90 text-[#5B67E2] text-xs font-bold flex items-center gap-1 shadow-2xs hover:scale-105 active:scale-95 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full bg-indigo-50/90 hover:bg-indigo-100 border border-indigo-200/90 text-[#5B67E2] text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:scale-105 active:scale-95 transition-all duration-200"
                 title="Explore Menu & All Pages"
                 aria-label="Explore Menu"
               >
@@ -109,53 +109,13 @@ export function DigihubMobileNavbar({
               </button>
             )}
 
-            {/* Quick Search */}
-            {onOpenSearch && (
-              <button
-                type="button"
-                onClick={onOpenSearch}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all duration-200 hover:scale-105 active:scale-95"
-                aria-label="Search courses"
-              >
-                <Search className="w-4 h-4 stroke-[2]" />
-              </button>
-            )}
-
-            {/* Notification Bell */}
-            {onOpenNotifications && (
-              <button
-                type="button"
-                onClick={onOpenNotifications}
-                className="relative w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all duration-200 hover:scale-105 active:scale-95"
-                aria-label="View notifications"
-              >
-                <Bell className="w-4 h-4 stroke-[2]" />
-                {unreadNotificationsCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#E02629] ring-2 ring-white animate-pulse" />
-                )}
-              </button>
-            )}
-
-            {/* DIGIHUB AI Tutor Quick Launch */}
-            {onOpenCoach && (
-              <button
-                type="button"
-                onClick={onOpenCoach}
-                className="px-2 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 text-[#5B67E2] text-xs font-bold flex items-center gap-1 shadow-2xs hover:scale-105 active:scale-95 transition-all duration-200"
-                title="Ask DIGIHUB AI"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#5B67E2]" />
-                <span className="text-[11px]">AI Coach</span>
-              </button>
-            )}
-
             {/* User Avatar */}
             {currentUser && onOpenProfile && (
               <button
                 type="button"
                 onClick={onOpenProfile}
-                className="w-7 h-7 rounded-full bg-[#5B67E2] text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-indigo-100 shadow-2xs ml-0.5 hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
-                aria-label="User account"
+                className="w-8 h-8 rounded-full bg-[#5B67E2] text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-100 shadow-2xs hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
+                aria-label="User account & profile"
               >
                 {currentUser.name.charAt(0).toUpperCase()}
               </button>
