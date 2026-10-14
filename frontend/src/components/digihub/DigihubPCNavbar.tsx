@@ -268,12 +268,12 @@ export function DigihubPCNavbar({
               </div>
             </Link>
 
-            {/* Desktop Navigation Tabs (Styled like Image 1: Dashboard, Courses, Labs, Mentorship, Diplomas, Menu) */}
-            <nav aria-label="PC Navigation Tabs" className="flex items-center gap-1 xl:gap-2">
+            {/* Desktop Navigation Tabs: Minimalist 3-Tab Structure */}
+            <nav aria-label="PC Navigation Tabs" className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => onSelectSection("learning")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "learning"
                     ? "bg-neutral-900 text-white shadow-xs"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
@@ -286,7 +286,7 @@ export function DigihubPCNavbar({
               <button
                 type="button"
                 onClick={() => onSelectSection("catalog")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "catalog"
                     ? "bg-neutral-900 text-white shadow-xs font-bold"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
@@ -296,50 +296,11 @@ export function DigihubPCNavbar({
                 <span>Courses</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => onSelectSection("labs")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
-                  activeSection === "labs"
-                    ? "bg-neutral-900 text-white shadow-xs font-bold"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
-                }`}
-              >
-                <Terminal className="w-3.5 h-3.5 stroke-[2]" />
-                <span>Browser Labs</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectSection("mentorship")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
-                  activeSection === "mentorship"
-                    ? "bg-neutral-900 text-white shadow-xs font-bold"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
-                }`}
-              >
-                <Users className="w-3.5 h-3.5 stroke-[2]" />
-                <span>Mentorship</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectSection("diplomas")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
-                  activeSection === "diplomas"
-                    ? "bg-neutral-900 text-white shadow-xs font-bold"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
-                }`}
-              >
-                <Award className="w-3.5 h-3.5 stroke-[2]" />
-                <span>Diplomas ({certificates.length})</span>
-              </button>
-
               {/* Dedicated Menu Tab (Explores all features and site pages) */}
               <button
                 type="button"
                 onClick={handleOpenMenu}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 group ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 group ${
                   isMenuModalOpen
                     ? "bg-[#5B67E2] text-white shadow-xs font-bold"
                     : "text-neutral-700 hover:text-neutral-900 hover:bg-indigo-50/80"
@@ -518,37 +479,6 @@ export function DigihubPCNavbar({
               <SlidersHorizontal className="w-4 h-4 stroke-[2]" />
             </button>
 
-            {/* Export Data Button (Styled like Image 1: Export data with downward icon) */}
-            <button
-              type="button"
-              onClick={handleExportData}
-              disabled={isExporting}
-              className="px-3 py-1.5 rounded-full bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/80 text-xs font-bold text-[#5B67E2] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 flex items-center gap-1.5 shadow-2xs hover:shadow-xs"
-              title="Download your official learner transcript and progress report"
-            >
-              <Download className="w-3.5 h-3.5 stroke-[2]" />
-              <span>{isExporting ? "Exporting..." : "Export data"}</span>
-              <span className="px-1 py-0.2 rounded text-[9px] bg-white text-[#5B67E2] font-mono border border-indigo-100">
-                .json
-              </span>
-            </button>
-
-            {/* Primary Action Button: Dark Navy Pill (+ Add new board style from Image 1) */}
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenMentorBooking) {
-                  onOpenMentorBooking();
-                } else {
-                  onSelectSection("catalog");
-                }
-              }}
-              className="px-4 py-2 rounded-full bg-[#101828] hover:bg-neutral-800 text-white text-xs font-bold shadow-xs transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 hover:shadow-md flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>New Board / Course</span>
-            </button>
-
             {/* User Profile Pill & Dropdown Menu */}
             <div ref={userMenuRef} className="relative pl-1">
               <button
@@ -611,6 +541,17 @@ export function DigihubPCNavbar({
                       <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
                       <span>DIGIHUB AI Tutor</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleExportData();
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center gap-2"
+                    >
+                      <Download className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>{isExporting ? "Exporting..." : "Export Transcript (.json)"}</span>
+                    </button>
                   </div>
                   <div className="pt-1 border-t border-neutral-100">
                     <button
@@ -651,105 +592,40 @@ export function DigihubPCNavbar({
         aria-label="PC Left Dock"
         className="hidden lg:flex fixed left-3 top-24 bottom-6 z-30 flex-col items-center justify-between w-16 bg-gradient-to-b from-[#626FE6] to-[#4F46E5] rounded-[28px] py-4 shadow-[0_12px_32px_rgba(79,70,229,0.28)] border border-white/20 select-none"
       >
-        {/* Top Active Tile (Image 1 Squircle: White rounded-2xl with active indigo icon) */}
+        {/* Top Active Tile (Image 1 Squircle: White rounded-2xl tile for Diplomas & Credentials) */}
         <div className="flex flex-col items-center gap-2.5">
           <button
             type="button"
-            onClick={() => onSelectSection("learning")}
-            className="w-11 h-11 bg-white rounded-2xl shadow-[0_6px_16px_rgba(0,0,0,0.12)] flex items-center justify-center text-[#5B67E2] transition-all duration-200 hover:scale-110 active:scale-95 group relative"
-            title="Dashboard (My Learning)"
+            onClick={() => onSelectSection("diplomas")}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
+              activeSection === "diplomas"
+                ? "bg-white text-[#5B67E2] shadow-[0_6px_16px_rgba(0,0,0,0.12)] font-bold"
+                : "bg-white/20 text-white hover:bg-white/30"
+            }`}
+            title="My Diplomas & Verified Credentials"
           >
-            <LayoutGrid className="w-5 h-5 stroke-[2.2]" />
-            <span className="sr-only">Dashboard</span>
+            <Award className="w-5 h-5 stroke-[2.2]" />
+            <span className="sr-only">Diplomas</span>
             {/* Tooltip */}
             <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Dashboard
+              My Diplomas ({certificates.length})
             </span>
           </button>
 
-          {/* Explore Menu Tab Icon (flat Compass icon) */}
+          {/* Browser Labs Sandbox */}
           <button
             type="button"
-            onClick={handleOpenMenu}
+            onClick={() => onSelectSection("labs")}
             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              isMenuModalOpen
-                ? "bg-white text-[#5B67E2] font-bold shadow-xs"
-                : "text-white/80 hover:text-white hover:bg-white/20"
-            }`}
-            title="Explore Menu & All Pages"
-          >
-            <Compass className="w-4.5 h-4.5 stroke-[2] group-hover:rotate-45 transition-transform duration-300" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Explore Menu & Pages
-            </span>
-          </button>
-
-          {/* User Profile / Diplomas */}
-          <button
-            type="button"
-            onClick={() => onSelectSection("diplomas")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "diplomas"
+              activeSection === "labs"
                 ? "bg-white/30 text-white font-bold"
                 : "text-white/80 hover:text-white hover:bg-white/15"
             }`}
-            title="Profile & Verified Diplomas"
+            title="Browser Labs & Sandboxes"
           >
-            <Award className="w-4.5 h-4.5 stroke-[2]" />
+            <Terminal className="w-4.5 h-4.5 stroke-[2]" />
             <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Diplomas & Profile
-            </span>
-          </button>
-
-          {/* Streak / Clock with Green PRO/LMS Badge (Exact replica from Image 1) */}
-          <div className="relative group">
-            <button
-              type="button"
-              onClick={() => setStreakModalOpen(!streakModalOpen)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 relative"
-              title="Study Streak (4 Days Active)"
-            >
-              <Clock className="w-4.5 h-4.5 stroke-[2]" />
-              {/* Neon Green PRO badge */}
-              <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-[#10B981] text-neutral-950 font-black text-[8px] uppercase tracking-tighter shadow-2xs">
-                PRO
-              </span>
-            </button>
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              4-Day Study Streak (PRO)
-            </span>
-          </div>
-
-          {/* Notification Bell */}
-          <button
-            type="button"
-            onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 group relative"
-            title="Notifications"
-          >
-            <Bell className="w-4.5 h-4.5 stroke-[2]" />
-            {unreadCount > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E02629] ring-1 ring-white animate-pulse" />
-            )}
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Notifications ({unreadCount})
-            </span>
-          </button>
-
-          {/* Courses Catalog */}
-          <button
-            type="button"
-            onClick={() => onSelectSection("catalog")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "catalog"
-                ? "bg-white/30 text-white font-bold"
-                : "text-white/80 hover:text-white hover:bg-white/15"
-            }`}
-            title="Course Catalog"
-          >
-            <BookOpen className="w-4.5 h-4.5 stroke-[2]" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Course Catalog
+              Browser Labs & Code Sandbox
             </span>
           </button>
 
@@ -770,7 +646,7 @@ export function DigihubPCNavbar({
             </span>
           </button>
 
-          {/* Jargon Buster / Notes with Yellow Dot (Exact replica from Image 1) */}
+          {/* Jargon Buster / Notes with Yellow Dot (Image 1 replica) */}
           <button
             type="button"
             onClick={onOpenJargonModal}
@@ -785,22 +661,24 @@ export function DigihubPCNavbar({
             </span>
           </button>
 
-          {/* Interactive Browser Labs */}
-          <button
-            type="button"
-            onClick={() => onSelectSection("labs")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
-              activeSection === "labs"
-                ? "bg-white/30 text-white font-bold"
-                : "text-white/80 hover:text-white hover:bg-white/15"
-            }`}
-            title="Browser Labs & Sandboxes"
-          >
-            <Terminal className="w-4.5 h-4.5 stroke-[2]" />
+          {/* Streak / Clock with Green PRO/LMS Badge (Image 1 replica) */}
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={() => setStreakModalOpen(!streakModalOpen)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 relative"
+              title="Study Streak (4 Days Active)"
+            >
+              <Clock className="w-4.5 h-4.5 stroke-[2]" />
+              {/* Neon Green PRO badge */}
+              <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-[#10B981] text-neutral-950 font-black text-[8px] uppercase tracking-tighter shadow-2xs">
+                PRO
+              </span>
+            </button>
             <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
-              Browser Labs & Code Sandbox
+              4-Day Study Streak (PRO)
             </span>
-          </button>
+          </div>
         </div>
 
         {/* Bottom AI Chat Bubble (Triggers Movable AI Coach) */}

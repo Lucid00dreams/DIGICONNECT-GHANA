@@ -111,7 +111,6 @@ export function DigihubDashboard({
   onUpdateStudentName,
 }: DigihubDashboardProps) {
   const [activeSection, setActiveSection] = useState<DashboardSection>("learning");
-  const [learningTab, setLearningTab] = useState<"in-progress" | "completed">("in-progress");
   const [catalogFilter, setCatalogFilter] = useState<string>("all");
   const [catalogSearch, setCatalogSearch] = useState<string>("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -301,223 +300,111 @@ export function DigihubDashboard({
               )}
             </section>
 
-            {/* Quick Launch Interactive Workspaces Strip */}
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
-                  Interactive Browser Workspaces
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection("labs")}
-                  className="text-xs font-semibold text-[#0056D2] hover:underline"
-                >
-                  View All Labs →
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                <Link
-                  href="/digihub/lesson/coding-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
-                  style={{ animationDelay: '50ms' }}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <Code2 className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-neutral-900 truncate">Web Sandbox</div>
-                    <div className="text-[10px] text-neutral-500">Live HTML/JS</div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/digihub/lesson/cyber-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
-                  style={{ animationDelay: '100ms' }}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                    <Shield className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-neutral-900 truncate">Cyber Incident Lab</div>
-                    <div className="text-[10px] text-neutral-500">Defense &amp; Phishing</div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/digihub/lesson/py-1"
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
-                  style={{ animationDelay: '150ms' }}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Terminal className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-neutral-900 truncate">Python Shell</div>
-                    <div className="text-[10px] text-neutral-500">Code Runner</div>
-                  </div>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveSection("diplomas")}
-                  className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200 hover:border-[#0056D2] hover:shadow-xs card-lift text-left flex items-center gap-2.5 group animate-fade-in-up"
-                  style={{ animationDelay: '200ms' }}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <Award className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-neutral-900 truncate">My Diplomas</div>
-                    <div className="text-[10px] text-neutral-500">{certificates.length} Verified</div>
-                  </div>
-                </button>
-              </div>
-            </section>
-
-            {/* In Progress vs Completed Segmented Tabs */}
+            {/* Clean, Minimalist Enrolled Courses (Zero tab clutter) */}
             <section className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-neutral-200 pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
+                    My Enrolled Courses
+                  </h2>
+                  <p className="text-xs text-neutral-500">
+                    Track your curriculum progress and earn verified diplomas.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setLearningTab("in-progress")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                    learningTab === "in-progress"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
+                  onClick={() => setActiveSection("catalog")}
+                  className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1 group"
                 >
-                  Active Tracks ({inProgressCourses.length})
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setLearningTab("completed")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                    learningTab === "completed"
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  Completed Tracks ({completedCourses.length})
+                  <span>Explore All ({courses.length})</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                 </button>
               </div>
 
-              {/* In Progress List */}
-              {learningTab === "in-progress" && (
-                <div className="space-y-3">
-                  {inProgressCourses.map((course) => {
-                    const cp = getCourseProgress(course.id, progress.completedLessonIds);
-                    const currentLesson =
-                      course.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
-                      course.lessons[0];
+              {/* Course Cards List */}
+              <div className="space-y-3">
+                {inProgressCourses.map((course) => {
+                  const cp = getCourseProgress(course.id, progress.completedLessonIds);
+                  const currentLesson =
+                    course.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
+                    course.lessons[0];
 
-                    return (
-                      <div
-                        key={course.id}
-                        className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 shadow-2xs card-lift space-y-3 animate-fade-in-up"
-                        style={{ animationDelay: `${Math.min(inProgressCourses.indexOf(course) * 80, 300)}ms` }}
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                          <div>
-                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                              {course.organization}
-                            </span>
-                            <h3 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug break-words">
-                              {course.title}
-                            </h3>
-                          </div>
-                          <span className="text-xs font-bold text-[#0056D2]">
-                            {cp.percentage}% complete
+                  return (
+                    <div
+                      key={course.id}
+                      className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 shadow-2xs card-lift space-y-3 animate-fade-in-up"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                        <div>
+                          <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                            {course.organization}
                           </span>
+                          <h3 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug break-words">
+                            {course.title}
+                          </h3>
+                        </div>
+                        <span className="text-xs font-bold text-[#0056D2]">
+                          {cp.percentage}% complete
+                        </span>
+                      </div>
+
+                      <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                        <div
+                          className="h-full bg-[#0056D2] rounded-full progress-animated"
+                          style={{ width: `${Math.max(cp.percentage, 10)}%` }}
+                        />
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                        <div className="text-xs text-neutral-600">
+                          Next: <span className="font-semibold text-neutral-900">{currentLesson?.title || "Lesson 1"}</span>
                         </div>
 
-                        <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                          <div
-                            className="h-full bg-[#0056D2] rounded-full progress-animated"
-                            style={{ width: `${Math.max(cp.percentage, 10)}%` }}
-                          />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                          <div className="text-xs text-neutral-600">
-                            Next: <span className="font-semibold text-neutral-900">{currentLesson?.title || "Lesson 1"}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => onOpenCourseModal(course)}
-                              className="px-3 py-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs"
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => onOpenCourseModal(course)}
+                            className="px-3.5 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition"
+                          >
+                            Syllabus
+                          </button>
+                          {currentLesson && (
+                            <Link
+                              href={`/digihub/lesson/${currentLesson.id}`}
+                              className="px-4 py-1.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
                             >
-                              Syllabus
-                            </button>
-                            {currentLesson && (
-                              <Link
-                                href={`/digihub/lesson/${currentLesson.id}`}
-                                className="px-4 py-1.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs"
-                              >
-                                Continue
-                              </Link>
-                            )}
-                          </div>
+                              Continue
+                            </Link>
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  );
+                })}
 
-                  {/* Clean Discover Tracks Card */}
-                  <div className="p-5 rounded-2xl bg-white border border-dashed border-neutral-300 text-center space-y-2.5">
-                    <p className="text-xs text-neutral-600 font-medium">
-                      Want to study something new? Discover all 12 tuition-free technical tracks right inside DIGIHub.
-                    </p>
+                {/* If user has any completed courses, show them cleanly without requiring a tab switch */}
+                {completedCourses.map((c) => (
+                  <div
+                    key={c.id}
+                    className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Completed Track</span>
+                      </div>
+                      <h4 className="text-sm font-bold text-neutral-900 mt-0.5">{c.title}</h4>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setActiveSection("catalog")}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
+                      onClick={() => setActiveSection("diplomas")}
+                      className="px-4 py-2 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
                     >
-                      <Compass className="w-3.5 h-3.5" />
-                      <span>Explore Courses</span>
+                      View Diploma
                     </button>
                   </div>
-                </div>
-              )}
-
-              {/* Completed List */}
-              {learningTab === "completed" && (
-                <div className="space-y-3">
-                  {completedCourses.length === 0 ? (
-                    <div className="p-8 text-center bg-white rounded-2xl border border-neutral-200 text-xs text-neutral-500 space-y-2">
-                      <Award className="w-8 h-8 text-neutral-300 mx-auto" />
-                      <p className="font-bold text-neutral-700">No completed courses yet</p>
-                      <p>Complete all modules in an academy track to earn your official diploma.</p>
-                    </div>
-                  ) : (
-                    completedCourses.map((c) => (
-                      <div
-                        key={c.id}
-                        className="p-4 rounded-2xl bg-white border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                      >
-                        <div>
-                          <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Completed Track</span>
-                          </div>
-                          <h4 className="text-sm font-bold text-neutral-900 mt-0.5">{c.title}</h4>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setActiveSection("diplomas")}
-                          className="px-4 py-2 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
-                        >
-                          View Diploma
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+                ))}
+              </div>
             </section>
           </div>
         )}
