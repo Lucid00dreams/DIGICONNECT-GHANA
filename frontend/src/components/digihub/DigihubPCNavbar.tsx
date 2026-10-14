@@ -30,8 +30,10 @@ import {
   Flame,
   MessageSquare,
   FileCode,
+  Compass,
 } from "lucide-react";
 import { LMSUser, Course, CertificateRecord, MentorshipSession } from "@/lib/lmsStore";
+import { DigihubMenuModal } from "./DigihubMenuModal";
 
 export type PCTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
 
@@ -49,6 +51,9 @@ interface DigihubPCNavbarProps {
   onOpenCourseModal?: (course: Course) => void;
   onOpenMentorBooking?: () => void;
   onSearchQuery?: (q: string) => void;
+  isMenuOpen?: boolean;
+  onOpenMenu?: () => void;
+  onCloseMenu?: () => void;
 }
 
 interface NotificationItem {
@@ -74,6 +79,9 @@ export function DigihubPCNavbar({
   onOpenCourseModal,
   onOpenMentorBooking,
   onSearchQuery,
+  isMenuOpen,
+  onOpenMenu,
+  onCloseMenu,
 }: DigihubPCNavbarProps) {
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
   const [searchVal, setSearchVal] = useState("");
@@ -82,6 +90,11 @@ export function DigihubPCNavbar({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+
+  const isMenuModalOpen = isMenuOpen !== undefined ? isMenuOpen : internalMenuOpen;
+  const handleOpenMenu = onOpenMenu || (() => setInternalMenuOpen(true));
+  const handleCloseMenu = onCloseMenu || (() => setInternalMenuOpen(false));
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -255,71 +268,94 @@ export function DigihubPCNavbar({
               </div>
             </Link>
 
-            {/* Desktop Navigation Tabs (Styled like Image 1: Dashboard, Workflows, Integrations) */}
+            {/* Desktop Navigation Tabs (Styled like Image 1: Dashboard, Courses, Labs, Mentorship, Diplomas, Menu) */}
             <nav aria-label="PC Navigation Tabs" className="flex items-center gap-1 xl:gap-2">
               <button
                 type="button"
                 onClick={() => onSelectSection("learning")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "learning"
                     ? "bg-neutral-900 text-white shadow-xs"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Dashboard</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectSection("catalog")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "catalog"
                     ? "bg-neutral-900 text-white shadow-xs font-bold"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
                 }`}
               >
-                <BookOpen className="w-3.5 h-3.5" />
+                <BookOpen className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Courses</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectSection("labs")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "labs"
                     ? "bg-neutral-900 text-white shadow-xs font-bold"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
                 }`}
               >
-                <Terminal className="w-3.5 h-3.5" />
+                <Terminal className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Browser Labs</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectSection("mentorship")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "mentorship"
                     ? "bg-neutral-900 text-white shadow-xs font-bold"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
                 }`}
               >
-                <Users className="w-3.5 h-3.5" />
+                <Users className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Mentorship</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectSection("diplomas")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 ${
                   activeSection === "diplomas"
                     ? "bg-neutral-900 text-white shadow-xs font-bold"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80"
                 }`}
               >
-                <Award className="w-3.5 h-3.5" />
+                <Award className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Diplomas ({certificates.length})</span>
+              </button>
+
+              {/* Dedicated Menu Tab (Explores all features and site pages) */}
+              <button
+                type="button"
+                onClick={handleOpenMenu}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 group ${
+                  isMenuModalOpen
+                    ? "bg-[#5B67E2] text-white shadow-xs font-bold"
+                    : "text-neutral-700 hover:text-neutral-900 hover:bg-indigo-50/80"
+                }`}
+                aria-label="Explore menu, features and pages"
+                title="Explore all features, labs, and DigiConnect pages"
+              >
+                <Compass className={`w-3.5 h-3.5 stroke-[2] transition-transform duration-300 group-hover:rotate-45 ${
+                  isMenuModalOpen ? "text-white" : "text-[#5B67E2]"
+                }`} />
+                <span>Menu</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold transition-colors ${
+                  isMenuModalOpen ? "bg-white/20 text-white" : "bg-[#5B67E2]/15 text-[#5B67E2]"
+                }`}>
+                  Explore
+                </span>
               </button>
             </nav>
           </div>
@@ -392,7 +428,7 @@ export function DigihubPCNavbar({
               <button
                 type="button"
                 onClick={() => setThemeMode("light")}
-                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition text-[11px] ${
+                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all duration-200 text-[11px] hover:scale-105 active:scale-95 ${
                   themeMode === "light"
                     ? "bg-white text-neutral-900 shadow-2xs font-bold"
                     : "text-neutral-500 hover:text-neutral-800"
@@ -405,7 +441,7 @@ export function DigihubPCNavbar({
               <button
                 type="button"
                 onClick={() => setThemeMode("dark")}
-                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition text-[11px] ${
+                className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all duration-200 text-[11px] hover:scale-105 active:scale-95 ${
                   themeMode === "dark"
                     ? "bg-neutral-900 text-white shadow-2xs font-bold"
                     : "text-neutral-500 hover:text-neutral-800"
@@ -422,13 +458,13 @@ export function DigihubPCNavbar({
               <button
                 type="button"
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition shadow-2xs relative"
+                className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 hover:shadow-xs shadow-2xs relative"
                 aria-label="Student notifications"
                 aria-expanded={isNotifOpen}
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-4 h-4 stroke-[2]" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#5B67E2] text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#5B67E2] text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white animate-pulse">
                     {unreadCount}
                   </span>
                 )}
@@ -453,7 +489,7 @@ export function DigihubPCNavbar({
                     {notifications.map((n) => (
                       <div
                         key={n.id}
-                        className={`p-2.5 rounded-xl border text-xs transition ${
+                        className={`p-2.5 rounded-xl border text-xs transition-colors ${
                           n.unread
                             ? "bg-indigo-50/50 border-indigo-100 text-neutral-900"
                             : "bg-neutral-50/50 border-neutral-100 text-neutral-600"
@@ -475,11 +511,11 @@ export function DigihubPCNavbar({
             <button
               type="button"
               onClick={onOpenQuickHub}
-              className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition shadow-2xs"
+              className="w-9 h-9 rounded-full bg-[#F3F4F8] hover:bg-[#EBEEF5] text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 hover:shadow-xs shadow-2xs"
               title="Open Quick Hub drawer & settings"
               aria-label="Open Quick Hub"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="w-4 h-4 stroke-[2]" />
             </button>
 
             {/* Export Data Button (Styled like Image 1: Export data with downward icon) */}
@@ -487,10 +523,10 @@ export function DigihubPCNavbar({
               type="button"
               onClick={handleExportData}
               disabled={isExporting}
-              className="px-3 py-1.5 rounded-full bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/80 text-xs font-bold text-[#5B67E2] transition flex items-center gap-1.5 shadow-2xs hover:scale-102 active:scale-98"
+              className="px-3 py-1.5 rounded-full bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/80 text-xs font-bold text-[#5B67E2] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 flex items-center gap-1.5 shadow-2xs hover:shadow-xs"
               title="Download your official learner transcript and progress report"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 stroke-[2]" />
               <span>{isExporting ? "Exporting..." : "Export data"}</span>
               <span className="px-1 py-0.2 rounded text-[9px] bg-white text-[#5B67E2] font-mono border border-indigo-100">
                 .json
@@ -507,9 +543,9 @@ export function DigihubPCNavbar({
                   onSelectSection("catalog");
                 }
               }}
-              className="px-4 py-2 rounded-full bg-[#101828] hover:bg-neutral-800 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 hover:scale-102 active:scale-98"
+              className="px-4 py-2 rounded-full bg-[#101828] hover:bg-neutral-800 text-white text-xs font-bold shadow-xs transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 hover:shadow-md flex items-center gap-1.5"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>New Board / Course</span>
             </button>
 
@@ -616,34 +652,51 @@ export function DigihubPCNavbar({
         className="hidden lg:flex fixed left-3 top-24 bottom-6 z-30 flex-col items-center justify-between w-16 bg-gradient-to-b from-[#626FE6] to-[#4F46E5] rounded-[28px] py-4 shadow-[0_12px_32px_rgba(79,70,229,0.28)] border border-white/20 select-none"
       >
         {/* Top Active Tile (Image 1 Squircle: White rounded-2xl with active indigo icon) */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-2.5">
           <button
             type="button"
             onClick={() => onSelectSection("learning")}
-            className="w-11 h-11 bg-white rounded-2xl shadow-[0_6px_16px_rgba(0,0,0,0.12)] flex items-center justify-center text-[#5B67E2] transition-transform hover:scale-105 active:scale-95 group relative"
+            className="w-11 h-11 bg-white rounded-2xl shadow-[0_6px_16px_rgba(0,0,0,0.12)] flex items-center justify-center text-[#5B67E2] transition-all duration-200 hover:scale-110 active:scale-95 group relative"
             title="Dashboard (My Learning)"
           >
             <LayoutGrid className="w-5 h-5 stroke-[2.2]" />
             <span className="sr-only">Dashboard</span>
             {/* Tooltip */}
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Dashboard
             </span>
           </button>
 
-          {/* User Profile */}
+          {/* Explore Menu Tab Icon (flat Compass icon) */}
+          <button
+            type="button"
+            onClick={handleOpenMenu}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
+              isMenuModalOpen
+                ? "bg-white text-[#5B67E2] font-bold shadow-xs"
+                : "text-white/80 hover:text-white hover:bg-white/20"
+            }`}
+            title="Explore Menu & All Pages"
+          >
+            <Compass className="w-4.5 h-4.5 stroke-[2] group-hover:rotate-45 transition-transform duration-300" />
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
+              Explore Menu & Pages
+            </span>
+          </button>
+
+          {/* User Profile / Diplomas */}
           <button
             type="button"
             onClick={() => onSelectSection("diplomas")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition group relative ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
               activeSection === "diplomas"
                 ? "bg-white/30 text-white font-bold"
                 : "text-white/80 hover:text-white hover:bg-white/15"
             }`}
             title="Profile & Verified Diplomas"
           >
-            <User className="w-4.5 h-4.5" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <Award className="w-4.5 h-4.5 stroke-[2]" />
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Diplomas & Profile
             </span>
           </button>
@@ -653,16 +706,16 @@ export function DigihubPCNavbar({
             <button
               type="button"
               onClick={() => setStreakModalOpen(!streakModalOpen)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 transition relative"
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 relative"
               title="Study Streak (4 Days Active)"
             >
-              <Clock className="w-4.5 h-4.5" />
+              <Clock className="w-4.5 h-4.5 stroke-[2]" />
               {/* Neon Green PRO badge */}
               <span className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full bg-[#10B981] text-neutral-950 font-black text-[8px] uppercase tracking-tighter shadow-2xs">
                 PRO
               </span>
             </button>
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               4-Day Study Streak (PRO)
             </span>
           </div>
@@ -671,15 +724,32 @@ export function DigihubPCNavbar({
           <button
             type="button"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 transition group relative"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 group relative"
             title="Notifications"
           >
-            <Bell className="w-4.5 h-4.5" />
+            <Bell className="w-4.5 h-4.5 stroke-[2]" />
             {unreadCount > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E02629] ring-1 ring-white" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E02629] ring-1 ring-white animate-pulse" />
             )}
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Notifications ({unreadCount})
+            </span>
+          </button>
+
+          {/* Courses Catalog */}
+          <button
+            type="button"
+            onClick={() => onSelectSection("catalog")}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
+              activeSection === "catalog"
+                ? "bg-white/30 text-white font-bold"
+                : "text-white/80 hover:text-white hover:bg-white/15"
+            }`}
+            title="Course Catalog"
+          >
+            <BookOpen className="w-4.5 h-4.5 stroke-[2]" />
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
+              Course Catalog
             </span>
           </button>
 
@@ -687,15 +757,15 @@ export function DigihubPCNavbar({
           <button
             type="button"
             onClick={() => onSelectSection("mentorship")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition group relative ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
               activeSection === "mentorship"
                 ? "bg-white/30 text-white font-bold"
                 : "text-white/80 hover:text-white hover:bg-white/15"
             }`}
             title="Mentorship Calendar"
           >
-            <Calendar className="w-4.5 h-4.5" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <Calendar className="w-4.5 h-4.5 stroke-[2]" />
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Mentorship Calendar
             </span>
           </button>
@@ -704,13 +774,13 @@ export function DigihubPCNavbar({
           <button
             type="button"
             onClick={onOpenJargonModal}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 transition group relative"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200 hover:scale-110 active:scale-95 group relative"
             title="Jargon Buster & Notes"
           >
-            <Bookmark className="w-4.5 h-4.5" />
+            <Bookmark className="w-4.5 h-4.5 stroke-[2]" />
             {/* Bright Yellow Dot Indicator */}
             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FACC15] ring-1 ring-[#5B67E2]" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Jargon Buster (Glossary)
             </span>
           </button>
@@ -719,15 +789,15 @@ export function DigihubPCNavbar({
           <button
             type="button"
             onClick={() => onSelectSection("labs")}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition group relative ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative ${
               activeSection === "labs"
                 ? "bg-white/30 text-white font-bold"
                 : "text-white/80 hover:text-white hover:bg-white/15"
             }`}
             title="Browser Labs & Sandboxes"
           >
-            <FileCode className="w-4.5 h-4.5" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <Terminal className="w-4.5 h-4.5 stroke-[2]" />
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               Browser Labs & Code Sandbox
             </span>
           </button>
@@ -738,12 +808,12 @@ export function DigihubPCNavbar({
           <button
             type="button"
             onClick={onOpenCoach}
-            className="w-11 h-11 rounded-2xl bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition hover:scale-105 active:scale-95 group relative shadow-xs"
+            className="w-11 h-11 rounded-2xl bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 group relative shadow-xs"
             title="Ask DIGIHUB AI Tutor"
           >
-            <MessageSquare className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5 stroke-[2]" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#5B67E2] animate-pulse" />
-            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+            <span className="absolute left-14 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 pointer-events-none z-50">
               DIGIHUB AI Tutor
             </span>
           </button>
@@ -794,6 +864,34 @@ export function DigihubPCNavbar({
           </div>
         </div>
       )}
+
+      {/* Feature & Page Explorer Modal */}
+      <DigihubMenuModal
+        isOpen={isMenuModalOpen}
+        onClose={handleCloseMenu}
+        onSelectSection={(tab) => {
+          onSelectSection(tab);
+          handleCloseMenu();
+        }}
+        onOpenJargonModal={() => {
+          handleCloseMenu();
+          onOpenJargonModal();
+        }}
+        onOpenCoach={() => {
+          handleCloseMenu();
+          onOpenCoach();
+        }}
+        onOpenQuickHub={() => {
+          handleCloseMenu();
+          onOpenQuickHub();
+        }}
+        onOpenExportData={() => {
+          handleCloseMenu();
+          handleExportData();
+        }}
+        coursesCount={courses.length}
+        certificatesCount={certificates.length}
+      />
     </>
   );
 }

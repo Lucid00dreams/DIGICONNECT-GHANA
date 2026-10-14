@@ -123,6 +123,7 @@ export function DigihubDashboard({
   const [coachOpenSignal, setCoachOpenSignal] = useState(0);
   const [isMobileSectionMenuOpen, setIsMobileSectionMenuOpen] = useState(false);
   const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   // First name extraction
   const firstName = currentUser.name.split(" ")[0] || "Learner";
@@ -218,6 +219,9 @@ export function DigihubDashboard({
           setCatalogSearch(q);
           setActiveSection('catalog');
         }}
+        isMenuOpen={isMenuModalOpen}
+        onOpenMenu={() => setIsMenuModalOpen(true)}
+        onCloseMenu={() => setIsMenuModalOpen(false)}
       />
 
       {/* 1.5 MOBILE VIEW NAVBAR (Image 2 top compact bar + floating scooped bottom nav) */}
@@ -232,6 +236,7 @@ export function DigihubDashboard({
         }}
         onOpenCoach={() => setCoachOpenSignal((prev) => prev + 1)}
         onOpenProfile={() => setActiveSection("diplomas")}
+        onOpenMenu={() => setIsMenuModalOpen(true)}
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
