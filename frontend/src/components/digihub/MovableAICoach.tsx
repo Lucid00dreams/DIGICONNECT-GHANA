@@ -168,9 +168,9 @@ export function MovableAICoach({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const isMobile = window.innerWidth < 640;
-      // Bottom-right corner placement - tucked into corner above bottom nav on mobile
+      // Bottom-right corner placement - elevated safely above bottom navigation bar on mobile
       const defaultLauncherX = Math.max(8, window.innerWidth - (isMobile ? 44 : 64));
-      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 86 : 72));
+      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 120 : 72));
       setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
 
       const defaultChatX = isMobile ? 12 : Math.max(16, window.innerWidth - 425);
@@ -184,7 +184,7 @@ export function MovableAICoach({
     const handleResize = () => {
       const isMobile = window.innerWidth < 640;
       const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
-      const maxY = Math.max(10, window.innerHeight - (isMobile ? 98 : 68));
+      const maxY = Math.max(10, window.innerHeight - (isMobile ? 116 : 68));
       setLauncherPos((prev) => ({
         x: Math.min(prev.x, maxX),
         y: Math.min(prev.y, maxY),
@@ -233,7 +233,7 @@ export function MovableAICoach({
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
     const maxX = Math.max(8, window.innerWidth - (isMobile ? 44 : 64));
-    const maxY = Math.max(8, window.innerHeight - (isMobile ? 84 : 68));
+    const maxY = Math.max(8, window.innerHeight - (isMobile ? 116 : 68));
 
     const newX = Math.max(10, Math.min(launcherDragStart.current.origX + deltaX, maxX));
     const newY = Math.max(10, Math.min(launcherDragStart.current.origY + deltaY, maxY));

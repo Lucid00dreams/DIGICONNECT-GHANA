@@ -71,10 +71,59 @@ export function DigihubMobileNavbar({
   isExporting = false,
 }: DigihubMobileNavbarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = React.useRef(0);
+
   const activeIndex = Math.max(
     0,
     NAV_ITEMS.findIndex((item) => item.id === activeSection)
   );
+
+  // Auto-hide navbar when user scrolls down (reading content, finger moving up),
+  // and smoothly reveal it when user scrolls up (moving back to top, finger moving down)
+  React.useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const deltaY = currentScrollY - lastScrollY.current;
+
+          // Always stay visible near top of page
+          if (currentScrollY < 30) {
+            setIsVisible(true);
+          } else if (
+            // Always stay visible when reached near bottom of page
+            window.innerHeight + currentScrollY >=
+            document.documentElement.scrollHeight - 50
+          ) {
+            setIsVisible(true);
+          } else if (Math.abs(deltaY) > 6) {
+            if (deltaY > 0 && currentScrollY > 60) {
+              // Scrolling down into content -> disappear to the down
+              setIsVisible(false);
+            } else if (deltaY < 0) {
+              // Scrolling up towards top -> appear
+              setIsVisible(true);
+            }
+          }
+
+          lastScrollY.current = Math.max(0, currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Ensure navbar appears when changing sections
+  React.useEffect(() => {
+    setIsVisible(true);
+  }, [activeSection]);
 
   return (
     <>
@@ -190,9 +239,13 @@ export function DigihubMobileNavbar({
           ───────────────────────────────────────────────────────────── */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 right-3 sm:bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:left-6 sm:right-6 z-50 max-w-md mx-auto select-none pointer-events-auto"
+        className={`lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 right-3 sm:bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:left-6 sm:right-6 z-50 max-w-md mx-auto select-none transform-gpu transition-all duration-300 ease-in-out ${
+          isVisible
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-[calc(100%+3rem)] opacity-0 pointer-events-none"
+        }`}
       >
-        <div className="relative bg-white/98 backdrop-blur-lg rounded-[28px] sm:rounded-[32px] shadow-[0_12px_40px_rgba(25,20,90,0.18)] border border-neutral-200/80 pt-1.5 pb-2 px-1">
+        <div className="relative bg-white/98 backdrop-blur-lg rounded-[28px] sm:rounded-[32px] shadow-[0_12px_40px_rgba(25,20,90,0.18)] border border-neutral-200/80 pt-1.5 pb-2.5 px-1">
           {/* Dynamic Sliding Dome Notch + Elevated Circular Active Indicator */}
           <div
             className="absolute -top-[20px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
@@ -276,9 +329,6 @@ export function DigihubMobileNavbar({
               );
             })}
           </div>
-
-          {/* iOS Style Home Indicator Bar */}
-          <div className="w-24 sm:w-28 h-1 bg-neutral-300 rounded-full mx-auto mt-1 mb-0.5" />
         </div>
       </nav>
     </>
