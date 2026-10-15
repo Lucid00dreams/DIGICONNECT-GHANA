@@ -91,7 +91,7 @@ export function DigihubMenuModal({
                 </span>
               </div>
               <p className="text-[11px] text-neutral-300">
-                Explore learning tracks, interactive labs, verified diplomas, and portals
+                Explore learning tracks, interactive labs, verified certificates, and portals
               </p>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function DigihubMenuModal({
                 </div>
               </button>
 
-              {/* Diplomas */}
+              {/* Certificates */}
               <button
                 type="button"
                 onClick={() => handleSelectTab("diplomas")}
@@ -233,7 +233,7 @@ export function DigihubMenuModal({
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-neutral-900 group-hover:text-amber-600 transition flex items-center gap-1">
-                    <span>Diplomas & Profile ({certificatesCount})</span>
+                    <span>Certificates & Profile ({certificatesCount})</span>
                     <ChevronRight className="w-3 h-3 text-neutral-400 group-hover:translate-x-0.5 transition" />
                   </h4>
                   <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">

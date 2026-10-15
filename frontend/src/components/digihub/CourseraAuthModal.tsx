@@ -124,7 +124,7 @@ export function CourseraAuthModal({
           <p className="text-sm text-neutral-600 mt-1 leading-relaxed">
             {isNewUserStep
               ? "Almost there! What name should appear on your verified certificates?"
-              : "Join DigiConnect Ghana's free technical learning community: access 12 academy tracks, live browser sandboxes, and earn faculty-verified diplomas."}
+              : "Join DigiConnect Ghana's free technical learning community: access 12 academy tracks, live browser sandboxes, and earn faculty-verified certificates."}
           </p>
         </div>
 

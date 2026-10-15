@@ -69,7 +69,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is DIGIHub really 100% free with no hidden charges?",
-    a: "Yes, completely free. DIGIHub is operated by DigiConnect Ghana, a registered non-profit educational NGO. There are no tuition fees, no subscription tiers, no examination charges, and no paywalled features for any of our 12 career tracks, interactive browser labs, or verified diplomas.",
+    a: "Yes, completely free. DIGIHub is operated by DigiConnect Ghana, a registered non-profit educational NGO. There are no tuition fees, no subscription tiers, no examination charges, and no paywalled features for any of our 12 career tracks, interactive browser labs, or verified certificates.",
   },
   {
     q: "Do I need a high-end laptop or expensive software to learn?",
@@ -81,7 +81,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Are the certificates verified and shareable on LinkedIn and CVs?",
-    a: "Yes. Every diploma issued by DIGIHub includes a unique cryptographic verification serial number and a live verification QR code that links directly to DigiConnect Ghana's official academic registry. Employers and universities can instantly confirm your credential authenticity.",
+    a: "Yes. Every certificate issued by DIGIHub includes a unique cryptographic verification serial number and a live verification QR code that links directly to DigiConnect Ghana's official academic registry. Employers and universities can instantly confirm your credential authenticity.",
   },
   {
     q: "How does the free 1-on-1 mentorship work?",
@@ -478,7 +478,7 @@ export function CourseraLandingPage({
                 Explore All DIGIHub Courses
               </h1>
               <p className="text-xs sm:text-sm text-neutral-600 max-w-2xl font-normal">
-                12 comprehensive technical tracks with in-browser coding sandboxes, real threat defense simulators, and verified completion diplomas. Create a free scholar account to enroll.
+                12 comprehensive technical tracks with in-browser coding sandboxes, real threat defense simulators, and verified completion certificates. Create a free scholar account to enroll.
               </p>
             </div>
 
@@ -718,7 +718,7 @@ export function CourseraLandingPage({
             <div>
               <h3 className="font-bold text-sm text-neutral-900">Want to learn more about how DIGIHub works?</h3>
               <p className="text-xs text-neutral-600 mt-0.5">
-                Explore our in-browser coding workspaces, mission, and official diploma verification on the academy overview.
+                Explore our in-browser coding workspaces, mission, and official certificate verification on the academy overview.
               </p>
             </div>
             <button
@@ -762,7 +762,7 @@ export function CourseraLandingPage({
             </h1>
 
             <p className="text-sm sm:text-lg text-neutral-200 leading-relaxed font-normal max-w-xl drop-shadow-sm animate-fade-in-up break-words" style={{ animationDelay: '300ms' }}>
-              Practice software development, cybersecurity, and cloud engineering directly inside your browser. Complete self-paced curricula, build real-world portfolios, and earn verified diplomas at zero cost.
+              Practice software development, cybersecurity, and cloud engineering directly inside your browser. Complete self-paced curricula, build real-world portfolios, and earn verified certificates at zero cost.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
@@ -798,7 +798,7 @@ export function CourseraLandingPage({
               </span>
               <span className="flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
-                <span>Verified Diplomas</span>
+                <span>Verified Certificates</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 shrink-0" />
@@ -884,7 +884,7 @@ export function CourseraLandingPage({
                 <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
                   <Award className="w-5 h-5" />
                 </div>
-                <h3 className="font-bold text-neutral-900 text-sm mb-1.5">Verified Diplomas</h3>
+                <h3 className="font-bold text-neutral-900 text-sm mb-1.5">Verified Certificates</h3>
                 <p className="text-xs text-neutral-600 leading-relaxed">
                   Graduate with digital certificates carrying unique cryptographic serial numbers and QR codes verified on our public academic registry.
                 </p>
@@ -941,7 +941,7 @@ export function CourseraLandingPage({
               <span className="w-8 h-8 rounded-full bg-[#0056D2] text-white font-bold text-sm flex items-center justify-center mb-4">
                 4
               </span>
-              <h3 className="font-bold text-base text-neutral-900 mb-2">Earn Verified Diplomas</h3>
+              <h3 className="font-bold text-base text-neutral-900 mb-2">Earn Verified Certificates</h3>
               <p className="text-xs text-neutral-600 leading-relaxed">
                 Graduate with tamper-proof certificates featuring official QR verification for your CV, job applications, and LinkedIn profile.
               </p>
@@ -1091,7 +1091,7 @@ export function CourseraLandingPage({
             Launch your technical journey on DIGIHub today
           </h2>
           <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto leading-relaxed font-normal">
-            Enroll in hands-on courses, practice in live browser sandboxes, and graduate with verified diplomas. 100% tuition-free for all Ghanaian youth.
+            Enroll in hands-on courses, practice in live browser sandboxes, and graduate with verified certificates. 100% tuition-free for all Ghanaian youth.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button

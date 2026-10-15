@@ -50,7 +50,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { id: "learning", label: "Home", icon: LayoutGrid },
   { id: "catalog", label: "Courses", icon: BookOpen },
   { id: "mentorship", label: "Mentors", icon: Users },
-  { id: "diplomas", label: "Diplomas", icon: Award },
+  { id: "diplomas", label: "Certificates", icon: Award },
 ];
 
 export function DigihubMobileNavbar({

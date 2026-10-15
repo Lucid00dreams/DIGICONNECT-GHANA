@@ -349,7 +349,7 @@ export function DigihubDashboard({
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <span className="font-semibold text-neutral-600 text-[11px] sm:text-xs">Curriculum Progress</span>
                     <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
-                      ~2.5 hrs to Diploma
+                      ~2.5 hrs to Certificate
                     </span>
                   </div>
                   <span className="font-bold text-[#0056D2] text-[11px] sm:text-xs">{primaryProgress.percentage}% complete</span>
@@ -372,7 +372,7 @@ export function DigihubDashboard({
                   </h2>
                   <span
                     className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
-                    title="Track your curriculum progress and earn verified diplomas."
+                    title="Track your curriculum progress and earn verified certificates."
                   >
                     <Info className="w-3.5 h-3.5" />
                   </span>
@@ -536,7 +536,7 @@ export function DigihubDashboard({
               {completedCourses.length > 0 && (
                 <div className="pt-2 space-y-2">
                   <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
-                    Completed Diplomas
+                    Completed Certificates
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {completedCourses.map((c) => (
@@ -556,7 +556,7 @@ export function DigihubDashboard({
                           onClick={() => setActiveSection("diplomas")}
                           className="px-3 py-1.5 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
                         >
-                          Diploma
+                          Certificate
                         </button>
                       </div>
                     ))}
@@ -835,13 +835,13 @@ export function DigihubDashboard({
           </div>
         )}
 
-        {/* ─── SECTION 3: DIPLOMAS & CERTIFICATES ─────────────── */}
+        {/* ─── SECTION 3: CERTIFICATES ─────────────── */}
         {activeSection === "diplomas" && (
           <div className="space-y-6 tab-content-enter" key="diplomas">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                  My Diplomas
+                  My Certificates
                 </h2>
                 <span
                   className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
@@ -861,14 +861,14 @@ export function DigihubDashboard({
               </button>
             </div>
 
-            {/* Diplomas List */}
+            {/* Certificates List */}
             {certificates.length === 0 ? (
               <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-neutral-200 space-y-3 animate-fade-in-up">
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
                   <Award className="w-6 h-6" />
                 </div>
                 <h3 className="font-bold text-neutral-800 text-sm sm:text-base">
-                  No Diplomas Issued Yet
+                  No Certificates Issued Yet
                 </h3>
                 <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
                   Complete all module quizzes and hands-on lab challenges in any of our 12 tracks to automatically unlock your faculty-signed certificate.
@@ -917,7 +917,7 @@ export function DigihubDashboard({
                         onClick={() => onOpenCertificateModal(cert)}
                         className="flex-1 py-2 px-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition text-center"
                       >
-                        View &amp; Print Diploma
+                        View &amp; Print Certificate
                       </button>
                     </div>
                   </div>
@@ -1094,7 +1094,7 @@ export function DigihubDashboard({
               </div>
               <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-100">
                 <div className="text-lg font-bold text-amber-600">{certificates.length}</div>
-                <div className="text-[10px] font-semibold text-neutral-600">Diplomas Earned</div>
+                <div className="text-[10px] font-semibold text-neutral-600">Certificates Earned</div>
               </div>
               <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100">
                 <div className="text-lg font-bold text-purple-600">
@@ -1182,7 +1182,7 @@ export function DigihubDashboard({
               >
                 <div className="flex items-center gap-2.5">
                   <Edit2 className="w-4 h-4 text-[#0056D2]" />
-                  <span className="font-semibold text-neutral-800">Update Diploma Legal Name</span>
+                  <span className="font-semibold text-neutral-800">Update Certificate Legal Name</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />
               </button>
@@ -1250,7 +1250,7 @@ export function DigihubDashboard({
             </div>
 
             <p className="text-xs text-neutral-600 leading-relaxed font-normal">
-              Enter your official full name as recognized on your Ghanaian passport, Ghana Card, or academic records. This will be printed on all your verified diplomas.
+              Enter your official full name as recognized on your Ghanaian passport, Ghana Card, or academic records. This will be printed on all your verified certificates.
             </p>
 
             <form onSubmit={handleSaveStudentName} className="space-y-4 pt-1">

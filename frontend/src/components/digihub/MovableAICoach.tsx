@@ -388,7 +388,7 @@ export function MovableAICoach({
         text: "Across Ghana (from Accra and Tema to Kumasi and Takoradi), businesses, schools, hospitals, and churches are moving records online. They urgently need young people who know how to protect computers, build clean websites, and manage spreadsheets.",
         analogy: "Having digital skills today is like knowing how to drive a vehicle 30 years ago. It gives you keys to work in almost any business in the country.",
         hintSteps: [
-          "Finish your lessons to unlock your verified faculty-signed diploma.",
+          "Finish your lessons to unlock your verified faculty-signed certificate.",
           "Book a free 1-on-1 session with our DCG mentors (look under the Mentorship tab!).",
           "Save the small web projects you build here to show future employers."
         ],

@@ -106,7 +106,7 @@ export function DigihubUserMenuDropdown({
             role="menuitem"
           >
             <Award className="w-3.5 h-3.5 text-[#5B67E2] shrink-0" />
-            <span className="truncate">My Diplomas</span>
+            <span className="truncate">My Certificates</span>
           </button>
 
           <button

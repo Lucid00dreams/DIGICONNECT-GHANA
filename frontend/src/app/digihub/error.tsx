@@ -53,7 +53,7 @@ export default function DigihubError({
         </h1>
         <p className="text-xs sm:text-sm text-neutral-400 mb-6 leading-relaxed">
           We couldn&apos;t load the active classroom data. Your completed lessons, badges,
-          and earned diplomas remain safely archived.
+          and earned certificates remain safely archived.
         </p>
 
         {/* Actions */}

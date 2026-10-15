@@ -524,7 +524,7 @@ export function DigihubPCNavbar({
             <div className="text-center py-2">
               <span className="text-4xl font-extrabold text-neutral-900 tracking-tight">4 Days</span>
               <p className="text-xs text-neutral-500 mt-1">
-                You’ve completed daily lessons 4 days in a row! 3 more days to earn the Weekly Champion diploma seal.
+                You’ve completed daily lessons 4 days in a row! 3 more days to earn the Weekly Champion certificate seal.
               </p>
             </div>
 

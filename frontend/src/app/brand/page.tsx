@@ -249,7 +249,7 @@ export default function BrandShowcasePage() {
                   <Award className="w-4 h-4" /> Verified Completion Certificate
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">
-                  Official graduation diploma presented to participants fulfilling the hands-on project and attendance requirements.
+                  Official graduation certificate presented to participants fulfilling the hands-on project and attendance requirements.
                 </p>
               </div>
             </div>
