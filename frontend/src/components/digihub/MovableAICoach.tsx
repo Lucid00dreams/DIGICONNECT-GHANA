@@ -168,9 +168,9 @@ export function MovableAICoach({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const isMobile = window.innerWidth < 640;
-      // Bottom-right corner placement - elevated on mobile to avoid overlapping floating bottom nav tabs
-      const defaultLauncherX = Math.max(12, window.innerWidth - (isMobile ? 56 : 68));
-      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 102 : 72));
+      // Bottom-right corner placement - tucked into corner above bottom nav on mobile
+      const defaultLauncherX = Math.max(8, window.innerWidth - (isMobile ? 44 : 64));
+      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 86 : 72));
       setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
 
       const defaultChatX = isMobile ? 12 : Math.max(16, window.innerWidth - 425);
@@ -232,8 +232,8 @@ export function MovableAICoach({
     }
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-    const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
-    const maxY = Math.max(10, window.innerHeight - (isMobile ? 98 : 68));
+    const maxX = Math.max(8, window.innerWidth - (isMobile ? 44 : 64));
+    const maxY = Math.max(8, window.innerHeight - (isMobile ? 84 : 68));
 
     const newX = Math.max(10, Math.min(launcherDragStart.current.origX + deltaX, maxX));
     const newY = Math.max(10, Math.min(launcherDragStart.current.origY + deltaY, maxY));
@@ -483,13 +483,13 @@ export function MovableAICoach({
           title="DIGIHUB AI • Drag to move freely, tap to open"
         >
           {/* Smaller, transparent glassmorphic circular button */}
-          <div className="relative group w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/45 hover:bg-white/95 border border-cyan-400/50 hover:border-cyan-400 shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(6,182,212,0.25)] flex items-center justify-center p-1 backdrop-blur-md opacity-75 hover:opacity-100 active:scale-95 transition-all duration-200">
+          <div className="relative group w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-white/40 hover:bg-white/95 border border-cyan-400/40 hover:border-cyan-400 shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(6,182,212,0.25)] flex items-center justify-center p-0.5 sm:p-1 backdrop-blur-md opacity-50 hover:opacity-100 active:scale-95 transition-all duration-200">
             {/* Subtle Ambient Cyan Aura */}
             <div className="absolute -inset-0.5 rounded-full bg-cyan-400/20 blur-xs group-hover:bg-cyan-400/40 transition-opacity pointer-events-none" />
 
             {/* Robot Mascot Head with Breathing Float */}
             <div className="relative bot-float shrink-0">
-              <DigiHubBotAvatar size={24} className="sm:hidden" />
+              <DigiHubBotAvatar size={20} className="sm:hidden" />
               <DigiHubBotAvatar size={26} className="hidden sm:block" />
             </div>
 

@@ -226,7 +226,7 @@ export function DigihubDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 md:pb-12">
+    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-clip pb-[calc(10.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 md:pb-12">
       {/* 1. PC VIEW NAVBAR (Image 1 top horizontal bar + left docked icon rail) */}
       <DigihubPCNavbar
         activeSection={activeSection}
@@ -274,18 +274,18 @@ export function DigihubDashboard({
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 space-y-6 sm:space-y-8">
+      <main className="max-w-[1400px] mx-auto px-2.5 sm:px-6 lg:px-8 pt-2 sm:pt-8 pb-[calc(10.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 space-y-4 sm:space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-6 sm:space-y-8 tab-content-enter" key="learning">
             {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
-            <section className="p-4 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-4 sm:space-y-5 animate-fade-in-up">
+            <section className="p-3.5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-3.5 sm:space-y-5 animate-fade-in-up">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
                     {timeGreeting}, {firstName} 👋
                   </span>
-                  <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
+                  <h1 className="text-base sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
                     {primaryCourse?.title || "Web Engineering & Coding Foundations"}
                   </h1>
                   {nextLesson && (
@@ -296,26 +296,27 @@ export function DigihubDashboard({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 self-start sm:self-auto">
-                  {/* Primary Resume Lesson CTA (Single source of truth for resuming active lesson) */}
+                {/* Mobile: Wrapped CTA row so 7-day streak never gets clipped on right edge */}
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
+                  {/* Primary Resume Lesson CTA */}
                   {nextLesson && (
                     <Link
                       href={`/digihub/lesson/${nextLesson.id}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs sm:text-sm font-bold shadow-2xs hover:shadow transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 shrink-0"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs sm:text-sm font-bold shadow-2xs hover:shadow transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 shrink-0"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Resume Lesson</span>
                     </Link>
                   )}
 
-                  {/* 7-Day Study Streak Indicator (Duolingo/GitHub style) */}
-                  <div className="flex items-center gap-2 sm:gap-2.5 bg-neutral-50 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs">
-                    <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 shrink-0">
-                      <Flame className="w-4 h-4 fill-emerald-500 text-emerald-500" />
-                      <span className="hidden sm:inline">4d</span>
+                  {/* 7-Day Study Streak Indicator (Compact dots that fit perfectly on all mobile viewports) */}
+                  <div className="flex items-center gap-1.5 sm:gap-2.5 bg-neutral-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0 max-w-full">
+                    <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-600 shrink-0">
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-emerald-500 text-emerald-500" />
+                      <span>4d</span>
                     </div>
                     <div className="h-3 w-px bg-neutral-200" />
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       {[
                         { day: "M", done: true },
                         { day: "T", done: true },
@@ -327,7 +328,7 @@ export function DigihubDashboard({
                       ].map((d, i) => (
                         <div
                           key={i}
-                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold transition ${
+                          className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold transition ${
                             d.done
                               ? "bg-emerald-500 text-white shadow-2xs"
                               : "bg-neutral-200/80 text-neutral-500"
@@ -344,14 +345,14 @@ export function DigihubDashboard({
 
               {/* Progress Bar & Time Remaining Badge */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-neutral-600">Curriculum Progress</span>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="font-semibold text-neutral-600 text-[11px] sm:text-xs">Curriculum Progress</span>
+                    <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
                       ~2.5 hrs to Diploma
                     </span>
                   </div>
-                  <span className="font-bold text-[#0056D2]">{primaryProgress.percentage}% complete</span>
+                  <span className="font-bold text-[#0056D2] text-[11px] sm:text-xs">{primaryProgress.percentage}% complete</span>
                 </div>
                 <div className="w-full h-1.5 sm:h-2 rounded-full bg-neutral-100 overflow-hidden">
                   <div
@@ -420,26 +421,26 @@ export function DigihubDashboard({
                       role="button"
                       tabIndex={0}
                       aria-label={`Open course: ${course.title}`}
-                      className="flex flex-col justify-between p-3 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-[#0056D2]/60 shadow-2xs hover:shadow-md card-lift transition-all duration-200 min-h-[200px] sm:min-h-[235px] cursor-pointer active:scale-[0.985] group select-none text-left"
+                      className="flex flex-col justify-between p-2.5 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-[#0056D2]/60 shadow-2xs hover:shadow-md card-lift transition-all duration-200 min-h-[195px] sm:min-h-[235px] cursor-pointer active:scale-[0.985] group select-none text-left"
                     >
-                      {/* Top Meta: Org + Hours left */}
+                      {/* Top Meta: Category + Hours left (never truncates into DIGICONNECT S...) */}
                       <div>
                         <div className="flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-wider truncate max-w-[65%]">
-                            {course.organization || "DigiConnect Ghana"}
+                          <span className="text-[9.5px] sm:text-[10px] font-bold text-[#0056D2] uppercase tracking-wider truncate max-w-[65%]">
+                            {course.category ? course.category.replace("-", " ") : "DigiConnect"}
                           </span>
                           <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[8px] sm:text-[9px] shrink-0">
                             ~{hoursLeft} hrs
                           </span>
                         </div>
 
-                        {/* Title */}
-                        <h3 className="text-xs sm:text-base font-bold text-neutral-900 group-hover:text-[#0056D2] leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] break-words transition-colors">
+                        {/* Title (optimized font size for mobile 2-column fit) */}
+                        <h3 className="text-[12px] sm:text-base font-bold text-neutral-900 group-hover:text-[#0056D2] leading-snug line-clamp-2 min-h-[2.1rem] sm:min-h-[2.5rem] break-words transition-colors">
                           {course.title}
                         </h3>
 
                         {/* Progress */}
-                        <div className="mt-2 sm:mt-2.5 space-y-1">
+                        <div className="mt-1.5 sm:mt-2.5 space-y-1">
                           <div className="flex items-center justify-between text-[10px] sm:text-xs">
                             <span className="text-neutral-500 font-medium">Curriculum</span>
                             <span className="font-bold text-[#0056D2]">
@@ -455,7 +456,7 @@ export function DigihubDashboard({
                         </div>
 
                         {/* Next lesson info */}
-                        <div className="text-[10px] sm:text-xs text-neutral-500 truncate mt-2">
+                        <div className="text-[9.5px] sm:text-xs text-neutral-500 truncate mt-1.5 sm:mt-2">
                           <span className="text-neutral-400">Next:</span>{" "}
                           <span className="font-semibold text-neutral-800">
                             {currentLesson?.title || "Lesson 1"}
@@ -463,8 +464,8 @@ export function DigihubDashboard({
                         </div>
                       </div>
 
-                      {/* Bottom Action Buttons: Isolated with e.stopPropagation() for clean secondary triggers */}
-                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-3 border-t border-neutral-100">
+                      {/* Bottom Action Buttons: Perfectly sized without '...' truncation */}
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-2.5 border-t border-neutral-100">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -474,7 +475,7 @@ export function DigihubDashboard({
                           className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl border border-neutral-200/90 hover:bg-neutral-50 text-neutral-700 font-semibold text-[10px] sm:text-xs transition flex items-center justify-center gap-1 shadow-2xs active:scale-95 text-center truncate"
                           title="View course syllabus"
                         >
-                          <BookOpen className="w-3 h-3 text-neutral-400 shrink-0 hidden sm:inline" />
+                          <BookOpen className="w-3 h-3 text-neutral-400 shrink-0 hidden min-[380px]:inline" />
                           <span className="truncate">Syllabus</span>
                         </button>
 
@@ -489,8 +490,9 @@ export function DigihubDashboard({
                               className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate active:scale-95 transition"
                               title="Currently active track on your hero banner - tap to resume"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse" />
-                              <span className="truncate">Active Track</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse shrink-0" />
+                              <span className="truncate sm:hidden">Active</span>
+                              <span className="truncate hidden sm:inline">Active Track</span>
                             </button>
                           ) : (
                             <button
@@ -502,7 +504,8 @@ export function DigihubDashboard({
                               className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
                               title="Switch to this track"
                             >
-                              <span className="truncate">Switch Track</span>
+                              <span className="truncate sm:hidden">Resume</span>
+                              <span className="truncate hidden sm:inline">Switch Track</span>
                               <ArrowRight className="w-3 h-3 shrink-0" />
                             </button>
                           )

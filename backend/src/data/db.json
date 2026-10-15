@@ -45,6 +45,17 @@
   ],
   "contacts": [
     {
+      "id": "msg-1792078617745-583",
+      "name": "Security Audit Bot",
+      "email": "audit@test.security.org",
+      "phone": "",
+      "organization": "",
+      "subject": "Automated Health Verification",
+      "message": "Verifying security defense in depth compliance.",
+      "status": "unread",
+      "date": "2026-10-15"
+    },
+    {
       "id": "msg-1790951046857-48",
       "name": "Security Audit Bot",
       "email": "audit@test.security.org",

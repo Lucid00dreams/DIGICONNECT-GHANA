@@ -20,7 +20,7 @@
 html {
   scroll-behavior: smooth;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -61,7 +61,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* DIGIHub humanistic, easy-on-the-eye typography (Plus Jakarta Sans + Outfit) */
