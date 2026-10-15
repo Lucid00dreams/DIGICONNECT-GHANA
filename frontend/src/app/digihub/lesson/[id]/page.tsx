@@ -670,34 +670,49 @@ export default function DIGIHubLessonPage() {
               {/* 3D Flip Flashcard */}
               <div
                 onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className="cursor-pointer min-h-[220px] h-60 perspective-1000 select-none group"
+                className="cursor-pointer min-h-[250px] sm:min-h-[240px] h-64 sm:h-64 perspective-1000 select-none group relative"
               >
                 <div
-                  className={`w-full h-full flashcard-inner rounded-3xl p-6 border-2 shadow-xs flex flex-col justify-between text-center transition-transform duration-500 ${
-                    isCardFlipped
-                      ? "rotate-y-180 bg-neutral-900 text-white border-sky-400"
-                      : "bg-neutral-50/90 text-neutral-900 border-neutral-200 hover:border-brand-blue/50"
+                  className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d ${
+                    isCardFlipped ? "rotate-y-180" : ""
                   }`}
                 >
-                  <div className="text-[11px] uppercase font-bold tracking-wider opacity-60">
-                    {isCardFlipped ? "✓ Answer & Explanation" : "? Question / Concept"}
-                  </div>
-
-                  <div className="py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-32">
-                    {isCardFlipped
-                      ? flashcards[activeCardIndex]?.back
-                      : flashcards[activeCardIndex]?.front}
-                  </div>
-
-                  {isCardFlipped && flashcards[activeCardIndex]?.analogy && (
-                    <div className="text-xs text-amber-300 italic">
-                      💡 Analogy: {flashcards[activeCardIndex].analogy}
+                  {/* FRONT FACE (Question / Concept) */}
+                  <div className="absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-6 border-2 border-neutral-200 bg-neutral-50/90 hover:border-brand-blue/50 text-neutral-900 shadow-xs flex flex-col justify-between text-center">
+                    <div className="text-[11px] uppercase font-bold tracking-wider text-neutral-500">
+                      ? Question / Concept
                     </div>
-                  )}
 
-                  <div className="text-[11px] opacity-60 flex items-center justify-center gap-1.5 group-hover:opacity-100 transition">
-                    <RotateCw className="w-3 h-3" />
-                    <span>Click to flip card</span>
+                    <div className="py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-36">
+                      {flashcards[activeCardIndex]?.front}
+                    </div>
+
+                    <div className="text-[11px] text-neutral-500 flex items-center justify-center gap-1.5 group-hover:text-brand-blue transition">
+                      <RotateCw className="w-3.5 h-3.5" />
+                      <span>Tap to reveal answer</span>
+                    </div>
+                  </div>
+
+                  {/* BACK FACE (Answer & Analogy) */}
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-6 border-2 border-sky-400 bg-neutral-900 text-white shadow-xs flex flex-col justify-between text-center">
+                    <div className="text-[11px] uppercase font-bold tracking-wider text-sky-400">
+                      ✓ Answer & Explanation
+                    </div>
+
+                    <div className="py-1 text-xs sm:text-sm font-semibold leading-relaxed overflow-y-auto max-h-28 text-neutral-100">
+                      {flashcards[activeCardIndex]?.back}
+                    </div>
+
+                    {flashcards[activeCardIndex]?.analogy && (
+                      <div className="text-xs text-amber-300 italic px-2.5 py-1.5 bg-neutral-800/90 rounded-xl border border-neutral-700/60 max-h-20 overflow-y-auto text-left sm:text-center">
+                        💡 Analogy: {flashcards[activeCardIndex].analogy}
+                      </div>
+                    )}
+
+                    <div className="text-[11px] text-neutral-400 flex items-center justify-center gap-1.5 group-hover:text-white transition">
+                      <RotateCw className="w-3.5 h-3.5" />
+                      <span>Tap to flip card</span>
+                    </div>
                   </div>
                 </div>
               </div>
