@@ -168,13 +168,13 @@ export function MovableAICoach({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const isMobile = window.innerWidth < 640;
-      // Bottom-right corner placement
-      const defaultLauncherX = Math.max(12, window.innerWidth - (isMobile ? 58 : 68));
-      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 62 : 72));
+      // Bottom-right corner placement - elevated on mobile to avoid overlapping floating bottom nav tabs
+      const defaultLauncherX = Math.max(12, window.innerWidth - (isMobile ? 56 : 68));
+      const defaultLauncherY = Math.max(12, window.innerHeight - (isMobile ? 102 : 72));
       setLauncherPos({ x: defaultLauncherX, y: defaultLauncherY });
 
       const defaultChatX = isMobile ? 12 : Math.max(16, window.innerWidth - 425);
-      const defaultChatY = isMobile ? 60 : Math.max(16, window.innerHeight - 580);
+      const defaultChatY = isMobile ? 40 : Math.max(16, window.innerHeight - 580);
       setChatPos({ x: defaultChatX, y: defaultChatY });
     }
   }, []);
@@ -184,7 +184,7 @@ export function MovableAICoach({
     const handleResize = () => {
       const isMobile = window.innerWidth < 640;
       const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
-      const maxY = Math.max(10, window.innerHeight - (isMobile ? 60 : 68));
+      const maxY = Math.max(10, window.innerHeight - (isMobile ? 98 : 68));
       setLauncherPos((prev) => ({
         x: Math.min(prev.x, maxX),
         y: Math.min(prev.y, maxY),
@@ -233,7 +233,7 @@ export function MovableAICoach({
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
     const maxX = Math.max(10, window.innerWidth - (isMobile ? 56 : 64));
-    const maxY = Math.max(10, window.innerHeight - (isMobile ? 60 : 68));
+    const maxY = Math.max(10, window.innerHeight - (isMobile ? 98 : 68));
 
     const newX = Math.max(10, Math.min(launcherDragStart.current.origX + deltaX, maxX));
     const newY = Math.max(10, Math.min(launcherDragStart.current.origY + deltaY, maxY));

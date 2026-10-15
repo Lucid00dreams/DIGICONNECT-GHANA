@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ChevronDown,
   LogOut,
@@ -111,6 +112,7 @@ export function DigihubDashboard({
   onRetakeOnboarding,
   onUpdateStudentName,
 }: DigihubDashboardProps) {
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>("learning");
   const [catalogFilter, setCatalogFilter] = useState<string>("all");
   const [catalogSearch, setCatalogSearch] = useState<string>("");
@@ -224,7 +226,7 @@ export function DigihubDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-36 sm:pb-24 md:pb-12">
+    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 font-digihub selection:bg-[#0056D2] selection:text-white max-w-full overflow-x-hidden pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 md:pb-12">
       {/* 1. PC VIEW NAVBAR (Image 1 top horizontal bar + left docked icon rail) */}
       <DigihubPCNavbar
         activeSection={activeSection}
@@ -272,7 +274,7 @@ export function DigihubDashboard({
       />
 
       {/* 2. DEDICATED SECTION CONTENT */}
-      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-36 sm:pb-24 space-y-6 sm:space-y-8">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 space-y-6 sm:space-y-8">
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-6 sm:space-y-8 tab-content-enter" key="learning">
@@ -384,8 +386,8 @@ export function DigihubDashboard({
                 </button>
               </div>
 
-              {/* 2x2 Grid of Course Cards (Image 2 sketch reproduction: 2 columns with 2 bottom buttons each) */}
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+              {/* 2x2 Grid of Course Cards (Image 2 sketch reproduction with Full-Card Tap Targets) */}
+              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2.5 sm:gap-4">
                 {dashboardGridCourses.map((course) => {
                   const isEnrolled = enrolledCourseIds.includes(course.id);
                   const isPrimaryTrack = primaryCourse?.id === course.id;
@@ -395,10 +397,30 @@ export function DigihubDashboard({
                     course.lessons[0];
                   const hoursLeft = Math.max(1, (course.lessons.length - (isEnrolled ? cp.completed : 0)) * 0.75).toFixed(1);
 
+                  const handleCardClick = () => {
+                    if (isEnrolled && currentLesson) {
+                      router.push(`/digihub/lesson/${currentLesson.id}`);
+                    } else if (onEnrollCourse) {
+                      onEnrollCourse(course.id);
+                    } else {
+                      onOpenCourseModal(course);
+                    }
+                  };
+
                   return (
                     <div
                       key={course.id}
-                      className="flex flex-col justify-between p-3 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs card-lift transition-all duration-200 min-h-[210px] sm:min-h-[235px]"
+                      onClick={handleCardClick}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleCardClick();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Open course: ${course.title}`}
+                      className="flex flex-col justify-between p-3 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-[#0056D2]/60 shadow-2xs hover:shadow-md card-lift transition-all duration-200 min-h-[200px] sm:min-h-[235px] cursor-pointer active:scale-[0.985] group select-none text-left"
                     >
                       {/* Top Meta: Org + Hours left */}
                       <div>
@@ -412,7 +434,7 @@ export function DigihubDashboard({
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-xs sm:text-base font-bold text-neutral-900 leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] break-words">
+                        <h3 className="text-xs sm:text-base font-bold text-neutral-900 group-hover:text-[#0056D2] leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] break-words transition-colors">
                           {course.title}
                         </h3>
 
@@ -441,11 +463,14 @@ export function DigihubDashboard({
                         </div>
                       </div>
 
-                      {/* Bottom Action Buttons: Clear track differentiation with zero CTA competition */}
+                      {/* Bottom Action Buttons: Isolated with e.stopPropagation() for clean secondary triggers */}
                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-3 border-t border-neutral-100">
                         <button
                           type="button"
-                          onClick={() => onOpenCourseModal(course)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenCourseModal(course);
+                          }}
                           className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl border border-neutral-200/90 hover:bg-neutral-50 text-neutral-700 font-semibold text-[10px] sm:text-xs transition flex items-center justify-center gap-1 shadow-2xs active:scale-95 text-center truncate"
                           title="View course syllabus"
                         >
@@ -455,27 +480,37 @@ export function DigihubDashboard({
 
                         {isEnrolled && currentLesson ? (
                           isPrimaryTrack ? (
-                            <span
-                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate"
-                              title="Currently active track on your hero banner"
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/digihub/lesson/${currentLesson.id}`);
+                              }}
+                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate active:scale-95 transition"
+                              title="Currently active track on your hero banner - tap to resume"
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse" />
                               <span className="truncate">Active Track</span>
-                            </span>
+                            </button>
                           ) : (
-                            <Link
-                              href={`/digihub/lesson/${currentLesson.id}`}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/digihub/lesson/${currentLesson.id}`);
+                              }}
                               className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
                               title="Switch to this track"
                             >
                               <span className="truncate">Switch Track</span>
                               <ArrowRight className="w-3 h-3 shrink-0" />
-                            </Link>
+                            </button>
                           )
                         ) : (
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               if (onEnrollCourse) {
                                 onEnrollCourse(course.id);
                               } else {
@@ -532,39 +567,18 @@ export function DigihubDashboard({
         {/* ─── SECTION 2: DEDICATED COURSE CATALOG ───────────────────────── */}
         {activeSection === "catalog" && (
           <div className="space-y-6 tab-content-enter" key="catalog">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection("learning")}
-                  className="text-xs font-bold text-[#0056D2] hover:underline flex items-center gap-1 mb-1.5 group"
-                >
-                  <span className="group-hover:-translate-x-0.5 transition">←</span>
-                  <span>Back to My Learning</span>
-                </button>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
-                    Course Catalog
-                  </h2>
-                  <span
-                    className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
-                    title="12 structured career tracks with 100% tuition-free enrollment."
-                  >
-                    <Info className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Search Box */}
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="text"
-                  value={catalogSearch}
-                  onChange={(e) => setCatalogSearch(e.target.value)}
-                  placeholder="Search courses or skills..."
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition bg-white"
-                />
+            {/* Top Back Navigation */}
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setActiveSection("learning")}
+                className="text-xs font-bold text-[#0056D2] hover:underline flex items-center gap-1 group"
+              >
+                <span className="group-hover:-translate-x-0.5 transition">←</span>
+                <span>Back to My Learning</span>
+              </button>
+              <div className="sm:hidden flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
+                <span>{courses.length} Career Tracks</span>
               </div>
             </div>
 
@@ -598,32 +612,73 @@ export function DigihubDashboard({
               </button>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2">
-              {[
-                { id: "all", label: `All Tracks (${courses.length})` },
-                { id: "cybersecurity", label: "Cybersecurity" },
-                { id: "coding", label: "Coding & Web" },
-                { id: "data-ai", label: "Data & AI" },
-                { id: "cloud", label: "Cloud & DevOps" },
-                { id: "mobile", label: "Mobile Apps" },
-                { id: "python", label: "Python" },
-                { id: "it", label: "IT Systems" },
-                { id: "literacy", label: "Digital Literacy" },
-              ].map((pill) => (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => setCatalogFilter(pill.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
-                    catalogFilter === pill.id
-                      ? "bg-[#0056D2] text-white shadow-2xs"
-                      : "bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                  }`}
-                >
-                  {pill.label}
-                </button>
-              ))}
+            {/* STICKY QUICK SEARCH & CATEGORY FILTERS (Item 7) */}
+            <div className="sticky top-[52px] sm:top-0 z-30 -mx-3 px-3 sm:mx-0 sm:px-0 py-2.5 sm:py-0 bg-[#f8fafc]/95 sm:bg-transparent backdrop-blur-md border-b border-neutral-200/80 sm:border-0 space-y-2.5">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4">
+                <div className="hidden sm:block">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
+                      Course Catalog
+                    </h2>
+                    <span
+                      className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                      title="12 structured career tracks with 100% tuition-free enrollment."
+                    >
+                      <Info className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
+
+                {/* Search Box with Instant Clear Button */}
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    value={catalogSearch}
+                    onChange={(e) => setCatalogSearch(e.target.value)}
+                    placeholder="Search 12 tracks or skills..."
+                    className="w-full pl-9 pr-9 py-2 sm:py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition bg-white shadow-2xs"
+                  />
+                  {catalogSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setCatalogSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-200 hover:bg-neutral-300 text-neutral-600 flex items-center justify-center transition active:scale-95"
+                      aria-label="Clear search query"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 pt-0.5 -mx-1 px-1">
+                {[
+                  { id: "all", label: `All Tracks (${courses.length})` },
+                  { id: "cybersecurity", label: "Cybersecurity" },
+                  { id: "coding", label: "Coding & Web" },
+                  { id: "data-ai", label: "Data & AI" },
+                  { id: "cloud", label: "Cloud & DevOps" },
+                  { id: "mobile", label: "Mobile Apps" },
+                  { id: "python", label: "Python" },
+                  { id: "it", label: "IT Systems" },
+                  { id: "literacy", label: "Digital Literacy" },
+                ].map((pill) => (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setCatalogFilter(pill.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition active:scale-95 ${
+                      catalogFilter === pill.id
+                        ? "bg-[#0056D2] text-white shadow-2xs"
+                        : "bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 shadow-2xs"
+                    }`}
+                  >
+                    {pill.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Course Cards Grid */}
@@ -660,7 +715,17 @@ export function DigihubDashboard({
                   return (
                     <div
                       key={course.id}
-                      className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md card-lift flex flex-col justify-between overflow-hidden group animate-fade-in-up"
+                      onClick={() => onOpenCourseModal(course)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onOpenCourseModal(course);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View syllabus for ${course.title}`}
+                      className="rounded-2xl border border-neutral-200 bg-white hover:border-[#0056D2] hover:shadow-md card-lift flex flex-col justify-between overflow-hidden group animate-fade-in-up cursor-pointer active:scale-[0.99] transition select-none text-left"
                       style={{ animationDelay: `${Math.min(filteredCatalogCourses.indexOf(course) * 50, 350)}ms` }}
                     >
                       {/* Visual Banner */}
@@ -689,7 +754,7 @@ export function DigihubDashboard({
                           )}
                         </div>
                         <div className="absolute bottom-2 left-2.5 right-2.5 text-white">
-                          <h3 className="font-bold text-xs leading-snug line-clamp-2 drop-shadow-sm">
+                          <h3 className="font-bold text-xs leading-snug line-clamp-2 drop-shadow-sm group-hover:text-blue-200 transition-colors">
                             {course.title}
                           </h3>
                         </div>
@@ -729,23 +794,30 @@ export function DigihubDashboard({
                         <div className="pt-2.5 border-t border-neutral-100 flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => onOpenCourseModal(course)}
-                            className="flex-1 py-1.5 px-2.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition text-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenCourseModal(course);
+                            }}
+                            className="flex-1 py-1.5 px-2.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition text-center active:scale-95"
                           >
                             Syllabus
                           </button>
                           {isEnrolled ? (
                             <Link
                               href={`/digihub/lesson/${course.lessons[0]?.id || "coding-1"}`}
-                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center"
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center active:scale-95"
                             >
                               Continue
                             </Link>
                           ) : (
                             <button
                               type="button"
-                              onClick={() => onEnrollCourse && onEnrollCourse(course.id)}
-                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs text-center"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onEnrollCourse) onEnrollCourse(course.id);
+                              }}
+                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs text-center active:scale-95"
                             >
                               Enroll Free
                             </button>
@@ -964,7 +1036,7 @@ export function DigihubDashboard({
       {isQuickDashboardOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-neutral-200 p-5 sm:p-6 space-y-5 animate-in slide-in-from-bottom-5 duration-200 max-h-[90vh] overflow-y-auto"
+            className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-neutral-200 p-5 sm:p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] space-y-5 animate-in slide-in-from-bottom-5 duration-200 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header with Drag Pill */}

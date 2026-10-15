@@ -190,7 +190,7 @@ export function DigihubMobileNavbar({
           ───────────────────────────────────────────────────────────── */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-6 sm:right-6 z-50 max-w-md mx-auto select-none pointer-events-auto"
+        className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 right-3 sm:bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:left-6 sm:right-6 z-50 max-w-md mx-auto select-none pointer-events-auto"
       >
         <div className="relative bg-white/98 backdrop-blur-lg rounded-[28px] sm:rounded-[32px] shadow-[0_12px_40px_rgba(25,20,90,0.18)] border border-neutral-200/80 pt-1.5 pb-2 px-1">
           {/* Dynamic Sliding Dome Notch + Elevated Circular Active Indicator */}

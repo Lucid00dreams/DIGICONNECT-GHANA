@@ -70,7 +70,7 @@ export function DigihubMenuModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto bg-neutral-950/60 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-neutral-200/90 overflow-hidden flex flex-col max-h-[84vh] animate-in zoom-in-95 slide-in-from-top-3 duration-200 ease-out"
+        className="relative w-full max-w-xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-neutral-200/90 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 slide-in-from-top-3 duration-200 ease-out"
         role="dialog"
         aria-modal="true"
         aria-labelledby="explore-menu-title"

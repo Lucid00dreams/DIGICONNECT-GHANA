@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -10,6 +10,14 @@ import { BackToTop } from "@/components/ui/BackToTop";
 import { CookieConsentBanner } from "@/components/ui/CookieConsentBanner";
 import { CookiePreferencesModal } from "@/components/ui/CookiePreferencesModal";
 import { CookieTriggerButton } from "@/components/ui/CookieTriggerButton";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#2196D3",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(

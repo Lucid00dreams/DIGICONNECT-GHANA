@@ -21,6 +21,23 @@ html {
   scroll-behavior: smooth;
   max-width: 100%;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── Touch & Mobile Native UX Optimization (Item 6) ──────────── */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 @media (prefers-reduced-motion: reduce) {
