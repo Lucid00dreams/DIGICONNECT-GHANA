@@ -1035,7 +1035,7 @@ export const DEFAULT_DEMO_STUDENT: LMSUser = {
   enrolledTracks: ["coding", "cybersecurity"],
   enrolledCourseIds: ["coding", "cybersecurity", "python"],
   currentTrackId: "coding",
-  completedLessonIds: ["web-1", "web-2"],
+  completedLessonIds: ["code-101"],
   certificateClaimed: false,
   createdAt: "2026-01-10T08:00:00Z",
   lastActive: "2026-10-14T05:00:00Z",
@@ -1261,10 +1261,13 @@ export function completeLearnerOnboarding(
 
 export function getLearnerProgress(): LearnerProgress {
   const activeUser = getActiveUser();
+  const safeActiveCompleted = activeUser && Array.isArray(activeUser.completedLessonIds)
+    ? activeUser.completedLessonIds
+    : [];
 
   if (typeof window === "undefined") {
     return {
-      completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+      completedLessonIds: safeActiveCompleted,
       currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
       enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
       xp: 0,
@@ -1284,7 +1287,7 @@ export function getLearnerProgress(): LearnerProgress {
     const raw = localStorage.getItem(LMS_PROGRESS_KEY);
     if (!raw) {
       const initial: LearnerProgress = {
-        completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+        completedLessonIds: safeActiveCompleted,
         currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
         enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
         xp: 0,
@@ -1302,10 +1305,13 @@ export function getLearnerProgress(): LearnerProgress {
       return initial;
     }
     const parsed = JSON.parse(raw);
+    parsed.completedLessonIds = Array.isArray(parsed.completedLessonIds) ? parsed.completedLessonIds : [];
     if (activeUser) {
       // Sync with active user
-      parsed.completedLessonIds = activeUser.completedLessonIds;
-      parsed.studentName = activeUser.name;
+      parsed.completedLessonIds = Array.isArray(activeUser.completedLessonIds)
+        ? activeUser.completedLessonIds
+        : parsed.completedLessonIds;
+      parsed.studentName = activeUser.name || parsed.studentName || "Learner";
       parsed.certificateClaimed = activeUser.certificateClaimed;
       parsed.onboardingCompleted = activeUser.onboardingCompleted;
       parsed.careerGoal = activeUser.careerGoal;
@@ -1316,9 +1322,9 @@ export function getLearnerProgress(): LearnerProgress {
     return parsed;
   } catch {
     return {
-      completedLessonIds: activeUser ? activeUser.completedLessonIds : [],
+      completedLessonIds: safeActiveCompleted,
       currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
-      enrolledCourseIds: activeUser ? (activeUser.enrolledCourseIds || ["coding", "cybersecurity"]) : ["coding", "cybersecurity"],
+      enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
       xp: 0,
       streakDays: 1,
       lastActiveDate: new Date().toISOString().split("T")[0],
@@ -1498,7 +1504,32 @@ export function getAllLessons(): Lesson[] {
 }
 
 export function getLessonById(id: string): Lesson | undefined {
-  return getAllLessons().find((l) => l.id === id);
+  if (!id) return undefined;
+  const lessons = getAllLessons();
+  const directMatch = lessons.find((l) => l.id === id);
+  if (directMatch) return directMatch;
+
+  // Normalization for legacy / alias IDs
+  if (id === "coding-1" || id === "web-1" || id === "web-dev-1") {
+    return lessons.find((l) => l.id === "code-101") || lessons[0];
+  }
+  if (id === "cyber-1" || id === "cybersecurity-1") {
+    return lessons.find((l) => l.id === "cyber-101") || lessons[0];
+  }
+  if (id === "python-1") {
+    return lessons.find((l) => l.id === "py-101") || lessons[0];
+  }
+
+  // If a course ID or slug was passed instead of a lesson ID (e.g. /digihub/lesson/coding)
+  const course = COURSES.find((c) => c.id === id || c.slug === id);
+  if (course && course.lessons && course.lessons.length > 0) {
+    return course.lessons[0];
+  }
+  // Try matching trackId
+  const trackLesson = lessons.find((l) => l.trackId === id);
+  if (trackLesson) return trackLesson;
+
+  return undefined;
 }
 
 // ─── CERTIFICATE & SIGNATURE AUTHORITY KEYS & DEFAULTS ─────────────────
@@ -1554,21 +1585,43 @@ export const INITIAL_CERTIFICATES: CertificateRecord[] = [
 export const LMS_COURSES_KEY = "dcg_lms_courses_v2";
 
 export function getAllCourses(): Course[] {
-  if (typeof window === "undefined") return COURSES;
+  const sanitize = (list: Course[]): Course[] => {
+    return list.map((c) => {
+      const defaultCourse = COURSES.find((base) => base.id === c.id || base.slug === c.slug);
+      const guaranteedLessons =
+        c.lessons && Array.isArray(c.lessons) && c.lessons.length > 0
+          ? c.lessons
+          : defaultCourse?.lessons && defaultCourse.lessons.length > 0
+          ? defaultCourse.lessons
+          : INITIAL_LESSONS.filter((l) => l.trackId === c.id || l.trackId === c.slug);
+
+      return {
+        ...c,
+        lessons: guaranteedLessons,
+        syllabus: c.syllabus && Array.isArray(c.syllabus) && c.syllabus.length > 0
+          ? c.syllabus
+          : defaultCourse?.syllabus || [],
+        skillsGained: Array.isArray(c.skillsGained) ? c.skillsGained : defaultCourse?.skillsGained || [],
+        prerequisites: Array.isArray(c.prerequisites) ? c.prerequisites : defaultCourse?.prerequisites || [],
+      };
+    });
+  };
+
+  if (typeof window === "undefined") return sanitize(COURSES);
   try {
     const raw = localStorage.getItem(LMS_COURSES_KEY);
     if (!raw) {
       localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(COURSES));
-      return COURSES;
+      return sanitize(COURSES);
     }
     const parsed: Course[] = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length < COURSES.length) {
       localStorage.setItem(LMS_COURSES_KEY, JSON.stringify(COURSES));
-      return COURSES;
+      return sanitize(COURSES);
     }
-    return parsed;
+    return sanitize(parsed);
   } catch {
-    return COURSES;
+    return sanitize(COURSES);
   }
 }
 
@@ -1610,7 +1663,14 @@ export function deleteCourse(courseId: string): Course[] {
 }
 
 export function getCourseById(id: string): Course | undefined {
-  return COURSES.find((c) => c.id === id || c.slug === id);
+  const all = getAllCourses();
+  const found = all.find((c) => c.id === id || c.slug === id) || COURSES.find((c) => c.id === id || c.slug === id);
+  if (!found) return undefined;
+  if (!found.lessons || found.lessons.length === 0) {
+    const defaultCourse = COURSES.find((c) => c.id === found.id || c.slug === found.slug);
+    found.lessons = defaultCourse?.lessons || INITIAL_LESSONS.filter((l) => l.trackId === found.id);
+  }
+  return found;
 }
 
 export function getEnrolledCourses(user?: LMSUser | null): Course[] {
@@ -1715,8 +1775,18 @@ export function getCourseProgress(
   const course = getCourseById(courseId);
   if (!course) return { completed: 0, total: 0, percentage: 0, isCompleted: false };
 
-  const completed = completedLessonIds || getLearnerProgress().completedLessonIds;
-  const courseLessonIds = course.lessons.map((l) => l.id);
+  const completed = Array.isArray(completedLessonIds)
+    ? completedLessonIds
+    : Array.isArray(getLearnerProgress().completedLessonIds)
+    ? getLearnerProgress().completedLessonIds
+    : [];
+
+  const courseLessons =
+    course.lessons && Array.isArray(course.lessons) && course.lessons.length > 0
+      ? course.lessons
+      : INITIAL_LESSONS.filter((l) => l.trackId === course.id || l.trackId === course.slug);
+
+  const courseLessonIds = courseLessons.map((l) => l.id);
   const completedInCourse = courseLessonIds.filter((id) => completed.includes(id)).length;
   const total = courseLessonIds.length || 1;
   const percentage = Math.round((completedInCourse / total) * 100);

@@ -21,7 +21,7 @@ import {
   Layers,
   FileCode,
 } from "lucide-react";
-import { Course, getCourseProgress } from "@/lib/lmsStore";
+import { Course, getCourseProgress, INITIAL_LESSONS } from "@/lib/lmsStore";
 
 interface CourseDetailModalProps {
   course: Course | null;
@@ -42,10 +42,17 @@ export function CourseDetailModal({
 }: CourseDetailModalProps) {
   if (!isOpen || !course) return null;
 
-  const progress = getCourseProgress(course.id, completedLessonIds);
+  const safeCompleted = Array.isArray(completedLessonIds) ? completedLessonIds : [];
+  const courseLessons =
+    course.lessons && Array.isArray(course.lessons) && course.lessons.length > 0
+      ? course.lessons
+      : INITIAL_LESSONS.filter((l) => l.trackId === course.id || l.trackId === course.slug);
+
+  const progress = getCourseProgress(course.id, safeCompleted);
 
   // Find next incomplete lesson
-  const nextLesson = course.lessons.find((l) => !completedLessonIds.includes(l.id)) || course.lessons[0];
+  const nextLesson = courseLessons.find((l) => !safeCompleted.includes(l.id)) || courseLessons[0];
+  const targetLessonId = nextLesson?.id || courseLessons[0]?.id || "code-101";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
@@ -172,9 +179,9 @@ export function CourseDetailModal({
             </div>
 
             <div className="space-y-3">
-              {course.syllabus.map((item, idx) => {
-                const lesson = course.lessons[idx];
-                const isFinished = lesson ? completedLessonIds.includes(lesson.id) : false;
+              {(course.syllabus || []).map((item, idx) => {
+                const lesson = courseLessons[idx] || courseLessons[0];
+                const isFinished = lesson ? safeCompleted.includes(lesson.id) : false;
 
                 return (
                   <div
@@ -216,7 +223,7 @@ export function CourseDetailModal({
                         </span>
                         {isEnrolled && (
                           <Link
-                            href={`/digihub/lesson/${lesson.id}`}
+                            href={`/digihub/lesson/${lesson.id || targetLessonId}`}
                             onClick={onClose}
                             className="text-brand-blue hover:underline font-semibold inline-flex items-center gap-1"
                           >
@@ -275,7 +282,7 @@ export function CourseDetailModal({
 
             {isEnrolled ? (
               <Link
-                href={`/digihub/lesson/${nextLesson?.id || course.lessons[0]?.id}`}
+                href={`/digihub/lesson/${targetLessonId}`}
                 onClick={onClose}
                 className="w-2/3 sm:w-auto px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs transition shadow-2xs inline-flex items-center justify-center gap-1.5 active:scale-[0.98]"
               >

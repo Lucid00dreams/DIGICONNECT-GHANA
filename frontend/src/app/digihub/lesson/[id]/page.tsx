@@ -212,7 +212,8 @@ export default function DIGIHubLessonPage() {
     if (found) {
       setLesson(found);
       const progress = getLearnerProgress();
-      setIsCompleted(progress.completedLessonIds.includes(found.id));
+      const safeCompleted = Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds : [];
+      setIsCompleted(safeCompleted.includes(found.id));
       setActiveTopicIndex(0);
       setActivePaneTab("content");
       setActiveCardIndex(0);
@@ -316,12 +317,12 @@ export default function DIGIHubLessonPage() {
     ...(lesson.keyTakeaways || []).map((t, idx) => ({
       front: `Core Principle 0${idx + 1}: ${cleanNoAsterisks(lesson.title)}`,
       back: cleanNoAsterisks(t),
-      analogy: topics[idx]?.sections[0]?.analogy || "Relate this directly to everyday technology workflows.",
+      analogy: topics[idx]?.sections?.[0]?.analogy || "Relate this directly to everyday technology workflows.",
     })),
     ...topics.map((top) => ({
       front: `What is the key insight of "${cleanNoAsterisks(top.title)}"?`,
       back: cleanNoAsterisks(top.summary),
-      analogy: top.sections[0]?.analogy || "Practice building intuition with real-world examples.",
+      analogy: top.sections?.[0]?.analogy || "Practice building intuition with real-world examples.",
     })),
   ];
 
@@ -615,7 +616,7 @@ export default function DIGIHubLessonPage() {
                   : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              <span>Quiz ({lesson.quiz.length})</span>
+              <span>Quiz ({lesson.quiz?.length || 0})</span>
             </button>
           </div>
 
@@ -672,13 +673,13 @@ export default function DIGIHubLessonPage() {
                   <AudioNarrationPlayer
                     title={cleanNoAsterisks(currentTopic.title)}
                     summary={cleanNoAsterisks(currentTopic.summary)}
-                    sections={currentTopic.sections}
-                    keyTakeaways={currentTopic.keyTakeaways}
+                    sections={currentTopic.sections || []}
+                    keyTakeaways={currentTopic.keyTakeaways || []}
                   />
 
                   {/* Topic Sections with Analogies and Clean Snippets */}
                   <div className="space-y-4 pt-2">
-                    {currentTopic.sections.map((sec, idx) => (
+                    {(currentTopic.sections || []).map((sec, idx) => (
                       <div
                         key={idx}
                         className="p-4 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 space-y-2.5"
@@ -915,7 +916,7 @@ export default function DIGIHubLessonPage() {
           {activePaneTab === "quiz" && (
             <div className="space-y-3">
               <QuizWidget
-                questions={lesson.quiz}
+                questions={lesson.quiz || []}
                 xpAward={lesson.xpAward}
                 onQuizCompleted={(score: number, total: number) => {
                   if (score === total) {
@@ -1096,7 +1097,7 @@ export default function DIGIHubLessonPage() {
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {trackLessons.map((l) => {
                 const isCurrent = l.id === lesson.id;
-                const isModDone = learnerProgress.completedLessonIds.includes(l.id);
+                const isModDone = (learnerProgress?.completedLessonIds || []).includes(l.id);
 
                 return (
                   <Link

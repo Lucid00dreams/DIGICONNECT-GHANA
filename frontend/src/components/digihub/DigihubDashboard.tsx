@@ -58,6 +58,7 @@ import {
   Mentor,
   MentorshipSession,
   getCourseProgress,
+  INITIAL_LESSONS,
 } from "@/lib/lmsStore";
 
 interface DigihubDashboardProps {
@@ -139,6 +140,9 @@ export function DigihubDashboard({
       ? "Good afternoon"
       : "Good evening";
 
+  // Safe progress completedLessonIds fallback
+  const safeCompletedIds = Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds : [];
+
   // Active enrolled courses
   const enrolledCourseIds = currentUser.enrolledCourseIds || ["cybersecurity", "coding"];
   const enrolledCourses = courses.filter((c) => enrolledCourseIds.includes(c.id));
@@ -146,22 +150,25 @@ export function DigihubDashboard({
 
   // Primary course progress & next lesson
   const primaryProgress = primaryCourse
-    ? getCourseProgress(primaryCourse.id, progress.completedLessonIds)
+    ? getCourseProgress(primaryCourse.id, safeCompletedIds)
     : { completed: 0, total: 4, percentage: 25, isCompleted: false };
 
-  const nextLesson = primaryCourse
-    ? primaryCourse.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
-      primaryCourse.lessons[0]
+  const primaryLessons = primaryCourse?.lessons && primaryCourse.lessons.length > 0
+    ? primaryCourse.lessons
+    : (INITIAL_LESSONS.filter((l) => l.trackId === primaryCourse?.id) || []);
+
+  const nextLesson = primaryLessons.length > 0
+    ? primaryLessons.find((l) => !safeCompletedIds.includes(l.id)) || primaryLessons[0]
     : null;
 
   // Filter courses for in-progress vs completed
   const inProgressCourses = enrolledCourses.filter((c) => {
-    const cp = getCourseProgress(c.id, progress.completedLessonIds);
+    const cp = getCourseProgress(c.id, safeCompletedIds);
     return !cp.isCompleted;
   });
 
   const completedCourses = enrolledCourses.filter((c) => {
-    const cp = getCourseProgress(c.id, progress.completedLessonIds);
+    const cp = getCourseProgress(c.id, safeCompletedIds);
     return cp.isCompleted;
   });
 
@@ -392,11 +399,14 @@ export function DigihubDashboard({
                 {dashboardGridCourses.map((course) => {
                   const isEnrolled = enrolledCourseIds.includes(course.id);
                   const isPrimaryTrack = primaryCourse?.id === course.id;
-                  const cp = getCourseProgress(course.id, progress.completedLessonIds);
+                  const cp = getCourseProgress(course.id, safeCompletedIds);
+                  const courseLessons = course.lessons && course.lessons.length > 0
+                    ? course.lessons
+                    : (INITIAL_LESSONS.filter((l) => l.trackId === course.id) || []);
                   const currentLesson =
-                    course.lessons.find((l) => !progress.completedLessonIds.includes(l.id)) ||
-                    course.lessons[0];
-                  const hoursLeft = Math.max(1, (course.lessons.length - (isEnrolled ? cp.completed : 0)) * 0.75).toFixed(1);
+                    courseLessons.find((l) => !safeCompletedIds.includes(l.id)) ||
+                    courseLessons[0];
+                  const hoursLeft = Math.max(1, (courseLessons.length - (isEnrolled ? cp.completed : 0)) * 0.75).toFixed(1);
 
                   const handleCardClick = () => {
                     if (isEnrolled && currentLesson) {
@@ -806,13 +816,21 @@ export function DigihubDashboard({
                             Syllabus
                           </button>
                           {isEnrolled ? (
-                            <Link
-                              href={`/digihub/lesson/${course.lessons[0]?.id || "coding-1"}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center active:scale-95"
-                            >
-                              Continue
-                            </Link>
+                            (() => {
+                              const catalogLessons = course.lessons && course.lessons.length > 0
+                                ? course.lessons
+                                : (INITIAL_LESSONS.filter((l) => l.trackId === course.id) || []);
+                              const targetLessonId = catalogLessons[0]?.id || "code-101";
+                              return (
+                                <Link
+                                  href={`/digihub/lesson/${targetLessonId}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition shadow-2xs text-center active:scale-95"
+                                >
+                                  Continue
+                                </Link>
+                              );
+                            })()
                           ) : (
                             <button
                               type="button"
@@ -1089,7 +1107,7 @@ export function DigihubDashboard({
                 <div className="text-[10px] font-semibold text-neutral-600">Active Tracks</div>
               </div>
               <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                <div className="text-lg font-bold text-emerald-600">{progress.completedLessonIds.length}</div>
+                <div className="text-lg font-bold text-emerald-600">{safeCompletedIds.length}</div>
                 <div className="text-[10px] font-semibold text-neutral-600">Completed Labs</div>
               </div>
               <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-100">
@@ -1098,7 +1116,7 @@ export function DigihubDashboard({
               </div>
               <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100">
                 <div className="text-lg font-bold text-purple-600">
-                  {progress.completedLessonIds.length * 50} XP
+                  {safeCompletedIds.length * 50} XP
                 </div>
                 <div className="text-[10px] font-semibold text-neutral-600">Scholar Score</div>
               </div>

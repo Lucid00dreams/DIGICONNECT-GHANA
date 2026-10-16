@@ -24,18 +24,42 @@ export default function DigihubError({
     console.error("DIGIHub LMS error boundary caught:", error);
   }, [error]);
 
+  const handleResume = () => {
+    try {
+      if (typeof window !== "undefined") {
+        if (
+          window.location.pathname.includes("/lesson/undefined") ||
+          window.location.pathname.includes("/lesson/coding-1")
+        ) {
+          window.location.href = "/digihub";
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    reset();
+  };
+
   const handleResetLearningCache = () => {
     setIsResettingStorage(true);
     try {
       if (typeof window !== "undefined") {
-        // Clear potential corrupted temporary session cache without deleting certificates
+        // Clear potentially corrupted course/lesson cache without deleting certificates or student account
         sessionStorage.clear();
+        localStorage.removeItem("dcg_lms_courses_v2");
+        localStorage.removeItem("dcg_digihub_lessons_v3");
+        localStorage.removeItem("dcg_lesson_split_ratio");
       }
     } catch {
       // Ignore storage errors
     }
     setTimeout(() => {
-      reset();
+      if (typeof window !== "undefined") {
+        window.location.href = "/digihub";
+      } else {
+        reset();
+      }
     }, 400);
   };
 
@@ -60,7 +84,7 @@ export default function DigihubError({
         <div className="flex flex-col gap-2.5 mb-6">
           <button
             type="button"
-            onClick={() => reset()}
+            onClick={handleResume}
             className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-semibold text-xs sm:text-sm shadow transition"
           >
             <RotateCcw className="w-4 h-4" />
