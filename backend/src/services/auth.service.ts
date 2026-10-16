@@ -27,17 +27,36 @@ class AuthServiceClass {
   private adminSalt: string;
 
   constructor() {
-    this.sessionSecret =
-      process.env.SESSION_SECRET ||
-      crypto.randomBytes(32).toString("hex");
+    const isProd = process.env.NODE_ENV === "production";
+
+    if (process.env.SESSION_SECRET) {
+      this.sessionSecret = process.env.SESSION_SECRET;
+    } else {
+      this.sessionSecret = crypto.randomBytes(32).toString("hex");
+      if (isProd) {
+        console.warn(
+          "[SECURITY WARNING] SESSION_SECRET is not set in production. A dynamic 32-byte secret was generated. Sessions will reset on server restart."
+        );
+      }
+    }
 
     this.adminEmail = (
       process.env.ADMIN_EMAIL || "admin@digiconnectghana.org"
     ).toLowerCase();
 
-    // Default admin password from environment or fallback secure default
-    const adminPassword =
-      process.env.ADMIN_PASSWORD || "DigiConnect@2026!Secure";
+    let adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      if (isProd) {
+        // In production: NEVER use a hardcoded default password!
+        adminPassword = crypto.randomBytes(16).toString("hex");
+        console.warn(
+          "[SECURITY WARNING] ADMIN_PASSWORD environment variable is not set in production! A one-time cryptographically secure key was generated for this instance."
+        );
+      } else {
+        // Development / local test mode default
+        adminPassword = "DigiConnect@Dev2026!";
+      }
+    }
 
     this.adminSalt = crypto.randomBytes(16).toString("hex");
     this.adminPasswordHash = this.hashPassword(adminPassword, this.adminSalt);
