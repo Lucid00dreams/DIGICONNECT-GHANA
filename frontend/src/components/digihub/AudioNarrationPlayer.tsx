@@ -98,6 +98,16 @@ export function AudioNarrationPlayer({
       utterance.voice = preferredVoice;
     }
 
+    utterance.onboundary = (event) => {
+      if (typeof event.charIndex === "number") {
+        const remaining = script.slice(event.charIndex);
+        const match = remaining.match(/^[^.!?]+[.!?]/);
+        if (match) {
+          setCurrentSentence(match[0].trim());
+        }
+      }
+    };
+
     utterance.onstart = () => {
       setIsPlaying(true);
       setIsPaused(false);
@@ -217,6 +227,20 @@ export function AudioNarrationPlayer({
           </button>
         </div>
       </div>
+
+      {/* Real-time Read-Along Karaoke Subtitle */}
+      {isPlaying && currentSentence && (
+        <div className="mt-2.5 pt-2.5 border-t border-blue-200/60 flex items-center gap-2 text-xs text-[#0056D2] animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="flex items-end gap-0.5 h-3 shrink-0">
+            <span className="w-0.5 h-full bg-[#0056D2] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-0.5 h-2 bg-[#0056D2] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-0.5 h-3 bg-[#0056D2] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+          <span className="truncate font-semibold tracking-tight text-neutral-800 italic">
+            "{currentSentence}"
+          </span>
+        </div>
+      )}
     </div>
   );
 }

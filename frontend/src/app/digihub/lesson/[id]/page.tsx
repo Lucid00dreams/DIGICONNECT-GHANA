@@ -31,6 +31,9 @@ import {
   MessageCircle,
   ChevronDown,
   SlidersHorizontal,
+  Maximize2,
+  Minimize2,
+  GripVertical,
 } from "lucide-react";
 import {
   getLessonById,
@@ -52,6 +55,7 @@ import { AudioNarrationPlayer } from "@/components/digihub/AudioNarrationPlayer"
 import { JargonBusterModal } from "@/components/digihub/JargonBusterModal";
 import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
 import { MovableAICoach } from "@/components/digihub/MovableAICoach";
+import { triggerConfetti, playSuccessChime } from "@/lib/confetti";
 
 // Utility to completely strip markdown asterisks from any text
 function cleanNoAsterisks(text?: string): string {
@@ -87,6 +91,116 @@ export default function DIGIHubLessonPage() {
   // Flashcards state
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+
+  // Desktop resizable split workspace state (default 42% left, 58% right)
+  const [splitRatio, setSplitRatio] = useState<number>(42);
+  const [isDraggingSplit, setIsDraggingSplit] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Mobile lab fullscreen focus mode
+  const [isMobileLabFullscreen, setIsMobileLabFullscreen] = useState(false);
+
+  // Flashcards touch swipe gesture state
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+  const [copiedSymbol, setCopiedSymbol] = useState<string | null>(null);
+
+  const QUICK_CODE_SYMBOLS = [
+    { label: "{ }", insert: "{\n  \n}" },
+    { label: "( )", insert: "()" },
+    { label: "[ ]", insert: "[]" },
+    { label: ";", insert: ";" },
+    { label: "=>", insert: " => " },
+    { label: "=", insert: " = " },
+    { label: '" "', insert: '""' },
+    { label: "/", insert: "/" },
+    { label: "< >", insert: "<></>" },
+    { label: "log", insert: "console.log();" },
+    { label: "return", insert: "return " },
+    { label: "def", insert: "def " },
+  ];
+
+  const handleInsertSymbol = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedSymbol(code);
+    setTimeout(() => setCopiedSymbol(null), 1500);
+  };
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const saved = localStorage.getItem("dcg_lesson_split_ratio");
+    if (saved) {
+      const val = parseFloat(saved);
+      if (!isNaN(val) && val >= 28 && val <= 65) {
+        setSplitRatio(val);
+      }
+    }
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleMouseDownSplit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingSplit(true);
+  };
+
+  useEffect(() => {
+    if (!isDraggingSplit) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (window.innerWidth < 1024) return;
+      const container = document.getElementById("dcg-split-container");
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const newRatio = Math.min(65, Math.max(28, (mouseX / rect.width) * 100));
+      setSplitRatio(newRatio);
+      localStorage.setItem("dcg_lesson_split_ratio", newRatio.toFixed(1));
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingSplit(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDraggingSplit]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+    setTouchCurrentX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchCurrentX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX !== null && touchCurrentX !== null) {
+      const deltaX = touchCurrentX - touchStartX;
+      if (deltaX < -45) {
+        // Swiped Left -> Next Card
+        setActiveCardIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
+        setIsCardFlipped(false);
+      } else if (deltaX > 45) {
+        // Swiped Right -> Previous Card
+        setActiveCardIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
+        setIsCardFlipped(false);
+      } else {
+        // Short tap -> Flip card
+        setIsCardFlipped((prev) => !prev);
+      }
+    }
+    setTouchStartX(null);
+    setTouchCurrentX(null);
+  };
 
   useEffect(() => {
     const user = getActiveUser();
@@ -169,6 +283,8 @@ export default function DIGIHubLessonPage() {
     markLessonCompleted(lesson.id, lesson.xpAward);
     setIsCompleted(true);
     setCompletionToast(true);
+    triggerConfetti();
+    playSuccessChime();
     setTimeout(() => setCompletionToast(false), 5000);
   };
 
@@ -208,6 +324,34 @@ export default function DIGIHubLessonPage() {
       analogy: top.sections[0]?.analogy || "Practice building intuition with real-world examples.",
     })),
   ];
+
+  // Global Keyboard Shortcuts (Space/F = flip, ArrowRight/Left = prev/next card)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
+
+      if (activePaneTab === "flashcards") {
+        if (e.code === "Space" || e.key.toLowerCase() === "f") {
+          e.preventDefault();
+          setIsCardFlipped((prev) => !prev);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          setActiveCardIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
+          setIsCardFlipped(false);
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          setActiveCardIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
+          setIsCardFlipped(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activePaneTab, flashcards.length]);
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col">
@@ -425,12 +569,18 @@ export default function DIGIHubLessonPage() {
       )}
 
       {/* ─── SPLIT-PANE WORKSPACE ────────────────────────────────────────── */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+      <main
+        id="dcg-split-container"
+        className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 flex flex-col lg:flex-row items-stretch gap-4 lg:gap-0"
+      >
         {/* LEFT PANE: Topics, Relatable Explanations, Flashcards & Quiz */}
         <div
+          style={{
+            width: isDesktop ? `${splitRatio}%` : "100%",
+          }}
           className={`${
             mobileActiveView === "guide" ? "flex" : "hidden"
-          } lg:flex lg:col-span-5 flex-col space-y-4`}
+          } lg:flex flex-col space-y-4 lg:pr-3 shrink-0 transition-[width] duration-75`}
         >
           {/* Sub Navigation (Guide vs Flashcards vs Quiz) */}
           <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs">
@@ -660,17 +810,28 @@ export default function DIGIHubLessonPage() {
           {/* TAB 2: INTERACTIVE FLASHCARDS */}
           {activePaneTab === "flashcards" && (
             <div className="bg-white rounded-3xl border border-neutral-200 p-5 sm:p-6 shadow-2xs space-y-5">
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between text-xs flex-wrap gap-1">
                 <span className="font-bold text-neutral-800">
                   Card {activeCardIndex + 1} of {flashcards.length}
                 </span>
-                <span className="text-neutral-500">Tap card to flip</span>
+                <span className="text-neutral-500 text-[11px]">
+                  Swipe or tap • Keys: <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">Space</kbd>/<kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">F</kbd>, <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">←</kbd>/<kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">→</kbd>
+                </span>
               </div>
 
-              {/* 3D Flip Flashcard */}
+              {/* 3D Flip Flashcard with Touch Swipe & Spring Tilt */}
               <div
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className="cursor-pointer min-h-[250px] sm:min-h-[240px] h-64 sm:h-64 perspective-1000 select-none group relative"
+                className="cursor-pointer min-h-[250px] sm:min-h-[240px] h-64 sm:h-64 perspective-1000 select-none group relative transition-transform active:scale-[0.99]"
+                style={{
+                  transform:
+                    touchStartX !== null && touchCurrentX !== null
+                      ? `translateX(${Math.max(-45, Math.min(45, touchCurrentX - touchStartX))}px) rotate(${Math.max(-6, Math.min(6, (touchCurrentX - touchStartX) * 0.12))}deg)`
+                      : undefined,
+                }}
               >
                 <div
                   className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d ${
@@ -759,6 +920,8 @@ export default function DIGIHubLessonPage() {
                 onQuizCompleted={(score: number, total: number) => {
                   if (score === total) {
                     handleMarkComplete();
+                  } else {
+                    playSuccessChime();
                   }
                 }}
               />
@@ -766,24 +929,86 @@ export default function DIGIHubLessonPage() {
           )}
         </div>
 
+        {/* DESKTOP DRAGGABLE SPLIT GUTTER */}
+        <div
+          onMouseDown={handleMouseDownSplit}
+          onDoubleClick={() => setSplitRatio(42)}
+          title="Drag to resize workspace (Double-click to reset 42/58)"
+          className="hidden lg:flex w-4 items-center justify-center cursor-col-resize select-none group relative py-4 hover:bg-neutral-200/50 rounded-full transition mx-1 shrink-0"
+        >
+          <div
+            className={`w-1 rounded-full transition-all duration-150 ${
+              isDraggingSplit
+                ? "bg-brand-blue h-full shadow-md scale-x-125"
+                : "bg-neutral-300 h-28 group-hover:bg-neutral-400 group-hover:h-36"
+            }`}
+          />
+          <div className="absolute opacity-0 group-hover:opacity-100 bg-neutral-900 text-white text-[10px] font-mono px-1.5 py-0.5 rounded shadow pointer-events-none transition whitespace-nowrap -top-3">
+            {splitRatio}% / {100 - splitRatio}%
+          </div>
+        </div>
+
         {/* RIGHT PANE: Interactive Labs & Practice Ground */}
         <div
+          style={{
+            width: isDesktop ? `${100 - splitRatio}%` : "100%",
+          }}
           className={`${
             mobileActiveView === "lab" ? "flex" : "hidden"
-          } lg:flex lg:col-span-7 flex-col space-y-3`}
+          } lg:flex flex-col space-y-3 lg:pl-3 shrink-0 ${
+            isMobileLabFullscreen
+              ? "fixed inset-0 z-50 bg-neutral-900/95 backdrop-blur-md p-4 overflow-y-auto w-full h-full"
+              : ""
+          }`}
         >
-          {/* Lab View Switcher for Beginners */}
-          <div className="flex items-center justify-between p-2.5 bg-white rounded-2xl border border-neutral-200 shadow-2xs text-xs">
-            <span className="text-neutral-500 font-medium pl-1 text-[11px]">
+          {/* Lab View Switcher & Focus Mode Header */}
+          <div className="flex items-center justify-between p-2.5 bg-white rounded-2xl border border-neutral-200 shadow-2xs text-xs gap-2">
+            <span className="text-neutral-500 font-medium pl-1 text-[11px] truncate">
               {showBasicsLab ? "Showing: Zero-Fear PC & Phone Basics" : "Showing: Interactive Module Workspace"}
             </span>
-            <button
-              type="button"
-              onClick={() => setShowBasicsLab(!showBasicsLab)}
-              className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] font-bold text-[11px] transition border border-blue-200"
-            >
-              {showBasicsLab ? "← Return to Module Workspace" : "🖱️ Practice PC Basics (Click/Copy/Type)"}
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowBasicsLab(!showBasicsLab)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] font-bold text-[11px] transition border border-blue-200"
+              >
+                {showBasicsLab ? "← Return to Lab" : "🖱️ PC Basics Sandbox"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsMobileLabFullscreen((prev) => !prev)}
+                className="p-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition"
+                title={isMobileLabFullscreen ? "Exit Focus Mode" : "Expand Lab Focus Mode"}
+              >
+                {isMobileLabFullscreen ? (
+                  <Minimize2 className="w-4 h-4 text-brand-blue" />
+                ) : (
+                  <Maximize2 className="w-4 h-4 text-neutral-600" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* MOBILE QUICK CODING TOUCH BAR */}
+          <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin select-none py-1.5 px-2 bg-neutral-900 rounded-2xl border border-neutral-800 text-xs shadow-inner">
+            <div className="px-2 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider shrink-0">
+              ⌨️ Touch Keys:
+            </div>
+            {QUICK_CODE_SYMBOLS.map((sym) => (
+              <button
+                key={sym.label}
+                type="button"
+                onClick={() => handleInsertSymbol(sym.insert)}
+                className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 active:bg-brand-blue text-sky-300 font-mono text-xs font-semibold shrink-0 transition active:scale-95"
+              >
+                {sym.label}
+              </button>
+            ))}
+            {copiedSymbol && (
+              <span className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded-md bg-emerald-950/70 border border-emerald-800 shrink-0">
+                Copied &quot;{copiedSymbol}&quot;
+              </span>
+            )}
           </div>
 
           {/* 3. Computer & Phone Basics 101 Sandbox */}

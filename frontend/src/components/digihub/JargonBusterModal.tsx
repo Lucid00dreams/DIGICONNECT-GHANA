@@ -66,10 +66,13 @@ export function JargonBusterModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-white border border-neutral-200 rounded-3xl shadow-2xl my-auto max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-white border border-neutral-200 rounded-t-[32px] sm:rounded-3xl shadow-2xl max-h-[88vh] sm:max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-200">
+        {/* Mobile pull-down drag handle bar */}
+        <div className="sm:hidden w-12 h-1.5 bg-neutral-300 rounded-full mx-auto my-2.5 shrink-0" />
+
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-neutral-100 bg-neutral-50/70 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-6 border-b border-neutral-100 bg-neutral-50/70 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 shadow-2xs">
               <Lightbulb className="w-5 h-5 text-amber-600" />

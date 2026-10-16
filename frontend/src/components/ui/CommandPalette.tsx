@@ -16,14 +16,22 @@ import {
   ShieldCheck,
   Gift,
   Heart,
+  Award,
+  Code2,
+  Terminal,
+  Laptop,
+  GraduationCap,
+  Lightbulb,
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { RESOURCES } from "@/lib/data";
+import { getAllCourses } from "@/lib/lmsStore";
+import { JARGON_TERMS } from "@/lib/jargonData";
 
 interface CommandItem {
   id: string;
   title: string;
-  category: "Quick actions" | "Program tracks" | "Learning resources" | "News stories" | "Community events";
+  category: "Quick actions" | "DIGIHub Courses" | "Jargon Terms" | "Program tracks" | "Learning resources" | "News stories" | "Community events";
   href?: string;
   action?: () => void;
   icon: React.ComponentType<{ className?: string }>;
@@ -174,6 +182,35 @@ export function CommandPalette() {
         href: "/events",
         icon: Calendar,
         detail: `${evt.date} / ${evt.location}`,
+      });
+    });
+
+    // DIGIHub LMS Courses
+    try {
+      const courses = getAllCourses();
+      courses.forEach((c) => {
+        items.push({
+          id: `lms-${c.id}`,
+          title: c.title,
+          category: "DIGIHub Courses",
+          href: `/digihub`,
+          icon: GraduationCap,
+          detail: `${c.level} • ${c.durationWeeks} weeks • ${c.skillsGained.slice(0, 3).join(", ")}`,
+        });
+      });
+    } catch {
+      // Fallback if accessed before store hydrates
+    }
+
+    // Jargon Buster Ghanaian Dictionary Terms
+    JARGON_TERMS.forEach((j) => {
+      items.push({
+        id: `jargon-${j.term.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
+        title: `${j.term} ${j.pronunciation ? `(${j.pronunciation})` : ""}`,
+        category: "Jargon Terms",
+        href: "/digihub",
+        icon: Lightbulb,
+        detail: `Analogy: ${j.africanAnalogy}`,
       });
     });
 

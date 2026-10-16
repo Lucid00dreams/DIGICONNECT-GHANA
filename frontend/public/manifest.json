@@ -1,0 +1,43 @@
+{
+  "name": "DigiConnect Ghana",
+  "short_name": "DigiConnect",
+  "description": "Tech for Youth. Tech for Good. Learn practical digital skills, coding, cybersecurity, and workplace tools in Ghana.",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2196D3",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/og-preview.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "DIGIHub Courses",
+      "short_name": "DIGIHub",
+      "description": "Interactive lessons, code sandboxes, and certificates",
+      "url": "/digihub",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Programs",
+      "short_name": "Programs",
+      "description": "Youth bootcamps and digital training initiatives",
+      "url": "/programs",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
