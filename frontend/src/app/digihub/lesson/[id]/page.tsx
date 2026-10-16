@@ -61,109 +61,151 @@ import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
 import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 import { triggerConfetti, playSuccessChime } from "@/lib/confetti";
 
-// DigiConnect Brand Colors for Flashcards
-export interface DigiConnectBrandTheme {
+// DigiConnect Brand Colors for Flashcards with Rich Saturated Themes
+export interface FlashcardBrandTheme {
+  id: string;
   name: string;
-  badgeBg: string;
-  frontBg: string;
+  categoryTag: string;
+  frontGradient: string;
   frontBorder: string;
-  frontAccent: string;
-  frontQuestionColor: string;
-  frontTag: string;
-  backBg: string;
+  frontShadow: string;
+  frontTextColor: string;
+  frontBadgeBg: string;
+  frontBadgeText: string;
+  frontFlipButtonBg: string;
+  backGradient: string;
   backBorder: string;
-  backAccent: string;
-  backAnswerColor: string;
-  backAnalogyBg: string;
+  backShadow: string;
+  backTextColor: string;
+  backBadgeBg: string;
+  backBadgeText: string;
+  analogyCardBg: string;
+  analogyCardBorder: string;
+  analogyCardText: string;
   accentHex: string;
-  dotClass: string;
+  dotColor: string;
 }
 
-export const DIGICONNECT_BRAND_THEMES: DigiConnectBrandTheme[] = [
-  // 1. DigiConnect Brand Blue (#2196D3 / #0056D2)
+export const FLASHCARD_BRAND_THEMES: FlashcardBrandTheme[] = [
+  // 1. DIGICONNECT ROYAL BLUE (#2196D3 / #0056D2)
   {
-    name: "DigiConnect Blue",
-    badgeBg: "bg-[#E3F2FD] border-[#90CAF9] text-[#0056D2]",
-    frontBg: "bg-gradient-to-br from-blue-50/95 via-white to-sky-50/80",
-    frontBorder: "border-[#2196D3]",
-    frontAccent: "text-[#1565A8]",
-    frontQuestionColor: "text-neutral-900",
-    frontTag: "bg-[#E3F2FD] text-[#0056D2]",
-    backBg: "bg-gradient-to-br from-[#0B2545] via-[#133E68] to-[#0A1F38]",
-    backBorder: "border-[#38BDF8]",
-    backAccent: "text-[#38BDF8]",
-    backAnswerColor: "text-blue-50",
-    backAnalogyBg: "bg-[#06182E]/90 border border-blue-400/40 text-amber-300",
-    accentHex: "#2196D3",
-    dotClass: "bg-[#2196D3]",
+    id: "blue",
+    name: "DigiConnect Royal Blue",
+    categoryTag: "CORE FOUNDATION",
+    frontGradient: "bg-gradient-to-br from-[#0047BA] via-[#0066FF] to-[#0A84FF]",
+    frontBorder: "border-[#38BDF8]/70",
+    frontShadow: "shadow-2xl shadow-blue-600/35",
+    frontTextColor: "text-white",
+    frontBadgeBg: "bg-white/20 backdrop-blur-md border border-white/35 text-white",
+    frontBadgeText: "text-white",
+    frontFlipButtonBg: "bg-white/20 hover:bg-white/30 text-white border-white/30",
+    backGradient: "bg-gradient-to-br from-[#071933] via-[#0B254D] to-[#030E1D]",
+    backBorder: "border-sky-400/80",
+    backShadow: "shadow-2xl shadow-sky-500/25",
+    backTextColor: "text-blue-50",
+    backBadgeBg: "bg-sky-500/25 text-sky-200 border border-sky-400/50",
+    backBadgeText: "text-sky-200",
+    analogyCardBg: "bg-white/10 backdrop-blur-md border border-sky-300/30",
+    analogyCardBorder: "border-sky-300/40",
+    analogyCardText: "text-amber-300",
+    accentHex: "#0056D2",
+    dotColor: "bg-[#0056D2]",
   },
-  // 2. DigiConnect Brand Gold / Yellow (#FFD600 / #F59E0B)
+  // 2. DIGICONNECT GHANA GOLD / SUN YELLOW (#FFD600 / #F59E0B)
   {
-    name: "DigiConnect Gold",
-    badgeBg: "bg-[#FFFDE7] border-[#FDE68A] text-[#B45309]",
-    frontBg: "bg-gradient-to-br from-amber-50/95 via-white to-yellow-50/80",
-    frontBorder: "border-[#F59E0B]",
-    frontAccent: "text-[#B45309]",
-    frontQuestionColor: "text-neutral-900",
-    frontTag: "bg-[#FFFDE7] text-[#B45309]",
-    backBg: "bg-gradient-to-br from-[#3B2002] via-[#4A2E05] to-[#261501]",
-    backBorder: "border-[#FBBF24]",
-    backAccent: "text-[#FCD34D]",
-    backAnswerColor: "text-amber-50",
-    backAnalogyBg: "bg-[#241301]/90 border border-amber-400/40 text-yellow-200",
+    id: "gold",
+    name: "DigiConnect Ghana Gold",
+    categoryTag: "KEY INSIGHT",
+    frontGradient: "bg-gradient-to-br from-[#B45309] via-[#D97706] to-[#F59E0B]",
+    frontBorder: "border-[#FDE68A]/75",
+    frontShadow: "shadow-2xl shadow-amber-600/35",
+    frontTextColor: "text-white",
+    frontBadgeBg: "bg-black/25 backdrop-blur-md border border-white/35 text-white",
+    frontBadgeText: "text-white",
+    frontFlipButtonBg: "bg-black/25 hover:bg-black/35 text-white border-white/30",
+    backGradient: "bg-gradient-to-br from-[#261301] via-[#3B1E03] to-[#120800]",
+    backBorder: "border-amber-400/80",
+    backShadow: "shadow-2xl shadow-amber-500/25",
+    backTextColor: "text-amber-50",
+    backBadgeBg: "bg-amber-500/25 text-amber-200 border border-amber-400/50",
+    backBadgeText: "text-amber-200",
+    analogyCardBg: "bg-white/10 backdrop-blur-md border border-amber-300/30",
+    analogyCardBorder: "border-amber-300/40",
+    analogyCardText: "text-yellow-200",
     accentHex: "#F59E0B",
-    dotClass: "bg-[#F59E0B]",
+    dotColor: "bg-[#F59E0B]",
   },
-  // 3. DigiConnect Brand Green (#006B3F / #10B981)
+  // 3. DIGICONNECT AFRICAN EMERALD / GREEN (#006B3F / #10B981)
   {
-    name: "DigiConnect Green",
-    badgeBg: "bg-[#E8F5E9] border-[#A7F3D0] text-[#006B3F]",
-    frontBg: "bg-gradient-to-br from-emerald-50/95 via-white to-teal-50/80",
-    frontBorder: "border-[#006B3F]",
-    frontAccent: "text-[#006B3F]",
-    frontQuestionColor: "text-neutral-900",
-    frontTag: "bg-[#E8F5E9] text-[#006B3F]",
-    backBg: "bg-gradient-to-br from-[#062B1A] via-[#0D4028] to-[#041D12]",
-    backBorder: "border-[#34D399]",
-    backAccent: "text-[#6EE7B7]",
-    backAnswerColor: "text-emerald-50",
-    backAnalogyBg: "bg-[#03170E]/90 border border-emerald-400/40 text-amber-200",
+    id: "green",
+    name: "DigiConnect Ghana Green",
+    categoryTag: "PRACTICAL MASTERY",
+    frontGradient: "bg-gradient-to-br from-[#006B3F] via-[#059669] to-[#044D2D]",
+    frontBorder: "border-[#6EE7B7]/75",
+    frontShadow: "shadow-2xl shadow-emerald-600/35",
+    frontTextColor: "text-white",
+    frontBadgeBg: "bg-white/20 backdrop-blur-md border border-white/35 text-white",
+    frontBadgeText: "text-white",
+    frontFlipButtonBg: "bg-white/20 hover:bg-white/30 text-white border-white/30",
+    backGradient: "bg-gradient-to-br from-[#031B10] via-[#072C1A] to-[#010D07]",
+    backBorder: "border-emerald-400/80",
+    backShadow: "shadow-2xl shadow-emerald-500/25",
+    backTextColor: "text-emerald-50",
+    backBadgeBg: "bg-emerald-500/25 text-emerald-200 border border-emerald-400/50",
+    backBadgeText: "text-emerald-200",
+    analogyCardBg: "bg-white/10 backdrop-blur-md border border-emerald-300/30",
+    analogyCardBorder: "border-emerald-300/40",
+    analogyCardText: "text-amber-200",
     accentHex: "#006B3F",
-    dotClass: "bg-[#006B3F]",
+    dotColor: "bg-[#006B3F]",
   },
-  // 4. DigiConnect Brand Red (#E02629 / #DC2626)
+  // 4. DIGICONNECT CRIMSON GLORY / RED (#E02629 / #DC2626)
   {
-    name: "DigiConnect Red",
-    badgeBg: "bg-[#FFEBEE] border-[#FECACA] text-[#E02629]",
-    frontBg: "bg-gradient-to-br from-rose-50/95 via-white to-red-50/80",
-    frontBorder: "border-[#E02629]",
-    frontAccent: "text-[#B91C1C]",
-    frontQuestionColor: "text-neutral-900",
-    frontTag: "bg-[#FFEBEE] text-[#E02629]",
-    backBg: "bg-gradient-to-br from-[#3B0707] via-[#4D0D0D] to-[#260505]",
-    backBorder: "border-[#F87171]",
-    backAccent: "text-[#FCA5A5]",
-    backAnswerColor: "text-rose-50",
-    backAnalogyBg: "bg-[#210404]/90 border border-rose-400/40 text-amber-200",
+    id: "red",
+    name: "DigiConnect Crimson Red",
+    categoryTag: "CRITICAL CONCEPT",
+    frontGradient: "bg-gradient-to-br from-[#991B1B] via-[#DC2626] to-[#BE123C]",
+    frontBorder: "border-[#FDA4AF]/75",
+    frontShadow: "shadow-2xl shadow-rose-600/35",
+    frontTextColor: "text-white",
+    frontBadgeBg: "bg-white/20 backdrop-blur-md border border-white/35 text-white",
+    frontBadgeText: "text-white",
+    frontFlipButtonBg: "bg-white/20 hover:bg-white/30 text-white border-white/30",
+    backGradient: "bg-gradient-to-br from-[#24040A] via-[#380712] to-[#120205]",
+    backBorder: "border-rose-400/80",
+    backShadow: "shadow-2xl shadow-rose-500/25",
+    backTextColor: "text-rose-50",
+    backBadgeBg: "bg-rose-500/25 text-rose-200 border border-rose-400/50",
+    backBadgeText: "text-rose-200",
+    analogyCardBg: "bg-white/10 backdrop-blur-md border border-rose-300/30",
+    analogyCardBorder: "border-rose-300/40",
+    analogyCardText: "text-amber-200",
     accentHex: "#E02629",
-    dotClass: "bg-[#E02629]",
+    dotColor: "bg-[#E02629]",
   },
-  // 5. DigiConnect Tech Dark (#1E1E1E / #0F172A)
+  // 5. DIGICONNECT ELECTRIC INDIGO / TECH PURPLE (#4F46E5 / #6366F1)
   {
-    name: "DigiConnect Tech Dark",
-    badgeBg: "bg-neutral-100 border-neutral-300 text-neutral-800",
-    frontBg: "bg-gradient-to-br from-slate-100/95 via-white to-neutral-100/80",
-    frontBorder: "border-[#1E1E1E]",
-    frontAccent: "text-[#1E1E1E]",
-    frontQuestionColor: "text-neutral-900",
-    frontTag: "bg-neutral-100 text-neutral-900",
-    backBg: "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#020617]",
-    backBorder: "border-[#94A3B8]",
-    backAccent: "text-[#CBD5E1]",
-    backAnswerColor: "text-slate-100",
-    backAnalogyBg: "bg-[#020617]/90 border border-slate-600/50 text-amber-300",
-    accentHex: "#1E1E1E",
-    dotClass: "bg-[#1E1E1E]",
+    id: "indigo",
+    name: "DigiConnect Electric Indigo",
+    categoryTag: "SYSTEM ARCHITECTURE",
+    frontGradient: "bg-gradient-to-br from-[#3730A3] via-[#4F46E5] to-[#6366F1]",
+    frontBorder: "border-[#C7D2FE]/75",
+    frontShadow: "shadow-2xl shadow-indigo-600/35",
+    frontTextColor: "text-white",
+    frontBadgeBg: "bg-white/20 backdrop-blur-md border border-white/35 text-white",
+    frontBadgeText: "text-white",
+    frontFlipButtonBg: "bg-white/20 hover:bg-white/30 text-white border-white/30",
+    backGradient: "bg-gradient-to-br from-[#0F0C2B] via-[#191444] to-[#070517]",
+    backBorder: "border-indigo-400/80",
+    backShadow: "shadow-2xl shadow-indigo-500/25",
+    backTextColor: "text-indigo-50",
+    backBadgeBg: "bg-indigo-500/25 text-indigo-200 border border-indigo-400/50",
+    backBadgeText: "text-indigo-200",
+    analogyCardBg: "bg-white/10 backdrop-blur-md border border-indigo-300/30",
+    analogyCardBorder: "border-indigo-300/40",
+    analogyCardText: "text-purple-200",
+    accentHex: "#4F46E5",
+    dotColor: "bg-[#4F46E5]",
   },
 ];
 
@@ -176,56 +218,55 @@ function cleanNoAsterisks(text?: string): string {
     .replace(/\*/g, "");
 }
 
-// Sentence-level real-time highlight helper when listening to audio
-function renderHighlightedText(
-  text: string,
-  currentSentence: string,
-  isActive: boolean
-): React.ReactNode {
-  if (!isActive || !currentSentence || !text) {
-    return cleanNoAsterisks(text);
-  }
+// Word-by-word real-time highlight component when listening to audio
+function InteractiveSpokenText({
+  targetId,
+  text,
+  activeTargetId,
+  activeWordIndex,
+  className = "",
+}: {
+  targetId: string;
+  text?: string;
+  activeTargetId: string | null;
+  activeWordIndex: number;
+  className?: string;
+}) {
+  if (!text) return null;
 
-  const cleanSpoken = currentSentence
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
+  const cleanText = text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*\*(.*?)\*/g, "$1")
+    .replace(/\*/g, "")
     .trim();
 
-  if (!cleanSpoken) {
-    return cleanNoAsterisks(text);
-  }
+  const words = cleanText.split(/\s+/);
+  const isTargetActive = activeTargetId === targetId;
 
-  // Split into sentences
-  const sentences = text.match(/[^.!?]+[.!?]?/g) || [text];
+  return (
+    <span className={className}>
+      {words.map((word, wIdx) => {
+        const isCurrent = isTargetActive && wIdx === activeWordIndex;
+        const isPast = isTargetActive && wIdx < activeWordIndex;
 
-  return sentences.map((part, pIdx) => {
-    const cleanPart = part
-      .toLowerCase()
-      .replace(/[^a-z0-9 ]/g, "")
-      .trim();
-
-    // Check if this sentence matches the active spoken utterance
-    const isMatch =
-      cleanPart.length > 5 &&
-      (cleanSpoken.includes(cleanPart.slice(0, 25)) ||
-        cleanPart.includes(cleanSpoken.slice(0, 25)) ||
-        (cleanSpoken.length > 15 &&
-          cleanPart.length > 15 &&
-          cleanSpoken.slice(0, 18) === cleanPart.slice(0, 18)));
-
-    if (isMatch) {
-      return (
-        <mark
-          key={pIdx}
-          className="bg-amber-200/90 text-neutral-950 font-semibold px-1 py-0.5 rounded shadow-2xs ring-1 ring-amber-300 transition-all duration-200"
-        >
-          {cleanNoAsterisks(part)}{" "}
-        </mark>
-      );
-    }
-
-    return <span key={pIdx}>{cleanNoAsterisks(part)} </span>;
-  });
+        return (
+          <span
+            key={wIdx}
+            className={`inline-block transition-all duration-150 rounded ${
+              isCurrent
+                ? "bg-amber-300 text-neutral-950 font-extrabold px-1.5 py-0.5 rounded-md shadow-sm ring-2 ring-amber-400 scale-[1.06] z-10 mx-0.5"
+                : isPast
+                ? "bg-amber-100/90 text-neutral-900 font-medium px-0.5"
+                : ""
+            }`}
+          >
+            {word}
+            {wIdx < words.length - 1 ? "\u00A0" : ""}
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
 export default function DIGIHubLessonPage() {
@@ -248,13 +289,15 @@ export default function DIGIHubLessonPage() {
   const [completionToast, setCompletionToast] = useState(false);
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
 
-  // Audio narration real-time highlight state
+  // Audio narration real-time word highlight state
   const [audioProgress, setAudioProgress] = useState<AudioProgressInfo>({
     isPlaying: false,
     isPaused: false,
-    activeType: null,
+    activeTargetId: null,
+    activeWordIndex: -1,
     activeSectionIndex: null,
     currentSentence: "",
+    activeWord: "",
   });
 
   // Drawer & modal states
@@ -882,21 +925,22 @@ export default function DIGIHubLessonPage() {
                     </h2>
                     <p
                       className={`text-xs mt-1 leading-relaxed transition-all duration-300 ${
-                        audioProgress.isPlaying && audioProgress.activeType === "summary"
-                          ? "p-2.5 rounded-xl bg-blue-100/90 border border-blue-300 text-neutral-900 font-medium ring-2 ring-brand-blue/50 shadow-xs"
+                        audioProgress.isPlaying && audioProgress.activeTargetId === "summary"
+                          ? "p-2.5 rounded-xl bg-amber-50/90 border border-amber-300/80 text-neutral-900 font-medium ring-2 ring-amber-400/50 shadow-xs"
                           : "text-neutral-600"
                       }`}
                     >
-                      {audioProgress.isPlaying && audioProgress.activeType === "summary" && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue mr-1.5 animate-pulse">
-                          <Volume2 className="w-3 h-3" /> Listening:
+                      {audioProgress.isPlaying && audioProgress.activeTargetId === "summary" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 mr-1.5 animate-pulse">
+                          <Volume2 className="w-3 h-3 text-amber-600" /> Reading:
                         </span>
                       )}
-                      {renderHighlightedText(
-                        currentTopic.summary,
-                        audioProgress.currentSentence,
-                        audioProgress.isPlaying && audioProgress.activeType === "summary"
-                      )}
+                      <InteractiveSpokenText
+                        targetId="summary"
+                        text={currentTopic.summary}
+                        activeTargetId={audioProgress.activeTargetId}
+                        activeWordIndex={audioProgress.activeWordIndex}
+                      />
                     </p>
                   </div>
 
@@ -914,7 +958,10 @@ export default function DIGIHubLessonPage() {
                     {(currentTopic.sections || []).map((sec, idx) => {
                       const isSectionActive =
                         audioProgress.isPlaying &&
-                        audioProgress.activeSectionIndex === idx;
+                        (audioProgress.activeTargetId === `sec-${idx}-heading` ||
+                          audioProgress.activeTargetId === `sec-${idx}-exp` ||
+                          audioProgress.activeTargetId === `sec-${idx}-analogy` ||
+                          audioProgress.activeSectionIndex === idx);
 
                       return (
                         <div
@@ -937,13 +984,18 @@ export default function DIGIHubLessonPage() {
                               >
                                 {idx + 1}
                               </span>
-                              <span>{cleanNoAsterisks(sec.heading)}</span>
+                              <InteractiveSpokenText
+                                targetId={`sec-${idx}-heading`}
+                                text={cleanNoAsterisks(sec.heading)}
+                                activeTargetId={audioProgress.activeTargetId}
+                                activeWordIndex={audioProgress.activeWordIndex}
+                              />
                             </h3>
 
                             {isSectionActive && (
                               <span className="px-2 py-0.5 rounded-full bg-brand-blue text-white text-[10px] font-bold flex items-center gap-1 shadow-2xs animate-pulse">
                                 <Volume2 className="w-3 h-3" />
-                                {audioProgress.activeType === "section_analogy"
+                                {audioProgress.activeTargetId === `sec-${idx}-analogy`
                                   ? "Analogy"
                                   : "Speaking"}
                               </span>
@@ -957,51 +1009,50 @@ export default function DIGIHubLessonPage() {
                                 : "text-neutral-700"
                             }`}
                           >
-                            {renderHighlightedText(
-                              sec.explanation,
-                              audioProgress.currentSentence,
-                              isSectionActive &&
-                                (audioProgress.activeType === "section_explanation" ||
-                                  audioProgress.activeType === "section_heading")
-                            )}
+                            <InteractiveSpokenText
+                              targetId={`sec-${idx}-exp`}
+                              text={sec.explanation}
+                              activeTargetId={audioProgress.activeTargetId}
+                              activeWordIndex={audioProgress.activeWordIndex}
+                            />
                           </p>
 
                           {/* Real-World Analogy Callout with Ghanaian highlight */}
                           {sec.analogy && (
                             <div
-                              className={`p-3 rounded-xl text-xs flex items-start gap-2.5 transition-all duration-300 ${
-                                isSectionActive &&
-                                audioProgress.activeType === "section_analogy"
+                              className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 transition-all duration-300 ${
+                                audioProgress.isPlaying &&
+                                audioProgress.activeTargetId === `sec-${idx}-analogy`
                                   ? "bg-amber-100 border-2 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-md scale-[1.01]"
                                   : "bg-amber-50/80 border border-amber-200/70 text-amber-950"
                               }`}
                             >
                               <Lightbulb
                                 className={`w-4 h-4 shrink-0 mt-0.5 ${
-                                  isSectionActive &&
-                                  audioProgress.activeType === "section_analogy"
+                                  audioProgress.isPlaying &&
+                                  audioProgress.activeTargetId === `sec-${idx}-analogy`
                                     ? "text-amber-700 animate-bounce"
                                     : "text-amber-600"
                                 }`}
                               />
                               <div className="leading-relaxed">
-                                <div className="flex items-center gap-1.5 mb-0.5">
+                                <div className="flex items-center gap-1.5 mb-1">
                                   <span className="font-bold text-amber-900">
                                     Ghanaian Everyday Analogy:{" "}
                                   </span>
-                                  {isSectionActive &&
-                                    audioProgress.activeType === "section_analogy" && (
+                                  {audioProgress.isPlaying &&
+                                    audioProgress.activeTargetId === `sec-${idx}-analogy` && (
                                       <span className="text-[9px] bg-amber-600 text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider animate-pulse">
                                         Active Audio
                                       </span>
                                     )}
                                 </div>
-                                {renderHighlightedText(
-                                  sec.analogy,
-                                  audioProgress.currentSentence,
-                                  isSectionActive &&
-                                    audioProgress.activeType === "section_analogy"
-                                )}
+                                <InteractiveSpokenText
+                                  targetId={`sec-${idx}-analogy`}
+                                  text={sec.analogy}
+                                  activeTargetId={audioProgress.activeTargetId}
+                                  activeWordIndex={audioProgress.activeWordIndex}
+                                />
                               </div>
                             </div>
                           )}
@@ -1052,7 +1103,7 @@ export default function DIGIHubLessonPage() {
                   {currentTopic.keyTakeaways && currentTopic.keyTakeaways.length > 0 && (
                     <div
                       className={`p-4 rounded-2xl border space-y-2 transition-all duration-300 ${
-                        audioProgress.isPlaying && audioProgress.activeType === "takeaways"
+                        audioProgress.isPlaying && audioProgress.activeTargetId === "takeaways"
                           ? "bg-blue-100/90 border-2 border-blue-500 ring-2 ring-blue-300 shadow-md scale-[1.01]"
                           : "bg-blue-50/60 border border-blue-200/60"
                       }`}
@@ -1063,17 +1114,22 @@ export default function DIGIHubLessonPage() {
                           Quick Bite-Sized Takeaways:
                         </span>
                         {audioProgress.isPlaying &&
-                          audioProgress.activeType === "takeaways" && (
+                          audioProgress.activeTargetId === "takeaways" && (
                             <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center gap-1 animate-pulse">
                               <Volume2 className="w-3 h-3" /> Reading Takeaways
                             </span>
                           )}
                       </div>
-                      <ul className="space-y-1 text-xs text-blue-950">
+                      <ul className="space-y-1.5 text-xs text-blue-950">
                         {currentTopic.keyTakeaways.map((takeaway, tIdx) => (
                           <li key={tIdx} className="flex items-start gap-1.5">
                             <Check className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
-                            <span>{cleanNoAsterisks(takeaway)}</span>
+                            <InteractiveSpokenText
+                              targetId="takeaways"
+                              text={cleanNoAsterisks(takeaway)}
+                              activeTargetId={audioProgress.activeTargetId}
+                              activeWordIndex={audioProgress.activeWordIndex}
+                            />
                           </li>
                         ))}
                       </ul>
@@ -1126,13 +1182,18 @@ export default function DIGIHubLessonPage() {
           {/* TAB 2: INTERACTIVE FLASHCARDS */}
           {activePaneTab === "flashcards" && (() => {
             const currentTheme =
-              DIGICONNECT_BRAND_THEMES[
-                activeCardIndex % DIGICONNECT_BRAND_THEMES.length
+              FLASHCARD_BRAND_THEMES[
+                activeCardIndex % FLASHCARD_BRAND_THEMES.length
               ];
             const nextCardIndex = (activeCardIndex + 1) % flashcards.length;
             const nextTheme =
-              DIGICONNECT_BRAND_THEMES[
-                nextCardIndex % DIGICONNECT_BRAND_THEMES.length
+              FLASHCARD_BRAND_THEMES[
+                nextCardIndex % FLASHCARD_BRAND_THEMES.length
+              ];
+            const nextNextCardIndex = (activeCardIndex + 2) % flashcards.length;
+            const nextNextTheme =
+              FLASHCARD_BRAND_THEMES[
+                nextNextCardIndex % FLASHCARD_BRAND_THEMES.length
               ];
 
             return (
@@ -1140,42 +1201,54 @@ export default function DIGIHubLessonPage() {
                 {/* Header with Card Count & Active Brand Theme */}
                 <div className="flex items-center justify-between text-xs flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-neutral-900">
+                    <span className="font-extrabold text-neutral-900 text-sm">
                       Card {activeCardIndex + 1} of {flashcards.length}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold shadow-2xs transition-all duration-300 ${currentTheme.badgeBg}`}
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold shadow-xs transition-all duration-300 text-white ${currentTheme.dotColor}`}
                     >
                       ● {currentTheme.name}
                     </span>
                   </div>
 
                   <span className="text-neutral-500 text-[11px] hidden sm:inline">
-                    Swipe or drag to fling • Keys:{" "}
-                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                    Drag or swipe to fling • Keys:{" "}
+                    <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       Space
                     </kbd>
                     /
-                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                    <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       F
                     </kbd>
                     ,{" "}
-                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                    <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       ←
                     </kbd>
                     /
-                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                    <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       →
                     </kbd>
                   </span>
                 </div>
 
-                {/* Interactive Flashcard Stage with Stack Physics & Swipe Away */}
-                <div className="relative w-full min-h-[265px] sm:min-h-[255px] h-68 sm:h-68 select-none">
-                  {/* UNDERNEATH CARD PREVIEW (Stacked Card with NEXT Brand Color) */}
+                {/* Interactive Flashcard Stage with 3-Card Stack Physics & Swipe Away */}
+                <div className="relative w-full min-h-[340px] sm:min-h-[320px] h-[340px] sm:h-[320px] select-none">
+                  {/* CARD #3: BOTTOM PEEK (Subtle preview of third card in deck) */}
+                  {flashcards.length > 2 && (
+                    <div
+                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextNextTheme.frontBorder} ${nextNextTheme.frontGradient} select-none pointer-events-none transition-all duration-300`}
+                      style={{
+                        transform: "scale(0.88) translateY(22px)",
+                        opacity: 0.45,
+                        zIndex: 0,
+                      }}
+                    />
+                  )}
+
+                  {/* CARD #2: MIDDLE STACK PEEK (Displays next card in deck with its own brand color) */}
                   {flashcards.length > 1 && (
                     <div
-                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextTheme.frontBorder} ${nextTheme.frontBg} shadow-xs select-none pointer-events-none flex flex-col justify-between text-center transition-all duration-300`}
+                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextTheme.frontBorder} ${nextTheme.frontGradient} ${nextTheme.frontShadow} select-none pointer-events-none flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
                       style={{
                         transform:
                           isAnimatingExit || isDraggingCard
@@ -1184,38 +1257,36 @@ export default function DIGIHubLessonPage() {
                                 0.94 + (Math.abs(dragDeltaX) / 200) * 0.06
                               )}) translateY(${Math.max(
                                 0,
-                                10 - (Math.abs(dragDeltaX) / 200) * 10
+                                11 - (Math.abs(dragDeltaX) / 200) * 11
                               )}px)`
-                            : "scale(0.94) translateY(10px)",
+                            : "scale(0.94) translateY(11px)",
                         opacity:
-                          isAnimatingExit || isDraggingCard
-                            ? 0.95
-                            : 0.72,
-                        zIndex: 0,
+                          isAnimatingExit || isDraggingCard ? 0.96 : 0.8,
+                        zIndex: 1,
                       }}
                     >
                       <div className="flex items-center justify-between text-[11px] font-bold">
                         <span
-                          className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${nextTheme.badgeBg}`}
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${nextTheme.frontBadgeBg}`}
                         >
                           Up Next: {nextTheme.name}
                         </span>
-                        <span className="text-neutral-400 font-mono text-[10px]">
+                        <span className="text-white/70 font-mono text-[10px]">
                           Card {nextCardIndex + 1}
                         </span>
                       </div>
 
-                      <div className="py-2 text-sm sm:text-base font-bold text-neutral-800 line-clamp-3 leading-relaxed">
+                      <div className="py-2 text-sm sm:text-base font-bold text-white line-clamp-3 leading-relaxed px-4 opacity-90">
                         {flashcards[nextCardIndex]?.front}
                       </div>
 
-                      <div className="text-[11px] text-neutral-400 flex items-center justify-center gap-1.5 font-medium">
+                      <div className="text-[11px] text-white/70 flex items-center justify-center gap-1.5 font-medium">
                         <span>Waiting in deck</span>
                       </div>
                     </div>
                   )}
 
-                  {/* ACTIVE TOP CARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
+                  {/* CARD #1: ACTIVE TOP CARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
                   <div
                     onPointerDown={handleCardPointerDown}
                     onPointerMove={handleCardPointerMove}
@@ -1225,128 +1296,141 @@ export default function DIGIHubLessonPage() {
                     style={{
                       transform:
                         swipeExitDirection === "left"
-                          ? "translateX(-150%) translateY(-28px) rotate(-22deg)"
+                          ? "translateX(-140vw) translateY(-32px) rotate(-26deg)"
                           : swipeExitDirection === "right"
-                          ? "translateX(150%) translateY(-28px) rotate(22deg)"
+                          ? "translateX(140vw) translateY(-32px) rotate(26deg)"
                           : `translateX(${dragDeltaX}px) translateY(${dragDeltaY}px) rotate(${
-                              dragDeltaX * 0.08
+                              dragDeltaX * 0.09
                             }deg)`,
                       opacity:
                         swipeExitDirection !== null
                           ? 0
                           : isDraggingCard
-                          ? Math.max(0.7, 1 - Math.abs(dragDeltaX) / 500)
+                          ? Math.max(0.75, 1 - Math.abs(dragDeltaX) / 450)
                           : 1,
                       transition: isDraggingCard
                         ? "none"
                         : isAnimatingExit
-                        ? "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 280ms ease-out"
+                        ? "transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-out"
                         : "transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1)",
                     }}
                   >
                     {/* Visual Swipe Direction Badges */}
                     {dragDeltaX < -25 && (
                       <div
-                        className="absolute top-3.5 right-3.5 z-20 px-3 py-1 rounded-full bg-[#0056D2] text-white text-[11px] font-bold shadow-md flex items-center gap-1 pointer-events-none transition-opacity"
+                        className="absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-white text-neutral-950 text-xs font-black shadow-xl flex items-center gap-1.5 pointer-events-none transition-opacity ring-2 ring-black/10 animate-pulse"
                         style={{
-                          opacity: Math.min(1, (Math.abs(dragDeltaX) - 20) / 45),
+                          opacity: Math.min(1, (Math.abs(dragDeltaX) - 20) / 40),
                         }}
                       >
-                        <span>Next Card</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
+                        <span>NEXT CARD</span>
+                        <ChevronRight className="w-4 h-4 stroke-[3]" />
                       </div>
                     )}
                     {dragDeltaX > 25 && (
                       <div
-                        className="absolute top-3.5 left-3.5 z-20 px-3 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-bold shadow-md flex items-center gap-1 pointer-events-none transition-opacity"
+                        className="absolute top-4 left-4 z-30 px-3.5 py-1.5 rounded-full bg-white text-neutral-950 text-xs font-black shadow-xl flex items-center gap-1.5 pointer-events-none transition-opacity ring-2 ring-black/10 animate-pulse"
                         style={{
-                          opacity: Math.min(1, (dragDeltaX - 20) / 45),
+                          opacity: Math.min(1, (dragDeltaX - 20) / 40),
                         }}
                       >
-                        <ChevronLeft className="w-3.5 h-3.5" />
-                        <span>Previous Card</span>
+                        <ChevronLeft className="w-4 h-4 stroke-[3]" />
+                        <span>PREVIOUS CARD</span>
                       </div>
                     )}
 
                     <div
-                      className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d shadow-sm ${
+                      className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d ${
                         isCardFlipped ? "rotate-y-180" : ""
                       }`}
                     >
-                      {/* FRONT FACE (Question / Concept with Active Brand Theme) */}
+                      {/* FRONT FACE: Vibrant Brand Saturated Gradient with Frosted Badges */}
                       <div
-                        className={`absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-6 border-2 ${currentTheme.frontBorder} ${currentTheme.frontBg} shadow-xs flex flex-col justify-between text-center transition-colors duration-300`}
+                        className={`absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.frontBorder} ${currentTheme.frontGradient} ${currentTheme.frontShadow} flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
                       >
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        {/* Ambient decorative glow orbs */}
+                        <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-white/20 blur-2xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-black/25 blur-2xl pointer-events-none" />
+
+                        <div className="flex items-center justify-between text-[11px] font-bold relative z-10">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold ${currentTheme.badgeBg}`}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.frontBadgeBg}`}
                           >
-                            ? Question & Concept
+                            ● {currentTheme.categoryTag}
                           </span>
-                          <span className="text-neutral-400 font-mono text-[10px]">
-                            {currentTheme.name}
+                          <span className="text-white/80 font-mono text-[11px] bg-black/20 backdrop-blur-sm px-2.5 py-0.5 rounded-md border border-white/20">
+                            Card {activeCardIndex + 1}/{flashcards.length}
                           </span>
                         </div>
 
-                        <div
-                          className={`py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-36 ${currentTheme.frontQuestionColor}`}
-                        >
+                        <div className="py-4 text-base sm:text-lg md:text-xl font-black text-white leading-snug tracking-tight my-auto px-2 relative z-10 overflow-y-auto max-h-44">
                           {flashcards[activeCardIndex]?.front}
                         </div>
 
-                        <div
-                          className={`text-[11px] flex items-center justify-center gap-1.5 font-semibold transition ${currentTheme.frontAccent}`}
-                        >
-                          <RotateCw className="w-3.5 h-3.5" />
-                          <span>Tap anywhere to reveal answer</span>
+                        <div className="relative z-10 pt-1">
+                          <div
+                            className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition ${currentTheme.frontFlipButtonBg} shadow-sm backdrop-blur-md`}
+                          >
+                            <RotateCw className="w-3.5 h-3.5" />
+                            <span>Tap card to reveal answer</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* BACK FACE (Answer & Ghanaian Analogy with Active Brand Dark/Contrast Theme) */}
+                      {/* BACK FACE: Deep Obsidian / Midnight Contrast Face with Ghanaian Analogy */}
                       <div
-                        className={`absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-6 border-2 ${currentTheme.backBorder} ${currentTheme.backBg} text-white shadow-xs flex flex-col justify-between text-center transition-colors duration-300`}
+                        className={`absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.backBorder} ${currentTheme.backGradient} ${currentTheme.backShadow} text-white flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
                       >
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        {/* Ambient decorative glow */}
+                        <div className="absolute -top-20 -left-20 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
+
+                        <div className="flex items-center justify-between text-[11px] font-bold relative z-10">
                           <span
-                            className={`text-[11px] uppercase font-bold tracking-wider ${currentTheme.backAccent}`}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.backBadgeBg}`}
                           >
-                            ✓ Answer & Insight
+                            ✓ ANSWER & INSIGHT
                           </span>
-                          <span className="text-white/60 font-mono text-[10px]">
+                          <span className="text-white/60 font-mono text-[11px]">
                             {currentTheme.name}
                           </span>
                         </div>
 
                         <div
-                          className={`py-1 text-xs sm:text-sm font-semibold leading-relaxed overflow-y-auto max-h-24 ${currentTheme.backAnswerColor}`}
+                          className={`py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-32 px-1 relative z-10 ${currentTheme.backTextColor}`}
                         >
                           {flashcards[activeCardIndex]?.back}
                         </div>
 
                         {flashcards[activeCardIndex]?.analogy && (
                           <div
-                            className={`text-xs italic px-3 py-1.5 rounded-xl border max-h-20 overflow-y-auto text-left sm:text-center ${currentTheme.backAnalogyBg}`}
+                            className={`relative z-10 text-xs italic px-3.5 py-2.5 rounded-2xl border max-h-24 overflow-y-auto text-left sm:text-center ${currentTheme.analogyCardBg} ${currentTheme.analogyCardBorder}`}
                           >
-                            💡 Ghanaian Analogy:{" "}
-                            {flashcards[activeCardIndex].analogy}
+                            <span className="font-bold text-amber-300 not-italic">
+                              💡 Ghanaian Analogy:{" "}
+                            </span>
+                            <span className={currentTheme.analogyCardText}>
+                              {flashcards[activeCardIndex].analogy}
+                            </span>
                           </div>
                         )}
 
-                        <div className="text-[11px] text-white/80 flex items-center justify-center gap-1.5 group-hover:text-white transition font-medium">
-                          <RotateCw className="w-3.5 h-3.5" />
-                          <span>Tap anywhere to flip card back</span>
+                        <div className="relative z-10 pt-1">
+                          <div className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition bg-white/15 hover:bg-white/25 border border-white/30 text-white shadow-sm backdrop-blur-md">
+                            <RotateCw className="w-3.5 h-3.5" />
+                            <span>Tap card to flip back</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Brand Color Dot Indicators (Click to jump to any card) */}
-                <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                {/* Brand Color Indicators (Click any dot to fling smoothly to that card) */}
+                <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
                   {flashcards.map((_, dotIdx) => {
                     const dotTheme =
-                      DIGICONNECT_BRAND_THEMES[
-                        dotIdx % DIGICONNECT_BRAND_THEMES.length
+                      FLASHCARD_BRAND_THEMES[
+                        dotIdx % FLASHCARD_BRAND_THEMES.length
                       ];
                     const isActive = dotIdx === activeCardIndex;
 
@@ -1362,12 +1446,12 @@ export default function DIGIHubLessonPage() {
                             setTimeout(() => setActiveCardIndex(dotIdx), 150);
                           }
                         }}
-                        className={`transition-all duration-300 rounded-full flex items-center gap-1 ${
+                        className={`transition-all duration-300 rounded-full flex items-center gap-1.5 ${
                           isActive
-                            ? `px-3 py-1 text-white text-[11px] font-bold shadow-xs ${dotTheme.dotClass} scale-105`
-                            : "w-2.5 h-2.5 bg-neutral-300 hover:bg-neutral-400 opacity-60 hover:opacity-100"
+                            ? `px-3.5 py-1 text-white text-[11px] font-black shadow-md ${dotTheme.dotColor} ring-2 ring-white/70 scale-105`
+                            : `w-3 h-3 ${dotTheme.dotColor} opacity-50 hover:opacity-100 hover:scale-125`
                         }`}
-                        title={`Go to Card ${dotIdx + 1} (${dotTheme.name})`}
+                        title={`Go to Card ${dotIdx + 1}: ${dotTheme.name}`}
                       >
                         {isActive && (
                           <>
@@ -1381,21 +1465,21 @@ export default function DIGIHubLessonPage() {
                 </div>
 
                 {/* Card Controls with Authentic Swipe-Away Physics */}
-                <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-neutral-100">
                   <button
                     type="button"
                     disabled={isAnimatingExit}
                     onClick={() => triggerSwipeAway("right")}
-                    className="px-4 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-semibold text-neutral-700 transition flex items-center gap-1.5 shadow-2xs"
+                    className="px-4 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-bold text-neutral-700 transition flex items-center gap-1.5 shadow-2xs"
                   >
                     <ChevronLeft className="w-4 h-4 text-neutral-500" />
-                    <span>Previous</span>
+                    <span>Previous Card</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIsCardFlipped((prev) => !prev)}
-                    className="px-3.5 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-semibold text-neutral-600 transition flex items-center gap-1.5 shadow-2xs"
+                    className="px-4 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-bold text-neutral-700 transition flex items-center gap-1.5 shadow-2xs"
                     title="Flip active card"
                   >
                     <RotateCw className="w-3.5 h-3.5 text-neutral-500" />
@@ -1406,7 +1490,7 @@ export default function DIGIHubLessonPage() {
                     type="button"
                     disabled={isAnimatingExit}
                     onClick={() => triggerSwipeAway("left")}
-                    className={`px-4 py-2.5 rounded-xl text-white text-xs font-bold transition shadow-2xs active:scale-95 flex items-center gap-1.5 ${
+                    className={`px-5 py-2.5 rounded-xl text-white text-xs font-black transition shadow-md active:scale-95 flex items-center gap-1.5 ${
                       activeCardIndex < flashcards.length - 1
                         ? "bg-[#0056D2] hover:bg-[#00419e]"
                         : "bg-emerald-600 hover:bg-emerald-700"

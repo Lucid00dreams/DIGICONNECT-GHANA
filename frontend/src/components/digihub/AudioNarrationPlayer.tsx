@@ -6,30 +6,22 @@ import { Volume2, Play, Pause, Square, Sparkles } from "lucide-react";
 export interface AudioProgressInfo {
   isPlaying: boolean;
   isPaused: boolean;
-  activeType:
-    | "title"
-    | "summary"
-    | "section_heading"
-    | "section_explanation"
-    | "section_analogy"
-    | "takeaways"
-    | null;
+  activeTargetId: string | null;
+  activeWordIndex: number;
   activeSectionIndex: number | null;
   currentSentence: string;
+  activeWord: string;
 }
 
-interface AudioSegment {
-  type:
-    | "title"
-    | "summary"
-    | "section_heading"
-    | "section_explanation"
-    | "section_analogy"
-    | "takeaways";
-  sectionIndex?: number;
-  label: string;
+interface WordToken {
+  word: string;
   charStart: number;
   charEnd: number;
+  targetId: string;
+  wordIndex: number;
+  sectionIndex: number | null;
+  sentence: string;
+  label: string;
 }
 
 interface AudioNarrationPlayerProps {
@@ -54,94 +46,130 @@ export function AudioNarrationPlayer({
   const [isSupported, setIsSupported] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState<number>(0.9); // Default slightly relaxed for beginners
+  const [playbackRate, setPlaybackRate] = useState<number>(0.9); // Relaxed for beginner learning
   const [currentSentence, setCurrentSentence] = useState<string>("");
+  const [activeWord, setActiveWord] = useState<string>("");
   const [activeSegmentLabel, setActiveSegmentLabel] = useState<string>("");
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const segmentsRef = useRef<AudioSegment[]>([]);
+  const tokensRef = useRef<WordToken[]>([]);
+  const currentTokenRef = useRef<WordToken | null>(null);
+  const lastBoundaryTimeRef = useRef<number>(0);
   const fullScriptRef = useRef<string>("");
 
-  // Build clean spoken script and index exact character positions for text highlighting
-  const prepareScriptAndSegments = (): { script: string; segments: AudioSegment[] } => {
-    const segments: AudioSegment[] = [];
+  // Build clean spoken script and index every single word to its exact target and position
+  const prepareTokensAndScript = (): { script: string; tokens: WordToken[] } => {
+    const tokens: WordToken[] = [];
     let script = "";
 
-    const add = (
-      type: AudioSegment["type"],
+    const addTarget = (
+      targetId: string,
       label: string,
       rawText: string,
-      sectionIndex?: number
+      sectionIndex: number | null,
+      prefix?: string
     ) => {
-      const cleaned = (rawText || "")
+      const cleanPrefix = (prefix || "").trim();
+      const cleanText = (rawText || "")
         .replace(/\*\*(.*?)\*\*/g, "$1")
         .replace(/\*(.*?)\*/g, "$1")
         .replace(/•/g, "")
         .replace(/\s+/g, " ")
         .trim();
 
-      if (!cleaned) return;
+      if (!cleanText) return;
 
-      if (script.length > 0 && !script.endsWith(" ")) {
+      // Spoken prefix (e.g. "Section 1:" or "Ghanaian Analogy:")
+      if (cleanPrefix) {
+        const prefixWords = cleanPrefix.split(" ");
+        prefixWords.forEach((pw) => {
+          if (script.length > 0 && !script.endsWith(" ")) script += " ";
+          const charStart = script.length;
+          script += pw;
+          const charEnd = script.length;
+          tokens.push({
+            word: pw,
+            charStart,
+            charEnd,
+            targetId: `${targetId}-prefix`,
+            wordIndex: -1,
+            sectionIndex,
+            sentence: cleanText,
+            label,
+          });
+        });
+      }
+
+      // Spoken target words
+      const words = cleanText.split(" ");
+      words.forEach((w, wIdx) => {
+        if (script.length > 0 && !script.endsWith(" ")) script += " ";
+        const charStart = script.length;
+        script += w;
+        const charEnd = script.length;
+
+        tokens.push({
+          word: w,
+          charStart,
+          charEnd,
+          targetId,
+          wordIndex: wIdx,
+          sectionIndex,
+          sentence: cleanText,
+          label,
+        });
+      });
+
+      if (!/[.!?]$/.test(cleanText)) {
+        script += ". ";
+      } else {
         script += " ";
       }
-
-      const charStart = script.length;
-      script += cleaned;
-      if (!/[.!?]$/.test(cleaned)) {
-        script += ".";
-      }
-      const charEnd = script.length;
-
-      segments.push({
-        type,
-        label,
-        sectionIndex,
-        charStart,
-        charEnd,
-      });
     };
 
-    add("title", "Topic Title", title);
-    add("summary", "Summary Overview", summary);
+    addTarget("summary", "Topic Summary", summary, null);
 
     if (sections && sections.length > 0) {
       sections.forEach((sec, idx) => {
-        add(
-          "section_heading",
-          `Section ${idx + 1}: ${sec.heading}`,
-          `Section ${idx + 1}: ${sec.heading}`,
-          idx
+        addTarget(
+          `sec-${idx}-heading`,
+          `Section ${idx + 1} Heading`,
+          sec.heading,
+          idx,
+          `Section ${idx + 1}:`
         );
-        add(
-          "section_explanation",
+        addTarget(
+          `sec-${idx}-exp`,
           `Section ${idx + 1} Explanation`,
           sec.explanation,
           idx
         );
         if (sec.analogy) {
-          add(
-            "section_analogy",
+          addTarget(
+            `sec-${idx}-analogy`,
             `Section ${idx + 1} Ghanaian Analogy`,
-            `Everyday Ghanaian analogy: ${sec.analogy}`,
-            idx
+            sec.analogy,
+            idx,
+            `Everyday Ghanaian Analogy:`
           );
         }
       });
     }
 
     if (keyTakeaways && keyTakeaways.length > 0) {
-      add(
+      addTarget(
         "takeaways",
         "Key Takeaways",
-        `Key takeaways to remember: ${keyTakeaways.join(". ")}`
+        keyTakeaways.join(". "),
+        null,
+        "Key takeaways to remember:"
       );
     }
 
-    segmentsRef.current = segments;
-    fullScriptRef.current = script;
-    return { script, segments };
+    tokensRef.current = tokens;
+    fullScriptRef.current = script.trim();
+    return { script: fullScriptRef.current, tokens };
   };
 
   useEffect(() => {
@@ -152,7 +180,6 @@ export function AudioNarrationPlayer({
       setIsSupported(false);
     }
 
-    // Stop speaking when user moves to a new topic or unmounts
     return () => {
       if (synthRef.current) {
         synthRef.current.cancel();
@@ -161,9 +188,11 @@ export function AudioNarrationPlayer({
         onAudioProgress({
           isPlaying: false,
           isPaused: false,
-          activeType: null,
+          activeTargetId: null,
+          activeWordIndex: -1,
           activeSectionIndex: null,
           currentSentence: "",
+          activeWord: "",
         });
       }
     };
@@ -172,21 +201,47 @@ export function AudioNarrationPlayer({
   const notifyProgress = (
     playing: boolean,
     paused: boolean,
-    activeSeg: AudioSegment | null,
-    sentence: string
+    token: WordToken | null
   ) => {
     if (!onAudioProgress) return;
     onAudioProgress({
       isPlaying: playing,
       isPaused: paused,
-      activeType: activeSeg ? activeSeg.type : null,
-      activeSectionIndex:
-        activeSeg && typeof activeSeg.sectionIndex === "number"
-          ? activeSeg.sectionIndex
-          : null,
-      currentSentence: sentence,
+      activeTargetId: token ? token.targetId : null,
+      activeWordIndex: token ? token.wordIndex : -1,
+      activeSectionIndex: token ? token.sectionIndex : null,
+      currentSentence: token ? token.sentence : "",
+      activeWord: token ? token.word : "",
     });
   };
+
+  // High-reliability smooth word ticker:
+  // If browser onboundary is delayed or skipped by the engine, advance smoothly
+  useEffect(() => {
+    if (!isPlaying || isPaused) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      // Average speech at 0.9x is ~380ms per word. If no boundary event for 400ms, nudge forward
+      if (now - lastBoundaryTimeRef.current >= 400) {
+        const tokens = tokensRef.current;
+        const current = currentTokenRef.current;
+        if (!current) return;
+        const curIdx = tokens.indexOf(current);
+        if (curIdx >= 0 && curIdx < tokens.length - 1) {
+          const nextToken = tokens[curIdx + 1];
+          currentTokenRef.current = nextToken;
+          lastBoundaryTimeRef.current = now;
+          setActiveWord(nextToken.word);
+          setCurrentSentence(nextToken.sentence);
+          setActiveSegmentLabel(nextToken.label);
+          notifyProgress(true, false, nextToken);
+        }
+      }
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, isPaused]);
 
   const handlePlay = () => {
     if (!synthRef.current) return;
@@ -195,15 +250,14 @@ export function AudioNarrationPlayer({
       synthRef.current.resume();
       setIsPaused(false);
       setIsPlaying(true);
-      const activeSeg = segmentsRef.current[0] || null;
-      notifyProgress(true, false, activeSeg, currentSentence);
+      notifyProgress(true, false, currentTokenRef.current);
       return;
     }
 
     synthRef.current.cancel(); // Clear any previous speech
 
-    const { script, segments } = prepareScriptAndSegments();
-    if (!script) return;
+    const { script, tokens } = prepareTokensAndScript();
+    if (!script || tokens.length === 0) return;
 
     const utterance = new SpeechSynthesisUtterance(script);
     utteranceRef.current = utterance;
@@ -212,7 +266,7 @@ export function AudioNarrationPlayer({
     utterance.pitch = 1.0;
     utterance.lang = "en-US";
 
-    // Pick a smooth natural English voice if available
+    // Select natural English voice
     const voices = (synthRef.current ? synthRef.current.getVoices() : []) || [];
     const preferredVoice =
       voices.find(
@@ -230,57 +284,68 @@ export function AudioNarrationPlayer({
     utterance.onboundary = (event) => {
       if (typeof event.charIndex === "number") {
         const charIdx = event.charIndex;
-        const currentSegments = segmentsRef.current;
-        const currentScript = fullScriptRef.current;
+        const currentTokens = tokensRef.current;
 
-        // Find active segment
-        let activeSeg = currentSegments.find(
-          (s) => charIdx >= s.charStart && charIdx <= s.charEnd
+        // Find token corresponding to charIdx
+        let match = currentTokens.find(
+          (t) => charIdx >= t.charStart && charIdx <= t.charEnd
         );
-        if (!activeSeg) {
-          activeSeg =
-            currentSegments.find((s) => charIdx <= s.charEnd) ||
-            currentSegments[currentSegments.length - 1] ||
-            null;
+        if (!match) {
+          // Closest token
+          for (let i = currentTokens.length - 1; i >= 0; i--) {
+            if (currentTokens[i].charStart <= charIdx) {
+              match = currentTokens[i];
+              break;
+            }
+          }
+        }
+        if (!match && currentTokens.length > 0) {
+          match = currentTokens[0];
         }
 
-        // Extract sentence being read
-        const remaining = currentScript.slice(charIdx);
-        const match = remaining.match(/^[^.!?]+[.!?]?/);
-        const sentence = match ? match[0].trim() : remaining.slice(0, 90).trim();
-
-        setCurrentSentence(sentence);
-        if (activeSeg) {
-          setActiveSegmentLabel(activeSeg.label);
+        if (match) {
+          currentTokenRef.current = match;
+          lastBoundaryTimeRef.current = Date.now();
+          setActiveWord(match.word);
+          setCurrentSentence(match.sentence);
+          setActiveSegmentLabel(match.label);
+          notifyProgress(true, false, match);
         }
-        notifyProgress(true, false, activeSeg || null, sentence);
       }
     };
 
     utterance.onstart = () => {
       setIsPlaying(true);
       setIsPaused(false);
-      const firstSeg = segments[0] || null;
-      if (firstSeg) {
-        setActiveSegmentLabel(firstSeg.label);
+      const firstToken = tokens[0] || null;
+      currentTokenRef.current = firstToken;
+      lastBoundaryTimeRef.current = Date.now();
+      if (firstToken) {
+        setActiveWord(firstToken.word);
+        setCurrentSentence(firstToken.sentence);
+        setActiveSegmentLabel(firstToken.label);
       }
-      notifyProgress(true, false, firstSeg, "");
+      notifyProgress(true, false, firstToken);
     };
 
     utterance.onend = () => {
       setIsPlaying(false);
       setIsPaused(false);
       setCurrentSentence("");
+      setActiveWord("");
       setActiveSegmentLabel("");
-      notifyProgress(false, false, null, "");
+      currentTokenRef.current = null;
+      notifyProgress(false, false, null);
     };
 
     utterance.onerror = () => {
       setIsPlaying(false);
       setIsPaused(false);
       setCurrentSentence("");
+      setActiveWord("");
       setActiveSegmentLabel("");
-      notifyProgress(false, false, null, "");
+      currentTokenRef.current = null;
+      notifyProgress(false, false, null);
     };
 
     synthRef.current.speak(utterance);
@@ -291,7 +356,7 @@ export function AudioNarrationPlayer({
     synthRef.current.pause();
     setIsPaused(true);
     setIsPlaying(false);
-    notifyProgress(false, true, null, currentSentence);
+    notifyProgress(false, true, currentTokenRef.current);
   };
 
   const handleStop = () => {
@@ -300,8 +365,10 @@ export function AudioNarrationPlayer({
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentSentence("");
+    setActiveWord("");
     setActiveSegmentLabel("");
-    notifyProgress(false, false, null, "");
+    currentTokenRef.current = null;
+    notifyProgress(false, false, null);
   };
 
   const toggleRate = () => {
@@ -314,14 +381,14 @@ export function AudioNarrationPlayer({
   };
 
   if (!isSupported) {
-    return null; // Graceful degrade on ancient unsupported environments
+    return null;
   }
 
   return (
     <div
       className={`p-3.5 sm:p-4 rounded-2xl transition-all duration-300 shadow-2xs ${
         isPlaying
-          ? "bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50/60 border-2 border-[#2196D3] shadow-md"
+          ? "bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50/60 border-2 border-[#0056D2] shadow-md"
           : "bg-blue-50/70 border border-blue-200/80 text-neutral-800"
       }`}
     >
@@ -338,15 +405,15 @@ export function AudioNarrationPlayer({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-bold text-neutral-900">
-              <span>Interactive Audio Narration</span>
+              <span>Interactive Audio Voice Reader</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-blue-200 text-[#0056D2] font-semibold flex items-center gap-1 shadow-2xs">
                 <Sparkles className="w-2.5 h-2.5 text-amber-500" />
-                Live Read-Along
+                Live Word Highlights
               </span>
             </div>
             <p className="text-[11px] text-neutral-600 truncate mt-0.5">
               {isPlaying
-                ? "Voicing lesson • Spoken sentences & analogies highlight below in real-time"
+                ? "Reading aloud • Words highlight in gold on the page as spoken"
                 : isPaused
                 ? "Narration paused • Press resume to continue"
                 : "Listen to the explanations, analogies, and concepts read aloud"}
@@ -371,7 +438,7 @@ export function AudioNarrationPlayer({
               type="button"
               onClick={handlePlay}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs font-bold transition shadow-2xs active:scale-95"
-              title="Listen to lesson with text highlighting"
+              title="Listen to lesson with real-time text highlighting"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
               <span>{isPaused ? "Resume" : "Listen Along"}</span>
@@ -396,12 +463,12 @@ export function AudioNarrationPlayer({
             title="Adjust reading speed"
           >
             {playbackRate === 0.8
-              ? "0.8x (Slow)"
+              ? "0.8x"
               : playbackRate === 0.9
               ? "0.9x"
               : playbackRate === 1.0
               ? "1.0x"
-              : "1.2x (Fast)"}
+              : "1.2x"}
           </button>
         </div>
       </div>
@@ -425,7 +492,7 @@ export function AudioNarrationPlayer({
                   style={{ animationDelay: "300ms" }}
                 />
               </div>
-              <span className="font-bold tracking-tight">Currently Speaking:</span>
+              <span className="font-bold tracking-tight">Currently Reading:</span>
               {activeSegmentLabel && (
                 <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#0056D2] text-[10px] font-bold border border-blue-200">
                   {activeSegmentLabel}
@@ -433,13 +500,19 @@ export function AudioNarrationPlayer({
               )}
             </div>
             <span className="text-[10px] text-neutral-500 hidden sm:inline">
-              Highlighted on page below ↓
+              Watch words highlight in real-time below ↓
             </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/95 border border-blue-300 shadow-xs text-xs text-neutral-900 leading-relaxed font-medium">
-            <span className="bg-amber-100 text-neutral-950 font-semibold px-1 py-0.5 rounded shadow-2xs">
-              "{currentSentence}"
+          <div className="p-2.5 rounded-xl bg-white/95 border border-blue-300 shadow-xs text-xs text-neutral-900 leading-relaxed font-medium flex items-center gap-1.5 flex-wrap">
+            <span className="text-neutral-500 italic text-[11px]">Speaking:</span>
+            {activeWord && (
+              <span className="bg-amber-300 text-neutral-950 font-extrabold px-2 py-0.5 rounded-md shadow-xs ring-2 ring-amber-400 animate-pulse text-xs">
+                "{activeWord}"
+              </span>
+            )}
+            <span className="text-neutral-700 font-normal line-clamp-1">
+              in {currentSentence}
             </span>
           </div>
         </div>
