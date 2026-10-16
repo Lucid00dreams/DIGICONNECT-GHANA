@@ -157,7 +157,7 @@ export function CourseDetailModal({
               Skills you will gain
             </h3>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {course.skillsGained.map((skill) => (
+              {(course.skillsGained || []).map((skill) => (
                 <span
                   key={skill}
                   className="px-3 py-1 rounded-lg bg-blue-50/80 text-blue-700 border border-blue-200/80 text-xs font-semibold"
@@ -173,7 +173,7 @@ export function CourseDetailModal({
             <div className="flex items-center justify-between">
               <h3 className="text-sm sm:text-base font-bold text-neutral-900 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-brand-blue" />
-                <span>Syllabus ({course.syllabus.length} Weeks • {course.lessons.length} Modules)</span>
+                <span>Syllabus ({(course.syllabus || []).length} Weeks • {courseLessons.length} Modules)</span>
               </h3>
               <span className="text-xs text-neutral-500">Self-Paced Practice</span>
             </div>

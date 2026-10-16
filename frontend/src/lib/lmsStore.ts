@@ -1493,43 +1493,65 @@ export function getAllLessons(): Lesson[] {
       return INITIAL_LESSONS;
     }
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || !parsed[0]?.topics || parsed.length < INITIAL_LESSONS.length) {
+    if (!Array.isArray(parsed) || parsed.length === 0) {
       localStorage.setItem(LMS_LESSONS_KEY, JSON.stringify(INITIAL_LESSONS));
       return INITIAL_LESSONS;
     }
-    return parsed;
+    // Guaranteed merge: ensure all standard INITIAL_LESSONS (including iam-101) exist
+    const lessonMap = new Map<string, Lesson>();
+    INITIAL_LESSONS.forEach((l) => lessonMap.set(l.id, l));
+    parsed.forEach((l: Lesson) => {
+      if (l && l.id) {
+        lessonMap.set(l.id, { ...lessonMap.get(l.id), ...l });
+      }
+    });
+    return Array.from(lessonMap.values());
   } catch {
     return INITIAL_LESSONS;
   }
 }
 
 export function getLessonById(id: string): Lesson | undefined {
-  if (!id) return undefined;
+  if (!id) return INITIAL_LESSONS[0];
   const lessons = getAllLessons();
-  const directMatch = lessons.find((l) => l.id === id);
+  const directMatch = lessons.find((l) => l.id === id) || INITIAL_LESSONS.find((l) => l.id === id);
   if (directMatch) return directMatch;
 
   // Normalization for legacy / alias IDs
   if (id === "coding-1" || id === "web-1" || id === "web-dev-1") {
-    return lessons.find((l) => l.id === "code-101") || lessons[0];
+    return lessons.find((l) => l.id === "code-101") || INITIAL_LESSONS.find((l) => l.id === "code-101");
   }
   if (id === "cyber-1" || id === "cybersecurity-1") {
-    return lessons.find((l) => l.id === "cyber-101") || lessons[0];
+    return lessons.find((l) => l.id === "cyber-101") || INITIAL_LESSONS.find((l) => l.id === "cyber-101");
   }
   if (id === "python-1") {
-    return lessons.find((l) => l.id === "py-101") || lessons[0];
+    return lessons.find((l) => l.id === "py-101") || INITIAL_LESSONS.find((l) => l.id === "py-101");
+  }
+  if (
+    id === "iam" ||
+    id === "iam-1" ||
+    id === "cyber-architecture" ||
+    id === "cybersecurity-architecture" ||
+    id === "cybersecurity-architecture-iam"
+  ) {
+    return lessons.find((l) => l.id === "iam-101") || INITIAL_LESSONS.find((l) => l.id === "iam-101");
   }
 
   // If a course ID or slug was passed instead of a lesson ID (e.g. /digihub/lesson/coding)
   const course = COURSES.find((c) => c.id === id || c.slug === id);
-  if (course && course.lessons && course.lessons.length > 0) {
-    return course.lessons[0];
+  if (course) {
+    if (course.lessons && course.lessons.length > 0) {
+      return course.lessons[0];
+    }
+    const foundByTrack = INITIAL_LESSONS.find((l) => l.trackId === course.id || l.trackId === course.slug);
+    if (foundByTrack) return foundByTrack;
   }
+
   // Try matching trackId
-  const trackLesson = lessons.find((l) => l.trackId === id);
+  const trackLesson = lessons.find((l) => l.trackId === id) || INITIAL_LESSONS.find((l) => l.trackId === id);
   if (trackLesson) return trackLesson;
 
-  return undefined;
+  return lessons[0] || INITIAL_LESSONS[0];
 }
 
 // ─── CERTIFICATE & SIGNATURE AUTHORITY KEYS & DEFAULTS ─────────────────

@@ -22,11 +22,24 @@ export default function DigihubError({
 
   useEffect(() => {
     console.error("DIGIHub LMS error boundary caught:", error);
+    try {
+      if (typeof window !== "undefined") {
+        // Auto-purge stale cached course/lesson keys to heal the student session immediately
+        localStorage.removeItem("dcg_lms_courses_v2");
+        localStorage.removeItem("dcg_digihub_lessons_v3");
+        localStorage.removeItem("dcg_lesson_split_ratio");
+        sessionStorage.clear();
+      }
+    } catch {}
   }, [error]);
 
   const handleResume = () => {
     try {
       if (typeof window !== "undefined") {
+        localStorage.removeItem("dcg_lms_courses_v2");
+        localStorage.removeItem("dcg_digihub_lessons_v3");
+        localStorage.removeItem("dcg_lesson_split_ratio");
+        sessionStorage.clear();
         if (
           window.location.pathname.includes("/lesson/undefined") ||
           window.location.pathname.includes("/lesson/coding-1")
@@ -34,6 +47,8 @@ export default function DigihubError({
           window.location.href = "/digihub";
           return;
         }
+        window.location.reload();
+        return;
       }
     } catch {
       // ignore

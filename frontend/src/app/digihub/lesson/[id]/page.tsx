@@ -71,7 +71,12 @@ export default function DIGIHubLessonPage() {
   const router = useRouter();
   const lessonId = params?.id as string;
 
-  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [lesson, setLesson] = useState<Lesson | null>(() => {
+    if (typeof window !== "undefined" && lessonId) {
+      return getLessonById(lessonId) || null;
+    }
+    return null;
+  });
   const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -207,17 +212,13 @@ export default function DIGIHubLessonPage() {
     setCurrentUser(user);
     setAuthChecked(true);
 
-    if (!lessonId) return;
-    const found = getLessonById(lessonId);
+    const targetId = lessonId || "code-101";
+    const found = getLessonById(targetId);
     if (found) {
       setLesson(found);
       const progress = getLearnerProgress();
       const safeCompleted = Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds : [];
       setIsCompleted(safeCompleted.includes(found.id));
-      setActiveTopicIndex(0);
-      setActivePaneTab("content");
-      setActiveCardIndex(0);
-      setIsCardFlipped(false);
     }
   }, [lessonId]);
 
@@ -236,22 +237,14 @@ export default function DIGIHubLessonPage() {
   }
 
   if (!lesson) {
+    const immediateLesson = getLessonById(lessonId || "code-101");
+    if (immediateLesson) {
+      return null;
+    }
     return (
-      <div className="min-h-screen bg-neutral-50 text-neutral-900 flex items-center justify-center p-6">
-        <div className="text-center max-w-md p-8 bg-white border border-neutral-200 rounded-3xl shadow-xs">
-          <BookOpen className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-neutral-900">Module Not Found</h2>
-          <p className="text-xs text-neutral-500 mt-2">
-            The requested module could not be found or has not been published yet.
-          </p>
-          <Link
-            href="/digihub"
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold text-xs transition shadow-2xs"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Return to DIGIHub</span>
-          </Link>
-        </div>
+      <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col items-center justify-center p-6">
+        <div className="w-10 h-10 border-3 border-brand-blue border-t-transparent rounded-full animate-spin mb-3" />
+        <span className="text-xs font-semibold text-neutral-600">Loading lesson content...</span>
       </div>
     );
   }

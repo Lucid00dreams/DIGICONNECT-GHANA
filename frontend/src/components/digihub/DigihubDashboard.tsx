@@ -198,7 +198,7 @@ export function DigihubDashboard({
       c.title.toLowerCase().includes(q) ||
       c.description.toLowerCase().includes(q) ||
       c.organization.toLowerCase().includes(q) ||
-      c.skillsGained.some((s) => s.toLowerCase().includes(q));
+      (c.skillsGained || []).some((s) => s.toLowerCase().includes(q));
 
     return matchesFilter && matchesSearch;
   });

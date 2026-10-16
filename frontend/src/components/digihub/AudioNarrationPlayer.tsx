@@ -90,10 +90,10 @@ export function AudioNarrationPlayer({
     utterance.lang = "en-US";
 
     // Attempt to pick a smooth natural English voice if available
-    const voices = synthRef.current.getVoices();
+    const voices = (synthRef.current ? synthRef.current.getVoices() : []) || [];
     const preferredVoice =
-      voices.find((v) => v.lang.startsWith("en") && (v.name.includes("Natural") || v.name.includes("Google"))) ||
-      voices.find((v) => v.lang.startsWith("en"));
+      voices.find((v) => v && v.lang && v.lang.startsWith("en") && (v.name?.includes("Natural") || v.name?.includes("Google"))) ||
+      voices.find((v) => v && v.lang && v.lang.startsWith("en"));
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }

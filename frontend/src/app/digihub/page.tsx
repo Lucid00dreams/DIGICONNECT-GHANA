@@ -175,8 +175,9 @@ export default function DIGIHubPage() {
 
   // Overall metric computations
   const totalLessonsCount = allLessons.length;
-  const completedCount = progress.completedLessonIds.length;
-  const completionPercentage = Math.round((completedCount / totalLessonsCount) * 100) || 0;
+  const safeCompletedIds = Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds : [];
+  const completedCount = safeCompletedIds.length;
+  const completionPercentage = Math.round((completedCount / (totalLessonsCount || 1)) * 100) || 0;
 
   const triggerToast = (msg: string) => {
     setEnrollToast(msg);
@@ -313,7 +314,7 @@ export default function DIGIHubPage() {
               setIsCourseModalOpen(false);
             }
           }}
-          completedLessonIds={progress.completedLessonIds}
+          completedLessonIds={safeCompletedIds}
         />
 
         {/* Movable AI Study Coach Floating Chatbot */}
@@ -333,7 +334,7 @@ export default function DIGIHubPage() {
       !q ||
       c.title.toLowerCase().includes(q) ||
       c.description.toLowerCase().includes(q) ||
-      c.skillsGained.some((s) => s.toLowerCase().includes(q)) ||
+      (c.skillsGained || []).some((s) => s.toLowerCase().includes(q)) ||
       c.instructorName.toLowerCase().includes(q);
     return matchesCategory && matchesSearch;
   });
@@ -379,7 +380,7 @@ export default function DIGIHubPage() {
         onClose={() => setIsCourseModalOpen(false)}
         isEnrolled={selectedCourseForModal ? isEnrolledInCourse(selectedCourseForModal.id, currentUser) : false}
         onEnroll={handleEnroll}
-        completedLessonIds={progress.completedLessonIds}
+        completedLessonIds={safeCompletedIds}
       />
 
       {/* Booking Modal */}
