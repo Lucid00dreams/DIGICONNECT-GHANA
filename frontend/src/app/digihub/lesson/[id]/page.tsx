@@ -1274,13 +1274,24 @@ export default function DIGIHubLessonPage() {
                     )}
 
                     <div
-                      className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d ${
-                        isCardFlipped ? "rotate-y-180" : ""
-                      }`}
+                      className="relative w-full h-full flashcard-inner rounded-3xl"
+                      style={{
+                        transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                        transformStyle: "preserve-3d",
+                        WebkitTransformStyle: "preserve-3d",
+                        transition: "transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      }}
                     >
                       {/* FRONT FACE: Vibrant Brand Saturated Gradient with Frosted Badges */}
                       <div
-                        className={`absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.frontBorder} ${currentTheme.frontGradient} ${currentTheme.frontShadow} flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
+                        className={`absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.frontBorder} ${currentTheme.frontGradient} ${currentTheme.frontShadow} flex flex-col justify-between text-center transition-all duration-300 overflow-hidden ${
+                          isCardFlipped ? "pointer-events-none" : "pointer-events-auto"
+                        }`}
+                        style={{
+                          transform: "rotateY(0deg)",
+                          backfaceVisibility: "hidden",
+                          WebkitBackfaceVisibility: "hidden",
+                        }}
                       >
                         {/* Ambient decorative glow orbs */}
                         <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-white/20 blur-2xl pointer-events-none" />
@@ -1319,7 +1330,14 @@ export default function DIGIHubLessonPage() {
 
                       {/* BACK FACE: Deep Obsidian / Midnight Contrast Face with Ghanaian Analogy */}
                       <div
-                        className={`absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.backBorder} ${currentTheme.backGradient} ${currentTheme.backShadow} text-white flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
+                        className={`absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.backBorder} ${currentTheme.backGradient} ${currentTheme.backShadow} text-white flex flex-col justify-between text-center transition-all duration-300 overflow-hidden ${
+                          isCardFlipped ? "pointer-events-auto" : "pointer-events-none"
+                        }`}
+                        style={{
+                          transform: "rotateY(180deg)",
+                          backfaceVisibility: "hidden",
+                          WebkitBackfaceVisibility: "hidden",
+                        }}
                       >
                         {/* Ambient decorative glow */}
                         <div className="absolute -top-20 -left-20 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
