@@ -34,6 +34,7 @@ import {
   Maximize2,
   Minimize2,
   GripVertical,
+  Volume2,
 } from "lucide-react";
 import {
   getLessonById,
@@ -51,11 +52,120 @@ import { PythonLab } from "@/components/digihub/PythonLab";
 import { DigitalLiteracyLab } from "@/components/digihub/DigitalLiteracyLab";
 import { QuizWidget } from "@/components/digihub/QuizWidget";
 import { AuthGate } from "@/components/digihub/AuthGate";
-import { AudioNarrationPlayer } from "@/components/digihub/AudioNarrationPlayer";
+import {
+  AudioNarrationPlayer,
+  AudioProgressInfo,
+} from "@/components/digihub/AudioNarrationPlayer";
 import { JargonBusterModal } from "@/components/digihub/JargonBusterModal";
 import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
 import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 import { triggerConfetti, playSuccessChime } from "@/lib/confetti";
+
+// DigiConnect Brand Colors for Flashcards
+export interface DigiConnectBrandTheme {
+  name: string;
+  badgeBg: string;
+  frontBg: string;
+  frontBorder: string;
+  frontAccent: string;
+  frontQuestionColor: string;
+  frontTag: string;
+  backBg: string;
+  backBorder: string;
+  backAccent: string;
+  backAnswerColor: string;
+  backAnalogyBg: string;
+  accentHex: string;
+  dotClass: string;
+}
+
+export const DIGICONNECT_BRAND_THEMES: DigiConnectBrandTheme[] = [
+  // 1. DigiConnect Brand Blue (#2196D3 / #0056D2)
+  {
+    name: "DigiConnect Blue",
+    badgeBg: "bg-[#E3F2FD] border-[#90CAF9] text-[#0056D2]",
+    frontBg: "bg-gradient-to-br from-blue-50/95 via-white to-sky-50/80",
+    frontBorder: "border-[#2196D3]",
+    frontAccent: "text-[#1565A8]",
+    frontQuestionColor: "text-neutral-900",
+    frontTag: "bg-[#E3F2FD] text-[#0056D2]",
+    backBg: "bg-gradient-to-br from-[#0B2545] via-[#133E68] to-[#0A1F38]",
+    backBorder: "border-[#38BDF8]",
+    backAccent: "text-[#38BDF8]",
+    backAnswerColor: "text-blue-50",
+    backAnalogyBg: "bg-[#06182E]/90 border border-blue-400/40 text-amber-300",
+    accentHex: "#2196D3",
+    dotClass: "bg-[#2196D3]",
+  },
+  // 2. DigiConnect Brand Gold / Yellow (#FFD600 / #F59E0B)
+  {
+    name: "DigiConnect Gold",
+    badgeBg: "bg-[#FFFDE7] border-[#FDE68A] text-[#B45309]",
+    frontBg: "bg-gradient-to-br from-amber-50/95 via-white to-yellow-50/80",
+    frontBorder: "border-[#F59E0B]",
+    frontAccent: "text-[#B45309]",
+    frontQuestionColor: "text-neutral-900",
+    frontTag: "bg-[#FFFDE7] text-[#B45309]",
+    backBg: "bg-gradient-to-br from-[#3B2002] via-[#4A2E05] to-[#261501]",
+    backBorder: "border-[#FBBF24]",
+    backAccent: "text-[#FCD34D]",
+    backAnswerColor: "text-amber-50",
+    backAnalogyBg: "bg-[#241301]/90 border border-amber-400/40 text-yellow-200",
+    accentHex: "#F59E0B",
+    dotClass: "bg-[#F59E0B]",
+  },
+  // 3. DigiConnect Brand Green (#006B3F / #10B981)
+  {
+    name: "DigiConnect Green",
+    badgeBg: "bg-[#E8F5E9] border-[#A7F3D0] text-[#006B3F]",
+    frontBg: "bg-gradient-to-br from-emerald-50/95 via-white to-teal-50/80",
+    frontBorder: "border-[#006B3F]",
+    frontAccent: "text-[#006B3F]",
+    frontQuestionColor: "text-neutral-900",
+    frontTag: "bg-[#E8F5E9] text-[#006B3F]",
+    backBg: "bg-gradient-to-br from-[#062B1A] via-[#0D4028] to-[#041D12]",
+    backBorder: "border-[#34D399]",
+    backAccent: "text-[#6EE7B7]",
+    backAnswerColor: "text-emerald-50",
+    backAnalogyBg: "bg-[#03170E]/90 border border-emerald-400/40 text-amber-200",
+    accentHex: "#006B3F",
+    dotClass: "bg-[#006B3F]",
+  },
+  // 4. DigiConnect Brand Red (#E02629 / #DC2626)
+  {
+    name: "DigiConnect Red",
+    badgeBg: "bg-[#FFEBEE] border-[#FECACA] text-[#E02629]",
+    frontBg: "bg-gradient-to-br from-rose-50/95 via-white to-red-50/80",
+    frontBorder: "border-[#E02629]",
+    frontAccent: "text-[#B91C1C]",
+    frontQuestionColor: "text-neutral-900",
+    frontTag: "bg-[#FFEBEE] text-[#E02629]",
+    backBg: "bg-gradient-to-br from-[#3B0707] via-[#4D0D0D] to-[#260505]",
+    backBorder: "border-[#F87171]",
+    backAccent: "text-[#FCA5A5]",
+    backAnswerColor: "text-rose-50",
+    backAnalogyBg: "bg-[#210404]/90 border border-rose-400/40 text-amber-200",
+    accentHex: "#E02629",
+    dotClass: "bg-[#E02629]",
+  },
+  // 5. DigiConnect Tech Dark (#1E1E1E / #0F172A)
+  {
+    name: "DigiConnect Tech Dark",
+    badgeBg: "bg-neutral-100 border-neutral-300 text-neutral-800",
+    frontBg: "bg-gradient-to-br from-slate-100/95 via-white to-neutral-100/80",
+    frontBorder: "border-[#1E1E1E]",
+    frontAccent: "text-[#1E1E1E]",
+    frontQuestionColor: "text-neutral-900",
+    frontTag: "bg-neutral-100 text-neutral-900",
+    backBg: "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#020617]",
+    backBorder: "border-[#94A3B8]",
+    backAccent: "text-[#CBD5E1]",
+    backAnswerColor: "text-slate-100",
+    backAnalogyBg: "bg-[#020617]/90 border border-slate-600/50 text-amber-300",
+    accentHex: "#1E1E1E",
+    dotClass: "bg-[#1E1E1E]",
+  },
+];
 
 // Utility to completely strip markdown asterisks from any text
 function cleanNoAsterisks(text?: string): string {
@@ -64,6 +174,58 @@ function cleanNoAsterisks(text?: string): string {
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/\*(.*?)\*/g, "$1")
     .replace(/\*/g, "");
+}
+
+// Sentence-level real-time highlight helper when listening to audio
+function renderHighlightedText(
+  text: string,
+  currentSentence: string,
+  isActive: boolean
+): React.ReactNode {
+  if (!isActive || !currentSentence || !text) {
+    return cleanNoAsterisks(text);
+  }
+
+  const cleanSpoken = currentSentence
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, "")
+    .trim();
+
+  if (!cleanSpoken) {
+    return cleanNoAsterisks(text);
+  }
+
+  // Split into sentences
+  const sentences = text.match(/[^.!?]+[.!?]?/g) || [text];
+
+  return sentences.map((part, pIdx) => {
+    const cleanPart = part
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/g, "")
+      .trim();
+
+    // Check if this sentence matches the active spoken utterance
+    const isMatch =
+      cleanPart.length > 5 &&
+      (cleanSpoken.includes(cleanPart.slice(0, 25)) ||
+        cleanPart.includes(cleanSpoken.slice(0, 25)) ||
+        (cleanSpoken.length > 15 &&
+          cleanPart.length > 15 &&
+          cleanSpoken.slice(0, 18) === cleanPart.slice(0, 18)));
+
+    if (isMatch) {
+      return (
+        <mark
+          key={pIdx}
+          className="bg-amber-200/90 text-neutral-950 font-semibold px-1 py-0.5 rounded shadow-2xs ring-1 ring-amber-300 transition-all duration-200"
+        >
+          {cleanNoAsterisks(part)}{" "}
+        </mark>
+      );
+    }
+
+    return <span key={pIdx}>{cleanNoAsterisks(part)} </span>;
+  });
 }
 
 export default function DIGIHubLessonPage() {
@@ -86,6 +248,15 @@ export default function DIGIHubLessonPage() {
   const [completionToast, setCompletionToast] = useState(false);
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
 
+  // Audio narration real-time highlight state
+  const [audioProgress, setAudioProgress] = useState<AudioProgressInfo>({
+    isPlaying: false,
+    isPaused: false,
+    activeType: null,
+    activeSectionIndex: null,
+    currentSentence: "",
+  });
+
   // Drawer & modal states
   const [isCurriculumDrawerOpen, setIsCurriculumDrawerOpen] = useState(false);
   const [coachOpenSignal, setCoachOpenSignal] = useState(0);
@@ -97,6 +268,14 @@ export default function DIGIHubLessonPage() {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
 
+  // Flashcards swipe-away physics & pointer drag state
+  const [dragDeltaX, setDragDeltaX] = useState<number>(0);
+  const [dragDeltaY, setDragDeltaY] = useState<number>(0);
+  const [isDraggingCard, setIsDraggingCard] = useState<boolean>(false);
+  const [isAnimatingExit, setIsAnimatingExit] = useState<boolean>(false);
+  const [swipeExitDirection, setSwipeExitDirection] = useState<"left" | "right" | null>(null);
+  const dragStartPos = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   // Desktop resizable split workspace state (default 42% left, 58% right)
   const [splitRatio, setSplitRatio] = useState<number>(42);
   const [isDraggingSplit, setIsDraggingSplit] = useState(false);
@@ -104,10 +283,6 @@ export default function DIGIHubLessonPage() {
 
   // Mobile lab fullscreen focus mode
   const [isMobileLabFullscreen, setIsMobileLabFullscreen] = useState(false);
-
-  // Flashcards touch swipe gesture state
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
   const [copiedSymbol, setCopiedSymbol] = useState<string | null>(null);
 
   const QUICK_CODE_SYMBOLS = [
@@ -178,33 +353,83 @@ export default function DIGIHubLessonPage() {
     };
   }, [isDraggingSplit]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-    setTouchCurrentX(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchCurrentX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX !== null && touchCurrentX !== null) {
-      const deltaX = touchCurrentX - touchStartX;
-      if (deltaX < -45) {
-        // Swiped Left -> Next Card
-        setActiveCardIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
-        setIsCardFlipped(false);
-      } else if (deltaX > 45) {
-        // Swiped Right -> Previous Card
-        setActiveCardIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
-        setIsCardFlipped(false);
-      } else {
-        // Short tap -> Flip card
-        setIsCardFlipped((prev) => !prev);
+  // Auto-scroll topic section into view as audio narration speaks it
+  useEffect(() => {
+    if (audioProgress.isPlaying && audioProgress.activeSectionIndex !== null) {
+      const el = document.getElementById(
+        `section-card-${audioProgress.activeSectionIndex}`
+      );
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     }
-    setTouchStartX(null);
-    setTouchCurrentX(null);
+  }, [audioProgress.isPlaying, audioProgress.activeSectionIndex]);
+
+  // Physics-based swipe-away animation trigger
+  const triggerSwipeAway = (direction: "left" | "right") => {
+    if (isAnimatingExit || flashcards.length === 0) return;
+    setIsAnimatingExit(true);
+    setSwipeExitDirection(direction);
+
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(20);
+    }
+
+    setTimeout(() => {
+      if (direction === "left") {
+        setActiveCardIndex((prev) =>
+          prev < flashcards.length - 1 ? prev + 1 : 0
+        );
+      } else {
+        setActiveCardIndex((prev) =>
+          prev > 0 ? prev - 1 : flashcards.length - 1
+        );
+      }
+      setIsCardFlipped(false);
+      setDragDeltaX(0);
+      setDragDeltaY(0);
+      setSwipeExitDirection(null);
+      setIsAnimatingExit(false);
+    }, 300);
+  };
+
+  const handleCardPointerDown = (e: React.PointerEvent) => {
+    if (isAnimatingExit) return;
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    setIsDraggingCard(true);
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    } catch (_) {}
+  };
+
+  const handleCardPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingCard || isAnimatingExit) return;
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    setDragDeltaX(dx);
+    setDragDeltaY(dy * 0.25);
+  };
+
+  const handleCardPointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingCard) return;
+    setIsDraggingCard(false);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+    } catch (_) {}
+
+    const threshold = 65;
+    if (dragDeltaX < -threshold) {
+      triggerSwipeAway("left");
+    } else if (dragDeltaX > threshold) {
+      triggerSwipeAway("right");
+    } else if (Math.abs(dragDeltaX) < 8 && Math.abs(dragDeltaY) < 8) {
+      // Short tap / click -> Flip front/back
+      setIsCardFlipped((prev) => !prev);
+    } else {
+      // Spring back to center
+      setDragDeltaX(0);
+      setDragDeltaY(0);
+    }
   };
 
   useEffect(() => {
@@ -333,12 +558,10 @@ export default function DIGIHubLessonPage() {
           setIsCardFlipped((prev) => !prev);
         } else if (e.key === "ArrowRight") {
           e.preventDefault();
-          setActiveCardIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
-          setIsCardFlipped(false);
+          triggerSwipeAway("left");
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          setActiveCardIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
-          setIsCardFlipped(false);
+          triggerSwipeAway("right");
         }
       }
     };
@@ -657,96 +880,195 @@ export default function DIGIHubLessonPage() {
                     <h2 className="text-base sm:text-lg font-bold text-neutral-900 mt-0.5">
                       {cleanNoAsterisks(currentTopic.title)}
                     </h2>
-                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
-                      {cleanNoAsterisks(currentTopic.summary)}
+                    <p
+                      className={`text-xs mt-1 leading-relaxed transition-all duration-300 ${
+                        audioProgress.isPlaying && audioProgress.activeType === "summary"
+                          ? "p-2.5 rounded-xl bg-blue-100/90 border border-blue-300 text-neutral-900 font-medium ring-2 ring-brand-blue/50 shadow-xs"
+                          : "text-neutral-600"
+                      }`}
+                    >
+                      {audioProgress.isPlaying && audioProgress.activeType === "summary" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue mr-1.5 animate-pulse">
+                          <Volume2 className="w-3 h-3" /> Listening:
+                        </span>
+                      )}
+                      {renderHighlightedText(
+                        currentTopic.summary,
+                        audioProgress.currentSentence,
+                        audioProgress.isPlaying && audioProgress.activeType === "summary"
+                      )}
                     </p>
                   </div>
 
-                  {/* 1. Voice Narration Player for Beginners */}
+                  {/* 1. Voice Narration Player for Beginners with Live Progress */}
                   <AudioNarrationPlayer
                     title={cleanNoAsterisks(currentTopic.title)}
                     summary={cleanNoAsterisks(currentTopic.summary)}
                     sections={currentTopic.sections || []}
                     keyTakeaways={currentTopic.keyTakeaways || []}
+                    onAudioProgress={(info) => setAudioProgress(info)}
                   />
 
                   {/* Topic Sections with Analogies and Clean Snippets */}
                   <div className="space-y-4 pt-2">
-                    {(currentTopic.sections || []).map((sec, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 space-y-2.5"
-                      >
-                        <h3 className="font-bold text-xs sm:text-sm text-neutral-900 flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-md bg-brand-blue-light text-brand-blue flex items-center justify-center text-[10px] font-bold">
-                            {idx + 1}
-                          </span>
-                          <span>{cleanNoAsterisks(sec.heading)}</span>
-                        </h3>
+                    {(currentTopic.sections || []).map((sec, idx) => {
+                      const isSectionActive =
+                        audioProgress.isPlaying &&
+                        audioProgress.activeSectionIndex === idx;
 
-                        <p className="text-xs text-neutral-700 leading-relaxed">
-                          {cleanNoAsterisks(sec.explanation)}
-                        </p>
-
-                        {/* Real-World Analogy Callout */}
-                        {sec.analogy && (
-                          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-950 flex items-start gap-2.5">
-                            <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                            <div className="leading-relaxed">
-                              <span className="font-bold text-amber-900">Ghanaian Everyday Analogy: </span>
-                              {cleanNoAsterisks(sec.analogy)}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Code Snippet Box */}
-                        {sec.codeSnippet && (
-                          <div className="mt-2 rounded-xl bg-neutral-950 text-neutral-100 p-3 font-mono text-xs overflow-hidden">
-                            <div className="flex items-center justify-between pb-1.5 border-b border-neutral-800 text-[11px] text-neutral-400">
-                              <span>{sec.codeSnippet.title || sec.codeSnippet.language}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleCopyCode(sec.codeSnippet!.code, `snip-${idx}`)
-                                }
-                                className="hover:text-white transition flex items-center gap-1"
+                      return (
+                        <div
+                          key={idx}
+                          id={`section-card-${idx}`}
+                          className={`p-4 rounded-2xl transition-all duration-300 space-y-2.5 ${
+                            isSectionActive
+                              ? "bg-blue-50/80 border-2 border-brand-blue/70 ring-2 ring-brand-blue/30 shadow-md scale-[1.008]"
+                              : "bg-neutral-50/70 border border-neutral-200/80"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="font-bold text-xs sm:text-sm text-neutral-900 flex items-center gap-2">
+                              <span
+                                className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold transition ${
+                                  isSectionActive
+                                    ? "bg-brand-blue text-white shadow-2xs"
+                                    : "bg-brand-blue-light text-brand-blue"
+                                }`}
                               >
-                                {copiedSnippetId === `snip-${idx}` ? (
-                                  <Check className="w-3 h-3 text-emerald-400" />
-                                ) : (
-                                  <Copy className="w-3 h-3" />
-                                )}
-                                <span>{copiedSnippetId === `snip-${idx}` ? "Copied" : "Copy"}</span>
-                              </button>
-                            </div>
-                            <pre className="pt-2 text-emerald-300 overflow-x-auto text-[11px] leading-relaxed">
-                              <code>{sec.codeSnippet.code}</code>
-                            </pre>
-                          </div>
-                        )}
+                                {idx + 1}
+                              </span>
+                              <span>{cleanNoAsterisks(sec.heading)}</span>
+                            </h3>
 
-                        {/* Bullet takeaways */}
-                        {sec.keyPoints && sec.keyPoints.length > 0 && (
-                          <ul className="space-y-1 text-xs text-neutral-600 pt-1">
-                            {sec.keyPoints.map((pt, pIdx) => (
-                              <li key={pIdx} className="flex items-start gap-1.5">
-                                <span className="text-brand-blue font-bold">•</span>
-                                <span>{cleanNoAsterisks(pt)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
+                            {isSectionActive && (
+                              <span className="px-2 py-0.5 rounded-full bg-brand-blue text-white text-[10px] font-bold flex items-center gap-1 shadow-2xs animate-pulse">
+                                <Volume2 className="w-3 h-3" />
+                                {audioProgress.activeType === "section_analogy"
+                                  ? "Analogy"
+                                  : "Speaking"}
+                              </span>
+                            )}
+                          </div>
+
+                          <p
+                            className={`text-xs leading-relaxed transition-colors ${
+                              isSectionActive
+                                ? "text-neutral-900 font-normal"
+                                : "text-neutral-700"
+                            }`}
+                          >
+                            {renderHighlightedText(
+                              sec.explanation,
+                              audioProgress.currentSentence,
+                              isSectionActive &&
+                                (audioProgress.activeType === "section_explanation" ||
+                                  audioProgress.activeType === "section_heading")
+                            )}
+                          </p>
+
+                          {/* Real-World Analogy Callout with Ghanaian highlight */}
+                          {sec.analogy && (
+                            <div
+                              className={`p-3 rounded-xl text-xs flex items-start gap-2.5 transition-all duration-300 ${
+                                isSectionActive &&
+                                audioProgress.activeType === "section_analogy"
+                                  ? "bg-amber-100 border-2 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-md scale-[1.01]"
+                                  : "bg-amber-50/80 border border-amber-200/70 text-amber-950"
+                              }`}
+                            >
+                              <Lightbulb
+                                className={`w-4 h-4 shrink-0 mt-0.5 ${
+                                  isSectionActive &&
+                                  audioProgress.activeType === "section_analogy"
+                                    ? "text-amber-700 animate-bounce"
+                                    : "text-amber-600"
+                                }`}
+                              />
+                              <div className="leading-relaxed">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <span className="font-bold text-amber-900">
+                                    Ghanaian Everyday Analogy:{" "}
+                                  </span>
+                                  {isSectionActive &&
+                                    audioProgress.activeType === "section_analogy" && (
+                                      <span className="text-[9px] bg-amber-600 text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider animate-pulse">
+                                        Active Audio
+                                      </span>
+                                    )}
+                                </div>
+                                {renderHighlightedText(
+                                  sec.analogy,
+                                  audioProgress.currentSentence,
+                                  isSectionActive &&
+                                    audioProgress.activeType === "section_analogy"
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Code Snippet Box */}
+                          {sec.codeSnippet && (
+                            <div className="mt-2 rounded-xl bg-neutral-950 text-neutral-100 p-3 font-mono text-xs overflow-hidden">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-neutral-800 text-[11px] text-neutral-400">
+                                <span>{sec.codeSnippet.title || sec.codeSnippet.language}</span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleCopyCode(sec.codeSnippet!.code, `snip-${idx}`)
+                                  }
+                                  className="hover:text-white transition flex items-center gap-1"
+                                >
+                                  {copiedSnippetId === `snip-${idx}` ? (
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                  <span>{copiedSnippetId === `snip-${idx}` ? "Copied" : "Copy"}</span>
+                                </button>
+                              </div>
+                              <pre className="pt-2 text-emerald-300 overflow-x-auto text-[11px] leading-relaxed">
+                                <code>{sec.codeSnippet.code}</code>
+                              </pre>
+                            </div>
+                          )}
+
+                          {/* Bullet takeaways */}
+                          {sec.keyPoints && sec.keyPoints.length > 0 && (
+                            <ul className="space-y-1 text-xs text-neutral-600 pt-1">
+                              {sec.keyPoints.map((pt, pIdx) => (
+                                <li key={pIdx} className="flex items-start gap-1.5">
+                                  <span className="text-brand-blue font-bold">•</span>
+                                  <span>{cleanNoAsterisks(pt)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Key Takeaways */}
                   {currentTopic.keyTakeaways && currentTopic.keyTakeaways.length > 0 && (
-                    <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/60 space-y-2">
-                      <span className="font-bold text-xs text-blue-900 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                        Quick Bite-Sized Takeaways:
-                      </span>
+                    <div
+                      className={`p-4 rounded-2xl border space-y-2 transition-all duration-300 ${
+                        audioProgress.isPlaying && audioProgress.activeType === "takeaways"
+                          ? "bg-blue-100/90 border-2 border-blue-500 ring-2 ring-blue-300 shadow-md scale-[1.01]"
+                          : "bg-blue-50/60 border border-blue-200/60"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                          Quick Bite-Sized Takeaways:
+                        </span>
+                        {audioProgress.isPlaying &&
+                          audioProgress.activeType === "takeaways" && (
+                            <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center gap-1 animate-pulse">
+                              <Volume2 className="w-3 h-3" /> Reading Takeaways
+                            </span>
+                          )}
+                      </div>
                       <ul className="space-y-1 text-xs text-blue-950">
                         {currentTopic.keyTakeaways.map((takeaway, tIdx) => (
                           <li key={tIdx} className="flex items-start gap-1.5">
@@ -802,108 +1124,305 @@ export default function DIGIHubLessonPage() {
           )}
 
           {/* TAB 2: INTERACTIVE FLASHCARDS */}
-          {activePaneTab === "flashcards" && (
-            <div className="bg-white rounded-3xl border border-neutral-200 p-5 sm:p-6 shadow-2xs space-y-5">
-              <div className="flex items-center justify-between text-xs flex-wrap gap-1">
-                <span className="font-bold text-neutral-800">
-                  Card {activeCardIndex + 1} of {flashcards.length}
-                </span>
-                <span className="text-neutral-500 text-[11px]">
-                  Swipe or tap • Keys: <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">Space</kbd>/<kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">F</kbd>, <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">←</kbd>/<kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">→</kbd>
-                </span>
-              </div>
+          {activePaneTab === "flashcards" && (() => {
+            const currentTheme =
+              DIGICONNECT_BRAND_THEMES[
+                activeCardIndex % DIGICONNECT_BRAND_THEMES.length
+              ];
+            const nextCardIndex = (activeCardIndex + 1) % flashcards.length;
+            const nextTheme =
+              DIGICONNECT_BRAND_THEMES[
+                nextCardIndex % DIGICONNECT_BRAND_THEMES.length
+              ];
 
-              {/* 3D Flip Flashcard with Touch Swipe & Spring Tilt */}
-              <div
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className="cursor-pointer min-h-[250px] sm:min-h-[240px] h-64 sm:h-64 perspective-1000 select-none group relative transition-transform active:scale-[0.99]"
-                style={{
-                  transform:
-                    touchStartX !== null && touchCurrentX !== null
-                      ? `translateX(${Math.max(-45, Math.min(45, touchCurrentX - touchStartX))}px) rotate(${Math.max(-6, Math.min(6, (touchCurrentX - touchStartX) * 0.12))}deg)`
-                      : undefined,
-                }}
-              >
-                <div
-                  className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d ${
-                    isCardFlipped ? "rotate-y-180" : ""
-                  }`}
-                >
-                  {/* FRONT FACE (Question / Concept) */}
-                  <div className="absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-6 border-2 border-neutral-200 bg-neutral-50/90 hover:border-brand-blue/50 text-neutral-900 shadow-xs flex flex-col justify-between text-center">
-                    <div className="text-[11px] uppercase font-bold tracking-wider text-neutral-500">
-                      ? Question / Concept
-                    </div>
-
-                    <div className="py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-36">
-                      {flashcards[activeCardIndex]?.front}
-                    </div>
-
-                    <div className="text-[11px] text-neutral-500 flex items-center justify-center gap-1.5 group-hover:text-brand-blue transition">
-                      <RotateCw className="w-3.5 h-3.5" />
-                      <span>Tap to reveal answer</span>
-                    </div>
+            return (
+              <div className="bg-white rounded-3xl border border-neutral-200 p-4 sm:p-6 shadow-2xs space-y-4 sm:space-y-5 overflow-hidden">
+                {/* Header with Card Count & Active Brand Theme */}
+                <div className="flex items-center justify-between text-xs flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-neutral-900">
+                      Card {activeCardIndex + 1} of {flashcards.length}
+                    </span>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold shadow-2xs transition-all duration-300 ${currentTheme.badgeBg}`}
+                    >
+                      ● {currentTheme.name}
+                    </span>
                   </div>
 
-                  {/* BACK FACE (Answer & Analogy) */}
-                  <div className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-6 border-2 border-sky-400 bg-neutral-900 text-white shadow-xs flex flex-col justify-between text-center">
-                    <div className="text-[11px] uppercase font-bold tracking-wider text-sky-400">
-                      ✓ Answer & Explanation
-                    </div>
+                  <span className="text-neutral-500 text-[11px] hidden sm:inline">
+                    Swipe or drag to fling • Keys:{" "}
+                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                      Space
+                    </kbd>
+                    /
+                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                      F
+                    </kbd>
+                    ,{" "}
+                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                      ←
+                    </kbd>
+                    /
+                    <kbd className="px-1 py-0.5 rounded bg-neutral-100 font-mono text-[10px]">
+                      →
+                    </kbd>
+                  </span>
+                </div>
 
-                    <div className="py-1 text-xs sm:text-sm font-semibold leading-relaxed overflow-y-auto max-h-28 text-neutral-100">
-                      {flashcards[activeCardIndex]?.back}
-                    </div>
+                {/* Interactive Flashcard Stage with Stack Physics & Swipe Away */}
+                <div className="relative w-full min-h-[265px] sm:min-h-[255px] h-68 sm:h-68 select-none">
+                  {/* UNDERNEATH CARD PREVIEW (Stacked Card with NEXT Brand Color) */}
+                  {flashcards.length > 1 && (
+                    <div
+                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextTheme.frontBorder} ${nextTheme.frontBg} shadow-xs select-none pointer-events-none flex flex-col justify-between text-center transition-all duration-300`}
+                      style={{
+                        transform:
+                          isAnimatingExit || isDraggingCard
+                            ? `scale(${Math.min(
+                                1,
+                                0.94 + (Math.abs(dragDeltaX) / 200) * 0.06
+                              )}) translateY(${Math.max(
+                                0,
+                                10 - (Math.abs(dragDeltaX) / 200) * 10
+                              )}px)`
+                            : "scale(0.94) translateY(10px)",
+                        opacity:
+                          isAnimatingExit || isDraggingCard
+                            ? 0.95
+                            : 0.72,
+                        zIndex: 0,
+                      }}
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-bold">
+                        <span
+                          className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${nextTheme.badgeBg}`}
+                        >
+                          Up Next: {nextTheme.name}
+                        </span>
+                        <span className="text-neutral-400 font-mono text-[10px]">
+                          Card {nextCardIndex + 1}
+                        </span>
+                      </div>
 
-                    {flashcards[activeCardIndex]?.analogy && (
-                      <div className="text-xs text-amber-300 italic px-2.5 py-1.5 bg-neutral-800/90 rounded-xl border border-neutral-700/60 max-h-20 overflow-y-auto text-left sm:text-center">
-                        💡 Analogy: {flashcards[activeCardIndex].analogy}
+                      <div className="py-2 text-sm sm:text-base font-bold text-neutral-800 line-clamp-3 leading-relaxed">
+                        {flashcards[nextCardIndex]?.front}
+                      </div>
+
+                      <div className="text-[11px] text-neutral-400 flex items-center justify-center gap-1.5 font-medium">
+                        <span>Waiting in deck</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ACTIVE TOP CARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
+                  <div
+                    onPointerDown={handleCardPointerDown}
+                    onPointerMove={handleCardPointerMove}
+                    onPointerUp={handleCardPointerUp}
+                    onPointerCancel={handleCardPointerUp}
+                    className="cursor-grab active:cursor-grabbing w-full h-full perspective-1000 select-none relative z-10 touch-none group"
+                    style={{
+                      transform:
+                        swipeExitDirection === "left"
+                          ? "translateX(-150%) translateY(-28px) rotate(-22deg)"
+                          : swipeExitDirection === "right"
+                          ? "translateX(150%) translateY(-28px) rotate(22deg)"
+                          : `translateX(${dragDeltaX}px) translateY(${dragDeltaY}px) rotate(${
+                              dragDeltaX * 0.08
+                            }deg)`,
+                      opacity:
+                        swipeExitDirection !== null
+                          ? 0
+                          : isDraggingCard
+                          ? Math.max(0.7, 1 - Math.abs(dragDeltaX) / 500)
+                          : 1,
+                      transition: isDraggingCard
+                        ? "none"
+                        : isAnimatingExit
+                        ? "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 280ms ease-out"
+                        : "transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    }}
+                  >
+                    {/* Visual Swipe Direction Badges */}
+                    {dragDeltaX < -25 && (
+                      <div
+                        className="absolute top-3.5 right-3.5 z-20 px-3 py-1 rounded-full bg-[#0056D2] text-white text-[11px] font-bold shadow-md flex items-center gap-1 pointer-events-none transition-opacity"
+                        style={{
+                          opacity: Math.min(1, (Math.abs(dragDeltaX) - 20) / 45),
+                        }}
+                      >
+                        <span>Next Card</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                    {dragDeltaX > 25 && (
+                      <div
+                        className="absolute top-3.5 left-3.5 z-20 px-3 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-bold shadow-md flex items-center gap-1 pointer-events-none transition-opacity"
+                        style={{
+                          opacity: Math.min(1, (dragDeltaX - 20) / 45),
+                        }}
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span>Previous Card</span>
                       </div>
                     )}
 
-                    <div className="text-[11px] text-neutral-400 flex items-center justify-center gap-1.5 group-hover:text-white transition">
-                      <RotateCw className="w-3.5 h-3.5" />
-                      <span>Tap to flip card</span>
+                    <div
+                      className={`relative w-full h-full flashcard-inner rounded-3xl transition-transform duration-500 transform-style-preserve-3d shadow-sm ${
+                        isCardFlipped ? "rotate-y-180" : ""
+                      }`}
+                    >
+                      {/* FRONT FACE (Question / Concept with Active Brand Theme) */}
+                      <div
+                        className={`absolute inset-0 backface-hidden w-full h-full rounded-3xl p-5 sm:p-6 border-2 ${currentTheme.frontBorder} ${currentTheme.frontBg} shadow-xs flex flex-col justify-between text-center transition-colors duration-300`}
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold ${currentTheme.badgeBg}`}
+                          >
+                            ? Question & Concept
+                          </span>
+                          <span className="text-neutral-400 font-mono text-[10px]">
+                            {currentTheme.name}
+                          </span>
+                        </div>
+
+                        <div
+                          className={`py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-36 ${currentTheme.frontQuestionColor}`}
+                        >
+                          {flashcards[activeCardIndex]?.front}
+                        </div>
+
+                        <div
+                          className={`text-[11px] flex items-center justify-center gap-1.5 font-semibold transition ${currentTheme.frontAccent}`}
+                        >
+                          <RotateCw className="w-3.5 h-3.5" />
+                          <span>Tap anywhere to reveal answer</span>
+                        </div>
+                      </div>
+
+                      {/* BACK FACE (Answer & Ghanaian Analogy with Active Brand Dark/Contrast Theme) */}
+                      <div
+                        className={`absolute inset-0 backface-hidden rotate-y-180 w-full h-full rounded-3xl p-5 sm:p-6 border-2 ${currentTheme.backBorder} ${currentTheme.backBg} text-white shadow-xs flex flex-col justify-between text-center transition-colors duration-300`}
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span
+                            className={`text-[11px] uppercase font-bold tracking-wider ${currentTheme.backAccent}`}
+                          >
+                            ✓ Answer & Insight
+                          </span>
+                          <span className="text-white/60 font-mono text-[10px]">
+                            {currentTheme.name}
+                          </span>
+                        </div>
+
+                        <div
+                          className={`py-1 text-xs sm:text-sm font-semibold leading-relaxed overflow-y-auto max-h-24 ${currentTheme.backAnswerColor}`}
+                        >
+                          {flashcards[activeCardIndex]?.back}
+                        </div>
+
+                        {flashcards[activeCardIndex]?.analogy && (
+                          <div
+                            className={`text-xs italic px-3 py-1.5 rounded-xl border max-h-20 overflow-y-auto text-left sm:text-center ${currentTheme.backAnalogyBg}`}
+                          >
+                            💡 Ghanaian Analogy:{" "}
+                            {flashcards[activeCardIndex].analogy}
+                          </div>
+                        )}
+
+                        <div className="text-[11px] text-white/80 flex items-center justify-center gap-1.5 group-hover:text-white transition font-medium">
+                          <RotateCw className="w-3.5 h-3.5" />
+                          <span>Tap anywhere to flip card back</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Card Controls */}
-              <div className="flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  disabled={activeCardIndex === 0}
-                  onClick={() => {
-                    setActiveCardIndex((prev) => Math.max(0, prev - 1));
-                    setIsCardFlipped(false);
-                  }}
-                  className="px-4 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 disabled:opacity-40 text-xs font-semibold text-neutral-700 transition"
-                >
-                  Previous Card
-                </button>
+                {/* Brand Color Dot Indicators (Click to jump to any card) */}
+                <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                  {flashcards.map((_, dotIdx) => {
+                    const dotTheme =
+                      DIGICONNECT_BRAND_THEMES[
+                        dotIdx % DIGICONNECT_BRAND_THEMES.length
+                      ];
+                    const isActive = dotIdx === activeCardIndex;
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeCardIndex < flashcards.length - 1) {
-                      setActiveCardIndex((prev) => prev + 1);
-                      setIsCardFlipped(false);
-                    } else {
-                      setActiveCardIndex(0);
-                      setIsCardFlipped(false);
-                    }
-                  }}
-                  className="px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold transition shadow-2xs"
-                >
-                  {activeCardIndex < flashcards.length - 1 ? "Next Card" : "Restart Deck"}
-                </button>
+                    return (
+                      <button
+                        key={dotIdx}
+                        type="button"
+                        onClick={() => {
+                          if (dotIdx !== activeCardIndex && !isAnimatingExit) {
+                            triggerSwipeAway(
+                              dotIdx > activeCardIndex ? "left" : "right"
+                            );
+                            setTimeout(() => setActiveCardIndex(dotIdx), 150);
+                          }
+                        }}
+                        className={`transition-all duration-300 rounded-full flex items-center gap-1 ${
+                          isActive
+                            ? `px-3 py-1 text-white text-[11px] font-bold shadow-xs ${dotTheme.dotClass} scale-105`
+                            : "w-2.5 h-2.5 bg-neutral-300 hover:bg-neutral-400 opacity-60 hover:opacity-100"
+                        }`}
+                        title={`Go to Card ${dotIdx + 1} (${dotTheme.name})`}
+                      >
+                        {isActive && (
+                          <>
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                            <span>{dotTheme.name}</span>
+                          </>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Card Controls with Authentic Swipe-Away Physics */}
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <button
+                    type="button"
+                    disabled={isAnimatingExit}
+                    onClick={() => triggerSwipeAway("right")}
+                    className="px-4 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-semibold text-neutral-700 transition flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-neutral-500" />
+                    <span>Previous</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsCardFlipped((prev) => !prev)}
+                    className="px-3.5 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-100 active:scale-95 text-xs font-semibold text-neutral-600 transition flex items-center gap-1.5 shadow-2xs"
+                    title="Flip active card"
+                  >
+                    <RotateCw className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>{isCardFlipped ? "Show Question" : "Reveal Answer"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isAnimatingExit}
+                    onClick={() => triggerSwipeAway("left")}
+                    className={`px-4 py-2.5 rounded-xl text-white text-xs font-bold transition shadow-2xs active:scale-95 flex items-center gap-1.5 ${
+                      activeCardIndex < flashcards.length - 1
+                        ? "bg-[#0056D2] hover:bg-[#00419e]"
+                        : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
+                  >
+                    <span>
+                      {activeCardIndex < flashcards.length - 1
+                        ? "Next Card"
+                        : "Restart Deck"}
+                    </span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* TAB 3: QUIZ */}
           {activePaneTab === "quiz" && (
