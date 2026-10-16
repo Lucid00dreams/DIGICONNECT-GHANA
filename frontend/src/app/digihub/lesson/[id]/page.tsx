@@ -460,16 +460,13 @@ export default function DIGIHubLessonPage() {
       (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
     } catch (_) {}
 
-    const threshold = 65;
+    const threshold = 48;
     if (dragDeltaX < -threshold) {
       triggerSwipeAway("left");
     } else if (dragDeltaX > threshold) {
       triggerSwipeAway("right");
-    } else if (Math.abs(dragDeltaX) < 8 && Math.abs(dragDeltaY) < 8) {
-      // Short tap / click -> Flip front/back
-      setIsCardFlipped((prev) => !prev);
     } else {
-      // Spring back to center
+      // When tapped or slight drag: do NOT flip, smoothly spring back to center
       setDragDeltaX(0);
       setDragDeltaY(0);
     }
@@ -1185,16 +1182,6 @@ export default function DIGIHubLessonPage() {
               FLASHCARD_BRAND_THEMES[
                 activeCardIndex % FLASHCARD_BRAND_THEMES.length
               ];
-            const nextCardIndex = (activeCardIndex + 1) % flashcards.length;
-            const nextTheme =
-              FLASHCARD_BRAND_THEMES[
-                nextCardIndex % FLASHCARD_BRAND_THEMES.length
-              ];
-            const nextNextCardIndex = (activeCardIndex + 2) % flashcards.length;
-            const nextNextTheme =
-              FLASHCARD_BRAND_THEMES[
-                nextNextCardIndex % FLASHCARD_BRAND_THEMES.length
-              ];
 
             return (
               <div className="bg-white rounded-3xl border border-neutral-200 p-4 sm:p-6 shadow-2xs space-y-4 sm:space-y-5 overflow-hidden">
@@ -1212,15 +1199,15 @@ export default function DIGIHubLessonPage() {
                   </div>
 
                   <span className="text-neutral-500 text-[11px] hidden sm:inline">
-                    Drag or swipe to fling • Keys:{" "}
+                    Swipe left/right to change cards • Keys:{" "}
                     <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       Space
                     </kbd>
                     /
                     <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       F
-                    </kbd>
-                    ,{" "}
+                    </kbd>{" "}
+                    to flip,{" "}
                     <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 font-mono text-[10px] text-neutral-700 border border-neutral-300">
                       ←
                     </kbd>
@@ -1231,62 +1218,9 @@ export default function DIGIHubLessonPage() {
                   </span>
                 </div>
 
-                {/* Interactive Flashcard Stage with 3-Card Stack Physics & Swipe Away */}
+                {/* Interactive Flashcard Stage with Swipe Away Physics */}
                 <div className="relative w-full min-h-[340px] sm:min-h-[320px] h-[340px] sm:h-[320px] select-none">
-                  {/* CARD #3: BOTTOM PEEK (Subtle preview of third card in deck) */}
-                  {flashcards.length > 2 && (
-                    <div
-                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextNextTheme.frontBorder} ${nextNextTheme.frontGradient} select-none pointer-events-none transition-all duration-300`}
-                      style={{
-                        transform: "scale(0.88) translateY(22px)",
-                        opacity: 0.45,
-                        zIndex: 0,
-                      }}
-                    />
-                  )}
-
-                  {/* CARD #2: MIDDLE STACK PEEK (Displays next card in deck with its own brand color) */}
-                  {flashcards.length > 1 && (
-                    <div
-                      className={`absolute inset-0 rounded-3xl p-5 sm:p-6 border-2 ${nextTheme.frontBorder} ${nextTheme.frontGradient} ${nextTheme.frontShadow} select-none pointer-events-none flex flex-col justify-between text-center transition-all duration-300 relative overflow-hidden`}
-                      style={{
-                        transform:
-                          isAnimatingExit || isDraggingCard
-                            ? `scale(${Math.min(
-                                1,
-                                0.94 + (Math.abs(dragDeltaX) / 200) * 0.06
-                              )}) translateY(${Math.max(
-                                0,
-                                11 - (Math.abs(dragDeltaX) / 200) * 11
-                              )}px)`
-                            : "scale(0.94) translateY(11px)",
-                        opacity:
-                          isAnimatingExit || isDraggingCard ? 0.96 : 0.8,
-                        zIndex: 1,
-                      }}
-                    >
-                      <div className="flex items-center justify-between text-[11px] font-bold">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${nextTheme.frontBadgeBg}`}
-                        >
-                          Up Next: {nextTheme.name}
-                        </span>
-                        <span className="text-white/70 font-mono text-[10px]">
-                          Card {nextCardIndex + 1}
-                        </span>
-                      </div>
-
-                      <div className="py-2 text-sm sm:text-base font-bold text-white line-clamp-3 leading-relaxed px-4 opacity-90">
-                        {flashcards[nextCardIndex]?.front}
-                      </div>
-
-                      <div className="text-[11px] text-white/70 flex items-center justify-center gap-1.5 font-medium">
-                        <span>Waiting in deck</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CARD #1: ACTIVE TOP CARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
+                  {/* ACTIVE FLASHCARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
                   <div
                     onPointerDown={handleCardPointerDown}
                     onPointerMove={handleCardPointerMove}
@@ -1296,11 +1230,11 @@ export default function DIGIHubLessonPage() {
                     style={{
                       transform:
                         swipeExitDirection === "left"
-                          ? "translateX(-140vw) translateY(-32px) rotate(-26deg)"
+                          ? "translateX(-140vw) translateY(-28px) rotate(-24deg)"
                           : swipeExitDirection === "right"
-                          ? "translateX(140vw) translateY(-32px) rotate(26deg)"
+                          ? "translateX(140vw) translateY(-28px) rotate(24deg)"
                           : `translateX(${dragDeltaX}px) translateY(${dragDeltaY}px) rotate(${
-                              dragDeltaX * 0.09
+                              dragDeltaX * 0.08
                             }deg)`,
                       opacity:
                         swipeExitDirection !== null
@@ -1311,27 +1245,27 @@ export default function DIGIHubLessonPage() {
                       transition: isDraggingCard
                         ? "none"
                         : isAnimatingExit
-                        ? "transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-out"
+                        ? "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 280ms ease-out"
                         : "transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1)",
                     }}
                   >
                     {/* Visual Swipe Direction Badges */}
-                    {dragDeltaX < -25 && (
+                    {dragDeltaX < -20 && (
                       <div
                         className="absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-white text-neutral-950 text-xs font-black shadow-xl flex items-center gap-1.5 pointer-events-none transition-opacity ring-2 ring-black/10 animate-pulse"
                         style={{
-                          opacity: Math.min(1, (Math.abs(dragDeltaX) - 20) / 40),
+                          opacity: Math.min(1, (Math.abs(dragDeltaX) - 15) / 35),
                         }}
                       >
                         <span>NEXT CARD</span>
                         <ChevronRight className="w-4 h-4 stroke-[3]" />
                       </div>
                     )}
-                    {dragDeltaX > 25 && (
+                    {dragDeltaX > 20 && (
                       <div
                         className="absolute top-4 left-4 z-30 px-3.5 py-1.5 rounded-full bg-white text-neutral-950 text-xs font-black shadow-xl flex items-center gap-1.5 pointer-events-none transition-opacity ring-2 ring-black/10 animate-pulse"
                         style={{
-                          opacity: Math.min(1, (dragDeltaX - 20) / 40),
+                          opacity: Math.min(1, (dragDeltaX - 15) / 35),
                         }}
                       >
                         <ChevronLeft className="w-4 h-4 stroke-[3]" />
@@ -1368,12 +1302,18 @@ export default function DIGIHubLessonPage() {
                         </div>
 
                         <div className="relative z-10 pt-1">
-                          <div
-                            className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition ${currentTheme.frontFlipButtonBg} shadow-sm backdrop-blur-md`}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsCardFlipped(true);
+                            }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition ${currentTheme.frontFlipButtonBg} shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer`}
                           >
                             <RotateCw className="w-3.5 h-3.5" />
-                            <span>Tap card to reveal answer</span>
-                          </div>
+                            <span>Flip to Reveal Answer</span>
+                          </button>
                         </div>
                       </div>
 
@@ -1415,10 +1355,18 @@ export default function DIGIHubLessonPage() {
                         )}
 
                         <div className="relative z-10 pt-1">
-                          <div className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition bg-white/15 hover:bg-white/25 border border-white/30 text-white shadow-sm backdrop-blur-md">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsCardFlipped(false);
+                            }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition bg-white/15 hover:bg-white/25 border border-white/30 text-white shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer"
+                          >
                             <RotateCw className="w-3.5 h-3.5" />
-                            <span>Tap card to flip back</span>
-                          </div>
+                            <span>Flip Back to Question</span>
+                          </button>
                         </div>
                       </div>
                     </div>
