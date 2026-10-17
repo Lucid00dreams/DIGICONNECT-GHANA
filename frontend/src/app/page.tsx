@@ -122,8 +122,8 @@ export default function HomePage() {
           </div>
         ))}
 
-        {/* Cinematic Directional Scrim Overlay (Matches Reference Image) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/75 to-neutral-950/90 lg:from-neutral-950/40 lg:via-neutral-950/70 lg:to-neutral-950/95 z-[1]" />
+        {/* Cinematic Directional Scrim Overlay (Dark on Left for text readability, open on Right for photography) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/85 to-neutral-950/75 lg:from-neutral-950/95 lg:via-neutral-950/75 lg:to-neutral-950/40 z-[1]" />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/95 via-transparent to-neutral-950/50 z-[1]" />
 
         {/* Carousel Indicator Dots on Right (Synchronized with 8s interval + WCAG Pause control) */}
@@ -154,8 +154,8 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Hero Content Container — Positioned to the right just like the reference image */}
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 w-full flex justify-end">
+        {/* Hero Content Container — Positioned to the left */}
+        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 w-full flex justify-start">
           <div className="max-w-2xl lg:max-w-xl text-left text-white py-10">
             {/* Eyebrow badge matching reference + active core value tag */}
             <div className="flex flex-wrap items-center gap-2.5 mb-4">

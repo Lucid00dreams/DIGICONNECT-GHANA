@@ -466,7 +466,10 @@ export default function DIGIHubLessonPage() {
     } else if (dragDeltaX > threshold) {
       triggerSwipeAway("right");
     } else {
-      // When tapped or slight drag: do NOT flip, smoothly spring back to center
+      // When tapped or clicked without dragging: flip card
+      if (Math.abs(dragDeltaX) < 8 && Math.abs(dragDeltaY) < 8) {
+        setIsCardFlipped((prev) => !prev);
+      }
       setDragDeltaX(0);
       setDragDeltaY(0);
     }
@@ -1219,7 +1222,7 @@ export default function DIGIHubLessonPage() {
                 </div>
 
                 {/* Interactive Flashcard Stage with Swipe Away Physics */}
-                <div className="relative w-full min-h-[340px] sm:min-h-[320px] h-[340px] sm:h-[320px] select-none">
+                <div className="relative w-full min-h-[380px] sm:min-h-[360px] h-[380px] sm:h-[360px] select-none">
                   {/* ACTIVE FLASHCARD (Interactive Drag, Tilt, 3D Flip & Fling Physics) */}
                   <div
                     onPointerDown={handleCardPointerDown}
@@ -1284,107 +1287,117 @@ export default function DIGIHubLessonPage() {
                     >
                       {/* FRONT FACE: Vibrant Brand Saturated Gradient with Frosted Badges */}
                       <div
-                        className={`absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.frontBorder} ${currentTheme.frontGradient} ${currentTheme.frontShadow} flex flex-col justify-between text-center transition-all duration-300 overflow-hidden ${
-                          isCardFlipped ? "pointer-events-none" : "pointer-events-auto"
+                        className={`flashcard-face flashcard-front absolute inset-0 w-full h-full rounded-3xl border-2 ${currentTheme.frontBorder} ${currentTheme.frontGradient} ${currentTheme.frontShadow} transition-opacity duration-300 ${
+                          isCardFlipped ? "opacity-0 z-0 pointer-events-none" : "opacity-100 z-20 pointer-events-auto"
                         }`}
                         style={{
-                          transform: "rotateY(0deg)",
+                          transform: "rotateY(0deg) translateZ(1px)",
+                          WebkitTransform: "rotateY(0deg) translateZ(1px)",
                           backfaceVisibility: "hidden",
                           WebkitBackfaceVisibility: "hidden",
                         }}
                       >
-                        {/* Ambient decorative glow orbs */}
-                        <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-white/20 blur-2xl pointer-events-none" />
-                        <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-black/25 blur-2xl pointer-events-none" />
+                        {/* Inner rounded container with overflow-hidden for ambient glow and frosted badges */}
+                        <div className="relative w-full h-full rounded-3xl overflow-hidden p-5 sm:p-7 flex flex-col justify-between text-center">
+                          {/* Ambient decorative glow orbs */}
+                          <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-white/20 blur-2xl pointer-events-none" />
+                          <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-black/25 blur-2xl pointer-events-none" />
 
-                        <div className="flex items-center justify-between text-[11px] font-bold relative z-10">
-                          <span
-                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.frontBadgeBg}`}
-                          >
-                            ● {currentTheme.categoryTag}
-                          </span>
-                          <span className="text-white/80 font-mono text-[11px] bg-black/20 backdrop-blur-sm px-2.5 py-0.5 rounded-md border border-white/20">
-                            Card {activeCardIndex + 1}/{flashcards.length}
-                          </span>
-                        </div>
+                          <div className="flex items-center justify-between text-[11px] font-bold relative z-10 shrink-0">
+                            <span
+                              className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.frontBadgeBg}`}
+                            >
+                              ● {currentTheme.categoryTag}
+                            </span>
+                            <span className="text-white/80 font-mono text-[11px] bg-black/20 backdrop-blur-sm px-2.5 py-0.5 rounded-md border border-white/20">
+                              Card {activeCardIndex + 1}/{flashcards.length}
+                            </span>
+                          </div>
 
-                        <div className="py-4 text-base sm:text-lg md:text-xl font-black text-white leading-snug tracking-tight my-auto px-2 relative z-10 overflow-y-auto max-h-44">
-                          {flashcards[activeCardIndex]?.front}
-                        </div>
+                          <div className="py-4 text-base sm:text-lg md:text-xl font-black text-white leading-snug tracking-tight my-auto px-2 relative z-10 overflow-y-auto max-h-48">
+                            {flashcards[activeCardIndex]?.front}
+                          </div>
 
-                        <div className="relative z-10 pt-1">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsCardFlipped(true);
-                            }}
-                            onPointerDown={(e) => e.stopPropagation()}
-                            className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition ${currentTheme.frontFlipButtonBg} shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer`}
-                          >
-                            <RotateCw className="w-3.5 h-3.5" />
-                            <span>Flip to Reveal Answer</span>
-                          </button>
+                          <div className="relative z-10 pt-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsCardFlipped(true);
+                              }}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition ${currentTheme.frontFlipButtonBg} shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer`}
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                              <span>Flip to Reveal Answer</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
 
                       {/* BACK FACE: Deep Obsidian / Midnight Contrast Face with Ghanaian Analogy */}
                       <div
-                        className={`absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-7 border-2 ${currentTheme.backBorder} ${currentTheme.backGradient} ${currentTheme.backShadow} text-white flex flex-col justify-between text-center transition-all duration-300 overflow-hidden ${
-                          isCardFlipped ? "pointer-events-auto" : "pointer-events-none"
+                        className={`flashcard-face flashcard-back absolute inset-0 w-full h-full rounded-3xl border-2 ${currentTheme.backBorder} ${currentTheme.backGradient} ${currentTheme.backShadow} text-white transition-opacity duration-300 ${
+                          isCardFlipped ? "opacity-100 z-20 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
                         }`}
                         style={{
-                          transform: "rotateY(180deg)",
+                          transform: "rotateY(180deg) translateZ(1px)",
+                          WebkitTransform: "rotateY(180deg) translateZ(1px)",
                           backfaceVisibility: "hidden",
                           WebkitBackfaceVisibility: "hidden",
                         }}
                       >
-                        {/* Ambient decorative glow */}
-                        <div className="absolute -top-20 -left-20 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
+                        {/* Inner rounded container with overflow-hidden for ambient glow */}
+                        <div className="relative w-full h-full rounded-3xl overflow-hidden p-5 sm:p-6 flex flex-col justify-between text-center">
+                          {/* Ambient decorative glow */}
+                          <div className="absolute -top-20 -left-20 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
 
-                        <div className="flex items-center justify-between text-[11px] font-bold relative z-10">
-                          <span
-                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.backBadgeBg}`}
-                          >
-                            ✓ ANSWER & INSIGHT
-                          </span>
-                          <span className="text-white/60 font-mono text-[11px]">
-                            {currentTheme.name}
-                          </span>
-                        </div>
-
-                        <div
-                          className={`py-2 text-sm sm:text-base font-bold leading-relaxed overflow-y-auto max-h-32 px-1 relative z-10 ${currentTheme.backTextColor}`}
-                        >
-                          {flashcards[activeCardIndex]?.back}
-                        </div>
-
-                        {flashcards[activeCardIndex]?.analogy && (
-                          <div
-                            className={`relative z-10 text-xs italic px-3.5 py-2.5 rounded-2xl border max-h-24 overflow-y-auto text-left sm:text-center ${currentTheme.analogyCardBg} ${currentTheme.analogyCardBorder}`}
-                          >
-                            <span className="font-bold text-amber-300 not-italic">
-                              💡 Ghanaian Analogy:{" "}
+                          <div className="flex items-center justify-between text-[11px] font-bold relative z-10 shrink-0">
+                            <span
+                              className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${currentTheme.backBadgeBg}`}
+                            >
+                              ✓ ANSWER & INSIGHT
                             </span>
-                            <span className={currentTheme.analogyCardText}>
-                              {flashcards[activeCardIndex].analogy}
+                            <span className="text-white/60 font-mono text-[11px]">
+                              {currentTheme.name}
                             </span>
                           </div>
-                        )}
 
-                        <div className="relative z-10 pt-1">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsCardFlipped(false);
-                            }}
-                            onPointerDown={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition bg-white/15 hover:bg-white/25 border border-white/30 text-white shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer"
-                          >
-                            <RotateCw className="w-3.5 h-3.5" />
-                            <span>Flip Back to Question</span>
-                          </button>
+                          <div className="my-auto py-2 px-1 relative z-10 flex flex-col justify-center gap-2.5">
+                            <div
+                              className={`text-sm sm:text-base font-bold leading-relaxed max-h-36 overflow-y-auto px-1 ${currentTheme.backTextColor}`}
+                            >
+                              {flashcards[activeCardIndex]?.back}
+                            </div>
+
+                            {flashcards[activeCardIndex]?.analogy && (
+                              <div
+                                className={`text-xs italic px-3.5 py-2.5 rounded-2xl border max-h-24 overflow-y-auto text-left sm:text-center ${currentTheme.analogyCardBg} ${currentTheme.analogyCardBorder}`}
+                              >
+                                <span className="font-bold text-amber-300 not-italic">
+                                  💡 Ghanaian Analogy:{" "}
+                                </span>
+                                <span className={currentTheme.analogyCardText}>
+                                  {flashcards[activeCardIndex].analogy}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="relative z-10 pt-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsCardFlipped(false);
+                              }}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition bg-white/15 hover:bg-white/25 border border-white/30 text-white shadow-sm backdrop-blur-md hover:scale-105 active:scale-95 cursor-pointer"
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                              <span>Flip Back to Question</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
