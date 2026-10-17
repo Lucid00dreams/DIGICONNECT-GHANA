@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Award, CheckCircle2, Printer, Clock, ShieldCheck } from "lucide-react";
-import { LearnerProgress, CertificateRecord, getCertificateSettings } from "@/lib/lmsStore";
+import { X, Award, CheckCircle2, Printer, Clock, ShieldCheck, Lock } from "lucide-react";
+import {
+  LearnerProgress,
+  CertificateRecord,
+  getCertificateSettings,
+  getCourseProgress,
+  getCourseById,
+} from "@/lib/lmsStore";
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -10,6 +16,7 @@ interface CertificateModalProps {
   progress?: LearnerProgress;
   certificate?: CertificateRecord | null;
   onUpdateName?: (name: string) => void;
+  isAdminPreview?: boolean;
 }
 
 export function CertificateModal({
@@ -18,6 +25,7 @@ export function CertificateModal({
   progress,
   certificate,
   onUpdateName,
+  isAdminPreview = false,
 }: CertificateModalProps) {
   const [studentName, setStudentName] = useState(
     certificate?.studentName || progress?.studentName || "Honored Student"
@@ -34,16 +42,111 @@ export function CertificateModal({
 
   if (!isOpen) return null;
 
+  // Identify course and verify actual completion
+  const courseId = certificate?.courseId || progress?.currentTrackId || "coding";
+  const course = getCourseById(courseId);
+  const courseTitle =
+    certificate?.courseTitle ||
+    course?.title ||
+    "Foundations of Web Coding & Cybersecurity Defense";
+
+  const completedLessonIds = Array.isArray(progress?.completedLessonIds)
+    ? progress.completedLessonIds
+    : [];
+  const courseProgress = getCourseProgress(courseId, completedLessonIds);
+
+  // STRICT REQUIREMENT: A user CANNOT have access to a certificate without completing 100% of the course!
+  // ConnectHub administrators can preview certificate templates via isAdminPreview.
+  const isAccessAllowed = Boolean(isAdminPreview || (courseProgress.isCompleted && courseProgress.total > 0));
+
+  if (!isAccessAllowed) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+        <div className="relative w-full max-w-md bg-white border border-neutral-200 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 my-auto text-center space-y-5 animate-in zoom-in-95 duration-200">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition z-20"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold uppercase tracking-wider">
+              <span>Certificate Locked</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">
+              100% Completion Required
+            </h2>
+            <p className="text-xs text-neutral-600 leading-relaxed max-w-sm mx-auto">
+              Official faculty-signed certificates are exclusively issued to learners who have completed all modules and exercises for{" "}
+              <strong className="text-neutral-900">{courseTitle}</strong>.
+            </p>
+          </div>
+
+          {/* Progress Breakdown Card */}
+          <div className="p-4 rounded-xl sm:rounded-2xl bg-neutral-50 border border-neutral-200 text-left space-y-2.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-neutral-700">Curriculum Progress</span>
+              <span className="font-bold text-[#0056D2]">
+                {courseProgress.completed} of {courseProgress.total} lessons ({courseProgress.percentage}%)
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-neutral-200 overflow-hidden">
+              <div
+                className="h-full bg-[#0056D2] rounded-full transition-all duration-500"
+                style={{ width: `${Math.max(courseProgress.percentage, 5)}%` }}
+              />
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
+              <Clock className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              <span>
+                {Math.max(0, courseProgress.total - courseProgress.completed)}{" "}
+                {courseProgress.total - courseProgress.completed === 1 ? "lesson" : "lessons"} left to complete before unlock.
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold text-xs transition"
+            >
+              Close
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition"
+            >
+              Resume Course
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const settings = getCertificateSettings();
   const isApproved = certificate ? certificate.status === "approved" : true;
   const isPending = certificate?.status === "pending_approval";
 
   const certificateId =
     certificate?.id ||
-    `DCG-CERT-${Math.abs(((progress?.xp || 100) * 73) + 1042).toString(16).toUpperCase()}`;
+    certificate?.verificationCode ||
+    `DCG-CERT-${courseId.toUpperCase().slice(0, 4)}-${Math.abs(((progress?.xp || 100) * 73) + 1042).toString(16).toUpperCase()}`;
 
   const issueDate = certificate?.approvedDate
     ? new Date(certificate.approvedDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : certificate?.completionDate
+    ? new Date(certificate.completionDate).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -53,10 +156,6 @@ export function CertificateModal({
         month: "long",
         day: "numeric",
       });
-
-  const courseTitle =
-    certificate?.courseTitle ||
-    "Foundations of Web Coding & Cybersecurity Defense";
 
   const signerName = certificate?.signerName || settings.signerName || "Patrick Paul";
   const signerTitle = certificate?.signerTitle || settings.signerTitle || "Executive Director & Academic Lead";

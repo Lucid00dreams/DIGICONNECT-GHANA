@@ -16,6 +16,7 @@ import { LMSUser } from "@/lib/lmsStore";
 
 interface DigihubUserMenuDropdownProps {
   currentUser: LMSUser;
+  streakDays?: number;
   onSelectSection: (section: any) => void;
   onOpenJargonModal: () => void;
   onOpenCoach: () => void;
@@ -30,6 +31,7 @@ interface DigihubUserMenuDropdownProps {
 
 export function DigihubUserMenuDropdown({
   currentUser,
+  streakDays = 1,
   onSelectSection,
   onOpenJargonModal,
   onOpenCoach,
@@ -145,7 +147,7 @@ export function DigihubUserMenuDropdown({
             role="menuitem"
           >
             <Flame className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="truncate">Study Streak (4d)</span>
+            <span className="truncate">Study Streak ({streakDays}d)</span>
           </button>
 
           <button

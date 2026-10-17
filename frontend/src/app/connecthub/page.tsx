@@ -7460,6 +7460,7 @@ export default function ConnectHubPage() {
             setSelectedCertToPreview(null);
           }}
           certificate={selectedCertToPreview}
+          isAdminPreview={true}
         />
       )}
     </div>

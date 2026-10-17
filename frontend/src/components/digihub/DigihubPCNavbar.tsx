@@ -32,7 +32,14 @@ import {
   FileCode,
   Compass,
 } from "lucide-react";
-import { LMSUser, Course, CertificateRecord, MentorshipSession } from "@/lib/lmsStore";
+import {
+  LMSUser,
+  Course,
+  CertificateRecord,
+  MentorshipSession,
+  LearnerProgress,
+  getCurrentWeekDays,
+} from "@/lib/lmsStore";
 import { DigihubMenuModal } from "./DigihubMenuModal";
 import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
@@ -44,6 +51,7 @@ interface DigihubPCNavbarProps {
   currentUser: LMSUser;
   courses: Course[];
   certificates: CertificateRecord[];
+  progress?: LearnerProgress;
   sessions?: MentorshipSession[];
   onSignOut: () => void;
   onOpenJargonModal: () => void;
@@ -72,6 +80,7 @@ export function DigihubPCNavbar({
   currentUser,
   courses,
   certificates,
+  progress,
   sessions = [],
   onSignOut,
   onOpenJargonModal,
@@ -92,6 +101,9 @@ export function DigihubPCNavbar({
   const [isExporting, setIsExporting] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+
+  const streakDays = Math.max(1, progress?.streakDays || 1);
+  const currentWeek = getCurrentWeekDays(progress);
 
   const isMenuModalOpen = isMenuOpen !== undefined ? isMenuOpen : internalMenuOpen;
   const handleOpenMenu = onOpenMenu || (() => setInternalMenuOpen(true));
@@ -479,6 +491,7 @@ export function DigihubPCNavbar({
               {isUserMenuOpen && (
                 <DigihubUserMenuDropdown
                   currentUser={currentUser}
+                  streakDays={streakDays}
                   onSelectSection={onSelectSection}
                   onOpenJargonModal={onOpenJargonModal}
                   onOpenCoach={onOpenCoach}
@@ -498,7 +511,7 @@ export function DigihubPCNavbar({
 
       {/* Streak Details Modal */}
       {streakModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl shadow-2xl border border-neutral-200 max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
               <div className="flex items-center gap-2">
@@ -521,18 +534,58 @@ export function DigihubPCNavbar({
               </button>
             </div>
 
-            <div className="text-center py-2">
-              <span className="text-4xl font-extrabold text-neutral-900 tracking-tight">4 Days</span>
+            <div className="text-center py-1">
+              <span className="text-4xl font-extrabold text-neutral-900 tracking-tight">
+                {streakDays} {streakDays === 1 ? "Day" : "Days"}
+              </span>
               <p className="text-xs text-neutral-500 mt-1">
-                You’ve completed daily lessons 4 days in a row! 3 more days to earn the Weekly Champion certificate seal.
+                {streakDays >= 7
+                  ? "Outstanding dedication! You've maintained a 7+ day active learning streak."
+                  : `You're on an active study streak! Keep completing daily lessons to earn the Weekly Champion certificate seal.`}
               </p>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-end">
+            {/* 7-Day Calendar Week Progress */}
+            <div className="my-3.5 p-3 bg-neutral-50 rounded-2xl border border-neutral-200/80">
+              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider text-center mb-2">
+                Active Week Breakdown
+              </div>
+              <div className="flex items-center justify-between gap-1">
+                {currentWeek.map((d, i) => (
+                  <div key={d.dateStr || i} className="flex flex-col items-center gap-1">
+                    <span className="text-[9px] font-semibold text-neutral-400">{d.dayLetter}</span>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition ${
+                        d.done
+                          ? "bg-emerald-500 text-white shadow-2xs"
+                          : d.isToday
+                          ? "bg-white border-2 border-emerald-500 text-emerald-700 font-extrabold ring-2 ring-emerald-100"
+                          : d.isPast
+                          ? "bg-neutral-200/80 text-neutral-400"
+                          : "bg-neutral-100 text-neutral-300"
+                      }`}
+                      title={`${d.fullDayName} (${d.dateStr}): ${
+                        d.done
+                          ? "Completed active study"
+                          : d.isToday
+                          ? "Today — study to keep streak!"
+                          : d.isPast
+                          ? "Past study day"
+                          : "Upcoming"
+                      }`}
+                    >
+                      {d.done ? "✓" : d.dayNumber}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-end">
               <button
                 type="button"
                 onClick={() => setStreakModalOpen(false)}
-                className="px-4 py-2 bg-[#5B67E2] hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition"
+                className="px-4 py-2 bg-[#5B67E2] hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition shadow-2xs"
               >
                 Got It
               </button>

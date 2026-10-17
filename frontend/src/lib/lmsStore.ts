@@ -254,6 +254,7 @@ export interface LearnerProgress {
   xp: number;
   streakDays: number;
   lastActiveDate: string;
+  activeStudyDates?: string[];
   certificateClaimed: boolean;
   studentName: string;
   onboardingCompleted?: boolean;
@@ -1286,13 +1287,15 @@ export function getLearnerProgress(): LearnerProgress {
   try {
     const raw = localStorage.getItem(LMS_PROGRESS_KEY);
     if (!raw) {
+      const todayStr = new Date().toISOString().split("T")[0];
       const initial: LearnerProgress = {
         completedLessonIds: safeActiveCompleted,
         currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
         enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
         xp: 0,
         streakDays: 1,
-        lastActiveDate: new Date().toISOString().split("T")[0],
+        lastActiveDate: todayStr,
+        activeStudyDates: safeActiveCompleted.length > 0 ? [todayStr] : [],
         certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
         studentName: activeUser ? activeUser.name : "Learner",
         onboardingCompleted: activeUser ? activeUser.onboardingCompleted : false,
@@ -1306,6 +1309,10 @@ export function getLearnerProgress(): LearnerProgress {
     }
     const parsed = JSON.parse(raw);
     parsed.completedLessonIds = Array.isArray(parsed.completedLessonIds) ? parsed.completedLessonIds : [];
+    if (!parsed.activeStudyDates || !Array.isArray(parsed.activeStudyDates)) {
+      const todayStr = new Date().toISOString().split("T")[0];
+      parsed.activeStudyDates = parsed.completedLessonIds.length > 0 ? [parsed.lastActiveDate || todayStr] : [];
+    }
     if (activeUser) {
       // Sync with active user
       parsed.completedLessonIds = Array.isArray(activeUser.completedLessonIds)
@@ -1321,13 +1328,15 @@ export function getLearnerProgress(): LearnerProgress {
     }
     return parsed;
   } catch {
+    const todayStr = new Date().toISOString().split("T")[0];
     return {
       completedLessonIds: safeActiveCompleted,
       currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
       enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
       xp: 0,
       streakDays: 1,
-      lastActiveDate: new Date().toISOString().split("T")[0],
+      lastActiveDate: todayStr,
+      activeStudyDates: safeActiveCompleted.length > 0 ? [todayStr] : [],
       certificateClaimed: activeUser ? activeUser.certificateClaimed : false,
       studentName: activeUser ? activeUser.name : "Learner",
       onboardingCompleted: activeUser ? activeUser.onboardingCompleted : false,
@@ -1367,30 +1376,57 @@ export function saveLearnerProgress(progress: LearnerProgress): void {
 
 export function markLessonCompleted(lessonId: string, xpAward: number): LearnerProgress {
   const current = getLearnerProgress();
+  const todayStr = new Date().toISOString().split("T")[0];
+
   if (!current.completedLessonIds.includes(lessonId)) {
     current.completedLessonIds.push(lessonId);
     current.xp += xpAward;
-    current.streakDays = Math.max(1, current.streakDays);
-    current.lastActiveDate = new Date().toISOString().split("T")[0];
-    saveLearnerProgress(current);
+  }
 
-    // Sync active user if signed in
-    const active = getActiveUser();
-    if (active) {
-      active.completedLessonIds = current.completedLessonIds;
-      active.lastActive = new Date().toISOString();
-      const users = getAllLMSUsers().map((u) => (u.id === active.id ? active : u));
-      saveLMSUsers(users);
-      setActiveUser(active);
+  // Record active study date
+  if (!current.activeStudyDates || !Array.isArray(current.activeStudyDates)) {
+    current.activeStudyDates = [];
+  }
+  if (!current.activeStudyDates.includes(todayStr)) {
+    current.activeStudyDates.push(todayStr);
+  }
 
-      // Check if any course is 100% completed to generate certificate
-      const courses = getAllCourses();
-      for (const course of courses) {
-        const cLessonIds = course.lessons.map((l) => l.id);
-        const isFinished = cLessonIds.length > 0 && cLessonIds.every((id) => current.completedLessonIds.includes(id));
-        if (isFinished) {
-          requestCourseCertificate(course.id, active);
-        }
+  // Calculate consecutive daily streak dynamically
+  if (current.lastActiveDate) {
+    const lastDate = new Date(current.lastActiveDate);
+    const today = new Date(todayStr);
+    const diffDays = Math.round((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      current.streakDays = (current.streakDays || 1) + 1;
+    } else if (diffDays === 0) {
+      current.streakDays = Math.max(1, current.streakDays || 1);
+    } else {
+      current.streakDays = 1;
+    }
+  } else {
+    current.streakDays = 1;
+  }
+  current.lastActiveDate = todayStr;
+
+  saveLearnerProgress(current);
+
+  // Sync active user if signed in
+  const active = getActiveUser();
+  if (active) {
+    active.completedLessonIds = current.completedLessonIds;
+    active.lastActive = new Date().toISOString();
+    const users = getAllLMSUsers().map((u) => (u.id === active.id ? active : u));
+    saveLMSUsers(users);
+    setActiveUser(active);
+
+    // Check if any course is 100% completed to generate certificate
+    const courses = getAllCourses();
+    for (const course of courses) {
+      const cLessonIds = course.lessons.map((l) => l.id);
+      const isFinished = cLessonIds.length > 0 && cLessonIds.every((id) => current.completedLessonIds.includes(id));
+      if (isFinished) {
+        requestCourseCertificate(course.id, active);
       }
     }
   }
@@ -1817,6 +1853,86 @@ export function getCourseProgress(
   return { completed: completedInCourse, total, percentage, isCompleted };
 }
 
+// ─── DYNAMIC STUDY STREAK & CALENDAR WEEK UTILITIES ─────────────────────
+
+export interface WeekDayStatus {
+  dayLetter: string;
+  fullDayName: string;
+  dateStr: string;
+  dayNumber: number;
+  isToday: boolean;
+  isPast: boolean;
+  isFuture: boolean;
+  done: boolean;
+}
+
+export function getCurrentWeekDays(progress?: LearnerProgress): WeekDayStatus[] {
+  const now = new Date();
+  const currentDayOfWeek = now.getDay(); // 0 is Sun, 1 is Mon, ..., 6 is Sat
+  const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset);
+  monday.setHours(0, 0, 0, 0);
+
+  const daysLabels = [
+    { letter: "M", name: "Monday" },
+    { letter: "T", name: "Tuesday" },
+    { letter: "W", name: "Wednesday" },
+    { letter: "T", name: "Thursday" },
+    { letter: "F", name: "Friday" },
+    { letter: "S", name: "Saturday" },
+    { letter: "S", name: "Sunday" },
+  ];
+
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  const currentProgress = progress || getLearnerProgress();
+  const activeDatesSet = new Set<string>(currentProgress.activeStudyDates || []);
+  const lastActiveDate = currentProgress.lastActiveDate || todayStr;
+  const streakDays = currentProgress.streakDays || 1;
+  const hasCompletedLessons = (currentProgress.completedLessonIds || []).length > 0;
+
+  // If learner has an active streak and has completed lessons, backfill streak dates for the current week
+  if (hasCompletedLessons && streakDays > 0) {
+    const refDate = new Date(lastActiveDate);
+    if (!isNaN(refDate.getTime())) {
+      for (let i = 0; i < Math.min(streakDays, 7); i++) {
+        const sd = new Date(refDate);
+        sd.setDate(refDate.getDate() - i);
+        const sdStr = `${sd.getFullYear()}-${String(sd.getMonth() + 1).padStart(2, "0")}-${String(sd.getDate()).padStart(2, "0")}`;
+        activeDatesSet.add(sdStr);
+      }
+    }
+  }
+
+  return daysLabels.map((item, index) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + index);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+    const isToday = dateStr === todayStr;
+    const isPast = dateStr < todayStr;
+    const isFuture = dateStr > todayStr;
+
+    let done = activeDatesSet.has(dateStr);
+    if (!done && isToday && lastActiveDate === todayStr && hasCompletedLessons) {
+      done = true;
+    }
+
+    return {
+      dayLetter: item.letter,
+      fullDayName: item.name,
+      dateStr,
+      dayNumber: d.getDate(),
+      isToday,
+      isPast,
+      isFuture,
+      done,
+    };
+  });
+}
+
 // ─── CERTIFICATE & FACULTY SIGNATURE STORE ─────────────────────────────
 
 export function getCertificateSettings(): CertificateSettings {
@@ -1868,22 +1984,41 @@ export function saveAllCertificates(certs: CertificateRecord[]): void {
   window.dispatchEvent(new Event("digihub_certificates_updated"));
 }
 
-export function getCertificatesForStudent(studentIdOrEmail: string): CertificateRecord[] {
+export function getCertificatesForStudent(studentIdOrEmail: string, completedLessonIds?: string[]): CertificateRecord[] {
   const all = getAllCertificates();
   const query = studentIdOrEmail.toLowerCase().trim();
-  return all.filter((c) => c.studentId === studentIdOrEmail || c.studentEmail.toLowerCase() === query);
+  const studentCerts = all.filter((c) => c.studentId === studentIdOrEmail || c.studentEmail.toLowerCase() === query);
+
+  // STRICT REQUIREMENT: A user CANNOT have access to a certificate without completing 100% of the course!
+  const completed = Array.isArray(completedLessonIds)
+    ? completedLessonIds
+    : getActiveUser()?.completedLessonIds || getLearnerProgress().completedLessonIds || [];
+
+  return studentCerts.filter((cert) => {
+    const cp = getCourseProgress(cert.courseId, completed);
+    return cp.isCompleted;
+  });
 }
 
 export function getCertificateForCourse(
   studentIdOrEmail: string,
-  courseId: string
+  courseId: string,
+  completedLessonIds?: string[]
 ): CertificateRecord | undefined {
-  const studentCerts = getCertificatesForStudent(studentIdOrEmail);
+  const studentCerts = getCertificatesForStudent(studentIdOrEmail, completedLessonIds);
   return studentCerts.find((c) => c.courseId === courseId);
 }
 
-export function requestCourseCertificate(courseId: string, student?: LMSUser | null): CertificateRecord {
+export function requestCourseCertificate(courseId: string, student?: LMSUser | null): CertificateRecord | null {
   const user = student || getActiveUser();
+  const completed = user?.completedLessonIds || getLearnerProgress().completedLessonIds || [];
+
+  // STRICT REQUIREMENT: A user CANNOT request or obtain a certificate without finishing 100% of the course!
+  const cp = getCourseProgress(courseId, completed);
+  if (!cp.isCompleted) {
+    return null;
+  }
+
   const course = getCourseById(courseId);
   const settings = getCertificateSettings();
   const existingCerts = getAllCertificates();

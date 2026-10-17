@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { LMSUser, CertificateRecord, MentorshipSession } from "@/lib/lmsStore";
+import { LMSUser, CertificateRecord, MentorshipSession, LearnerProgress } from "@/lib/lmsStore";
 import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
 export type MobileTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
@@ -27,6 +27,8 @@ interface DigihubMobileNavbarProps {
   onSelectSection: (section: MobileTab) => void;
   currentUser?: LMSUser | null;
   unreadNotificationsCount?: number;
+  progress?: LearnerProgress;
+  streakDays?: number;
   onOpenNotifications?: () => void;
   onOpenSearch?: () => void;
   onOpenCoach?: () => void;
@@ -58,6 +60,8 @@ export function DigihubMobileNavbar({
   onSelectSection,
   currentUser,
   unreadNotificationsCount = 2,
+  progress,
+  streakDays,
   onOpenNotifications,
   onOpenSearch,
   onOpenCoach,
@@ -188,6 +192,7 @@ export function DigihubMobileNavbar({
                 {isUserMenuOpen && (
                   <DigihubUserMenuDropdown
                     currentUser={currentUser}
+                    streakDays={streakDays ?? progress?.streakDays ?? 1}
                     onSelectSection={(sec) => {
                       onSelectSection(sec);
                       setIsUserMenuOpen(false);

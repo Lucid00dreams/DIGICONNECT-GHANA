@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -44,6 +44,7 @@ import {
   Bot,
   Menu,
   Flame,
+  Lock,
 } from "lucide-react";
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
@@ -59,6 +60,8 @@ import {
   MentorshipSession,
   getCourseProgress,
   INITIAL_LESSONS,
+  getCurrentWeekDays,
+  WeekDayStatus,
 } from "@/lib/lmsStore";
 
 interface DigihubDashboardProps {
@@ -127,6 +130,36 @@ export function DigihubDashboard({
   const [isMobileSectionMenuOpen, setIsMobileSectionMenuOpen] = useState(false);
   const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+
+  // Dynamic 7-day study week state that automatically adapts when a calendar day changes
+  const [weekDays, setWeekDays] = useState<WeekDayStatus[]>(() => getCurrentWeekDays(progress));
+
+  useEffect(() => {
+    const refreshWeek = () => {
+      setWeekDays(getCurrentWeekDays(progress));
+    };
+
+    // Recompute when window gains focus or tab becomes visible (e.g. user returns the next day)
+    const onVisibilityOrFocus = () => {
+      refreshWeek();
+    };
+    window.addEventListener("focus", onVisibilityOrFocus);
+    document.addEventListener("visibilitychange", onVisibilityOrFocus);
+
+    // Recompute when midnight rolls over
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2);
+    const msToMidnight = Math.max(1000, tomorrow.getTime() - now.getTime());
+    const midnightTimer = setTimeout(() => {
+      refreshWeek();
+    }, msToMidnight);
+
+    return () => {
+      window.removeEventListener("focus", onVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", onVisibilityOrFocus);
+      clearTimeout(midnightTimer);
+    };
+  }, [progress]);
 
   // First name extraction
   const firstName = currentUser.name.split(" ")[0] || "Learner";
@@ -241,6 +274,7 @@ export function DigihubDashboard({
         currentUser={currentUser}
         courses={courses}
         certificates={certificates}
+        progress={progress}
         sessions={sessions}
         onSignOut={onSignOut}
         onOpenJargonModal={() => setIsJargonModalOpen(true)}
@@ -266,6 +300,7 @@ export function DigihubDashboard({
         activeSection={activeSection}
         onSelectSection={setActiveSection}
         currentUser={currentUser}
+        progress={progress}
         unreadNotificationsCount={2}
         onOpenNotifications={() => {}}
         onOpenSearch={() => {
@@ -316,33 +351,40 @@ export function DigihubDashboard({
                     </Link>
                   )}
 
-                  {/* 7-Day Study Streak Indicator (Compact dots that fit perfectly on all mobile viewports) */}
+                  {/* 7-Day Study Streak Indicator (Dynamic calendar week dots) */}
                   <div className="flex items-center gap-1.5 sm:gap-2.5 bg-neutral-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0 max-w-full">
                     <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-600 shrink-0">
                       <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-emerald-500 text-emerald-500" />
-                      <span>4d</span>
+                      <span>{Math.max(1, progress.streakDays || 1)}d</span>
                     </div>
                     <div className="h-3 w-px bg-neutral-200" />
                     <div className="flex items-center gap-0.5 sm:gap-1">
-                      {[
-                        { day: "M", done: true },
-                        { day: "T", done: true },
-                        { day: "W", done: true },
-                        { day: "T", done: true },
-                        { day: "F", done: false },
-                        { day: "S", done: false },
-                        { day: "S", done: false },
-                      ].map((d, i) => (
+                      {weekDays.map((d, i) => (
                         <div
-                          key={i}
-                          className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold transition ${
+                          key={d.dateStr || i}
+                          className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold transition relative ${
                             d.done
                               ? "bg-emerald-500 text-white shadow-2xs"
-                              : "bg-neutral-200/80 text-neutral-500"
+                              : d.isToday
+                              ? "bg-white border-1.5 border-emerald-500 text-emerald-700 font-extrabold ring-1 ring-emerald-300"
+                              : d.isPast
+                              ? "bg-neutral-200/80 text-neutral-400"
+                              : "bg-neutral-100 text-neutral-400"
                           }`}
-                          title={`${d.day}: ${d.done ? "Active study day completed" : "Upcoming study day"}`}
+                          title={`${d.fullDayName} (${d.dateStr}): ${
+                            d.done
+                              ? "Active study day completed"
+                              : d.isToday
+                              ? "Today — study now to keep your streak!"
+                              : d.isPast
+                              ? "Past study day (no activity recorded)"
+                              : "Upcoming day"
+                          }`}
                         >
-                          {d.day}
+                          {d.dayLetter}
+                          {d.isToday && !d.done && (
+                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -879,17 +921,17 @@ export function DigihubDashboard({
               </button>
             </div>
 
-            {/* Certificates List */}
+            {/* Certificates Content */}
             {certificates.length === 0 ? (
-              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-neutral-200 space-y-3 animate-fade-in-up">
+              <div className="p-6 sm:p-10 text-center bg-white rounded-2xl border border-neutral-200 space-y-3 animate-fade-in-up">
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
                   <Award className="w-6 h-6" />
                 </div>
                 <h3 className="font-bold text-neutral-800 text-sm sm:text-base">
-                  No Certificates Issued Yet
+                  No Certificates Unlocked Yet
                 </h3>
                 <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
-                  Complete all module quizzes and hands-on lab challenges in any of our 12 tracks to automatically unlock your faculty-signed certificate.
+                  To maintain academic credibility, certificates are exclusively unlocked after completing <strong>100%</strong> of all modules and laboratory exercises in a course track.
                 </p>
                 <div className="pt-2">
                   <button
@@ -902,44 +944,153 @@ export function DigihubDashboard({
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {certificates.map((cert, certIdx) => (
-                  <div
-                    key={cert.id}
-                    className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 card-lift animate-fade-in-up"
-                    style={{ animationDelay: `${certIdx * 80}ms` }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
-                          Verified Credential
-                        </span>
-                        <h4 className="font-bold text-base text-neutral-900 mt-0.5">
-                          {cert.courseTitle}
-                        </h4>
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                  Earned &amp; Verified Credentials ({certificates.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {certificates.map((cert, certIdx) => (
+                    <div
+                      key={cert.id}
+                      className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4 card-lift animate-fade-in-up"
+                      style={{ animationDelay: `${certIdx * 80}ms` }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                            Verified Credential
+                          </span>
+                          <h4 className="font-bold text-base text-neutral-900 mt-0.5">
+                            {cert.courseTitle}
+                          </h4>
+                        </div>
+                        <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                          <Award className="w-5 h-5" />
+                        </div>
                       </div>
-                      <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                        <Award className="w-5 h-5" />
+
+                      <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-100 text-[11px] text-neutral-600 space-y-1">
+                        <div>Issued to: <strong className="text-neutral-900">{cert.studentName}</strong></div>
+                        <div>Serial: <span className="font-mono font-bold text-[#0056D2]">{cert.verificationCode}</span></div>
+                        <div>Date: {cert.completionDate}</div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => onOpenCertificateModal(cert)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition text-center"
+                        >
+                          View &amp; Print Certificate
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                    <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-100 text-[11px] text-neutral-600 space-y-1">
-                      <div>Issued to: <strong className="text-neutral-900">{cert.studentName}</strong></div>
-                      <div>Serial: <span className="font-mono font-bold text-[#0056D2]">{cert.verificationCode}</span></div>
-                      <div>Date: {cert.completionDate}</div>
-                    </div>
+            {/* In-Progress Track Credentials (Locked until 100% completed) */}
+            {inProgressCourses.length > 0 && (
+              <div className="space-y-4 pt-6 border-t border-neutral-200/80">
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-amber-600" />
+                    <span>In-Progress Track Credentials (Locked)</span>
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Complete 100% of all lessons in these enrolled tracks to unlock and download your official certificate.
+                  </p>
+                </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => onOpenCertificateModal(cert)}
-                        className="flex-1 py-2 px-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition text-center"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {inProgressCourses.map((course) => {
+                    const cp = getCourseProgress(course.id, safeCompletedIds);
+                    return (
+                      <div
+                        key={course.id}
+                        className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-2xs space-y-4"
                       >
-                        View &amp; Print Certificate
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                              <Lock className="w-3 h-3 text-amber-600" />
+                              <span>Locked • {cp.percentage}% Complete</span>
+                            </span>
+                            <h4 className="font-bold text-base text-neutral-900 mt-1.5">
+                              {course.title}
+                            </h4>
+                          </div>
+                          <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-400 flex items-center justify-center shrink-0">
+                            <Lock className="w-5 h-5" />
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-1.5 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+                          <div className="flex items-center justify-between text-xs text-neutral-600">
+                            <span className="font-medium">Curriculum Progress:</span>
+                            <span className="font-bold text-neutral-900">
+                              {cp.completed} / {cp.total} lessons ({cp.percentage}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-neutral-200 overflow-hidden">
+                            <div
+                              className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                              style={{ width: `${Math.max(cp.percentage, 5)}%` }}
+                            />
+                          </div>
+                          <p className="text-[11px] text-neutral-500 pt-0.5">
+                            {Math.max(0, cp.total - cp.completed)}{" "}
+                            {cp.total - cp.completed === 1 ? "lesson" : "lessons"} remaining before certificate unlock.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onOpenCertificateModal({
+                                id: `LOCKED-${course.id}`,
+                                studentId: currentUser.id,
+                                studentName: progress.studentName || currentUser.name,
+                                studentEmail: currentUser.email,
+                                courseId: course.id,
+                                courseTitle: course.title,
+                                status: "pending_approval",
+                                completionDate: "",
+                                verificationCode: "LOCKED",
+                              });
+                            }}
+                            className="flex-1 py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold text-xs transition text-center flex items-center justify-center gap-1.5"
+                          >
+                            <Lock className="w-3.5 h-3.5 text-neutral-500" />
+                            <span>Check Status</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const courseLessons =
+                                course.lessons && course.lessons.length > 0
+                                  ? course.lessons
+                                  : INITIAL_LESSONS.filter((l) => l.trackId === course.id);
+                              const firstIncomplete =
+                                courseLessons.find((l) => !safeCompletedIds.includes(l.id)) || courseLessons[0];
+                              if (firstIncomplete) {
+                                router.push(`/digihub/lesson/${firstIncomplete.id}`);
+                              } else {
+                                setActiveSection("learning");
+                              }
+                            }}
+                            className="flex-1 py-2 px-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs shadow-2xs transition text-center"
+                          >
+                            Resume Track
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
