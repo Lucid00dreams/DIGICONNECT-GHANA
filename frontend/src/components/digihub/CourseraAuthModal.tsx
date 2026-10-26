@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
+import { X, AlertCircle, ArrowRight } from "lucide-react";
 import {
   signInWithEmail,
   signUpWithEmail,
   signInWithSocialProvider,
   LMSUser,
 } from "@/lib/lmsStore";
+import {
+  executeSocialLogin,
+  SocialAuthConfigError,
+  SocialProvider,
+} from "@/lib/socialAuth";
 
 interface CourseraAuthModalProps {
   isOpen: boolean;
@@ -29,12 +34,18 @@ export function CourseraAuthModal({
   const [isNewUserStep, setIsNewUserStep] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
+  const [configNotice, setConfigNotice] = useState<{
+    provider: SocialProvider;
+    envKey: string;
+  } | null>(null);
 
   if (!isOpen) return null;
 
   const handleContinueWithEmail = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+    setConfigNotice(null);
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !trimmedEmail.includes("@")) {
@@ -77,29 +88,54 @@ export function CourseraAuthModal({
     }
   };
 
-  const handleSocialAuth = (provider: "google" | "facebook" | "apple") => {
-    setIsLoading(true);
+  const handleSocialAuth = async (provider: SocialProvider) => {
+    setSocialLoading(provider);
     setErrorMessage("");
+    setConfigNotice(null);
+
     try {
+      const profile = await executeSocialLogin(provider);
       const user = signInWithSocialProvider(
-        provider,
-        name.trim() || undefined,
-        email.trim() || undefined
+        profile.provider,
+        profile.name,
+        profile.email,
+        profile.avatar,
+        profile.id
       );
       const isNew = !user.onboardingCompleted;
       onAuthenticated(user, isNew);
       onClose();
-    } catch {
-      setErrorMessage(`${provider.toUpperCase()} login could not be completed. Please try again.`);
+    } catch (err: any) {
+      if (err instanceof SocialAuthConfigError) {
+        setConfigNotice({
+          provider: err.provider,
+          envKey: err.envKey,
+        });
+      } else {
+        setErrorMessage(
+          err?.message || "Google login could not be completed. Please try again."
+        );
+      }
     } finally {
-      setIsLoading(false);
+      setSocialLoading(null);
     }
   };
 
+  const handleDemoSocialLogin = (provider: SocialProvider) => {
+    const user = signInWithSocialProvider(
+      provider,
+      name.trim() || undefined,
+      email.trim() || undefined
+    );
+    const isNew = !user.onboardingCompleted;
+    onAuthenticated(user, isNew);
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 my-auto border border-neutral-100 animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[390px] bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 my-auto border border-neutral-100 animate-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -107,117 +143,79 @@ export function CourseraAuthModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
           aria-label="Close modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Header */}
-        <div className="mb-6 pr-6">
+        <div className="mb-4 pr-6">
           <h2
             id="auth-modal-title"
-            className="text-2xl font-bold text-neutral-900 tracking-tight"
+            className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight"
           >
             {isNewUserStep ? "Create your account" : "Log in or create account"}
           </h2>
-          <p className="text-sm text-neutral-600 mt-1 leading-relaxed">
+          <p className="text-xs text-neutral-500 mt-1 leading-snug">
             {isNewUserStep
-              ? "Almost there! What name should appear on your verified certificates?"
-              : "Join DigiConnect Ghana's free technical learning community: access 12 academy tracks, live browser sandboxes, and earn faculty-verified certificates."}
+              ? "Enter your full name to appear on certificates."
+              : "Access DigiConnect courses, labs, and mentorship."}
           </p>
         </div>
 
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="mb-3 p-2.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-xs text-red-700">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Email Form */}
-        <form onSubmit={handleContinueWithEmail} className="space-y-4">
-          {isNewUserStep && (
-            <div>
-              <label
-                htmlFor="user-fullname"
-                className="block text-xs font-semibold text-neutral-800 mb-1.5"
-              >
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="user-fullname"
-                type="text"
-                autoFocus
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Ama Mensah or Kwame Boateng"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-neutral-900 text-sm placeholder:text-neutral-400 outline-none transition"
-              />
-            </div>
-          )}
-
-          <div>
-            <label
-              htmlFor="user-email"
-              className="block text-xs font-semibold text-neutral-800 mb-1.5"
-            >
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="user-email"
-              type="email"
-              required
-              disabled={isNewUserStep}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@email.com"
-              className={`w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-neutral-900 text-sm placeholder:text-neutral-400 outline-none transition ${
-                isNewUserStep ? "bg-neutral-100 text-neutral-600 cursor-not-allowed" : ""
-              }`}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-semibold text-sm transition shadow-sm active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <span>Checking...</span>
-            ) : isNewUserStep ? (
-              <>
-                <span>Complete Registration</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            ) : (
-              <span>Continue</span>
-            )}
-          </button>
-        </form>
-
-        {/* Divider */}
-        {!isNewUserStep && (
-          <>
-            <div className="relative my-5 text-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-neutral-200" />
+        {/* Missing Config Notification */}
+        {configNotice && (
+          <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-start gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-[11px]">
+                  Google Login Setup Required
+                </p>
+                <p className="text-[10px] text-amber-700 leading-tight">
+                  Set <code className="bg-amber-100 px-1 rounded font-mono text-[9px]">{configNotice.envKey}</code> in <code className="font-mono text-[9px]">.env.local</code>.
+                </p>
               </div>
-              <span className="relative bg-white px-3 text-xs text-neutral-400 font-medium">
-                or continue with
-              </span>
             </div>
-
-            {/* Social SSO Buttons */}
-            <div className="space-y-2.5">
-              {/* Google */}
+            <div className="flex items-center gap-1.5 pt-0.5">
               <button
                 type="button"
-                onClick={() => handleSocialAuth("google")}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
+                onClick={() => handleDemoSocialLogin(configNotice.provider)}
+                className="px-2.5 py-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-medium text-[10px] transition"
               >
+                Sign in with Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfigNotice(null)}
+                className="px-2 py-1 rounded-md text-amber-700 hover:bg-amber-100 text-[10px] transition"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Google SSO Button (First for quick seamless access) */}
+        {!isNewUserStep && (
+          <>
+            <button
+              type="button"
+              onClick={() => handleSocialAuth("google")}
+              disabled={isLoading || socialLoading !== null}
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99] disabled:opacity-60 shadow-2xs"
+            >
+              {socialLoading === "google" ? (
+                <div className="w-4 h-4 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -236,64 +234,98 @@ export function CourseraAuthModal({
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.84 3.6-4.99 6.72-4.99z"
                   />
                 </svg>
-                <span>Continue with Google</span>
-              </button>
+              )}
+              <span>
+                {socialLoading === "google" ? "Connecting to Google..." : "Continue with Google"}
+              </span>
+            </button>
 
-              {/* Facebook */}
-              <button
-                type="button"
-                onClick={() => handleSocialAuth("facebook")}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
-              >
-                <svg className="w-4 h-4 fill-[#1877F2] shrink-0" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-                <span>Continue with Facebook</span>
-              </button>
-
-              {/* Apple */}
-              <button
-                type="button"
-                onClick={() => handleSocialAuth("apple")}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-neutral-50 border border-neutral-300 hover:border-neutral-400 rounded-xl text-neutral-800 text-xs sm:text-sm font-semibold transition active:scale-[0.99]"
-              >
-                <svg className="w-4 h-4 fill-black shrink-0" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.4c.66-.82 1.11-1.96.99-3.1-.96.04-2.12.64-2.8 1.44-.59.69-1.12 1.84-.98 2.95 1.07.08 2.15-.55 2.79-1.29z" />
-                </svg>
-                <span>Continue with Apple</span>
-              </button>
+            {/* Divider */}
+            <div className="relative my-3 text-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-neutral-200" />
+              </div>
+              <span className="relative bg-white px-2.5 text-[11px] text-neutral-400 font-medium">
+                or continue with email
+              </span>
             </div>
           </>
         )}
 
-        {/* Footer links */}
-        <div className="mt-6 pt-4 border-t border-neutral-100 text-center space-y-3">
-          <a
-            href="mailto:contact@digiconnectghana.org?subject=Institutional%20Access%20Inquiry"
-            className="text-xs font-semibold text-[#0056D2] hover:underline inline-block"
-          >
-            Sign up with your organization or school
-          </a>
+        {/* Email Form */}
+        <form onSubmit={handleContinueWithEmail} className="space-y-3">
+          {isNewUserStep && (
+            <div>
+              <label
+                htmlFor="user-fullname"
+                className="block text-xs font-semibold text-neutral-700 mb-1"
+              >
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="user-fullname"
+                type="text"
+                autoFocus
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Ama Mensah"
+                className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-neutral-900 text-xs sm:text-sm placeholder:text-neutral-400 outline-none transition"
+              />
+            </div>
+          )}
 
-          <p className="text-[11px] text-neutral-500 leading-relaxed">
-            I accept DigiConnect&apos;s{" "}
-            <a href="#" className="text-[#0056D2] hover:underline">
-              Terms of Use
+          <div>
+            <label
+              htmlFor="user-email"
+              className="block text-xs font-semibold text-neutral-700 mb-1"
+            >
+              Email Address <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="user-email"
+              type="email"
+              required
+              disabled={isNewUserStep}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@email.com"
+              className={`w-full px-3 py-2 rounded-xl border border-neutral-300 focus:border-[#0056D2] focus:ring-2 focus:ring-[#0056D2]/20 text-neutral-900 text-xs sm:text-sm placeholder:text-neutral-400 outline-none transition ${
+                isNewUserStep ? "bg-neutral-100 text-neutral-600 cursor-not-allowed" : ""
+              }`}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-semibold text-xs sm:text-sm transition shadow-2xs active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-1.5"
+          >
+            {isLoading ? (
+              <span>Checking...</span>
+            ) : isNewUserStep ? (
+              <>
+                <span>Complete Registration</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </>
+            ) : (
+              <span>Continue</span>
+            )}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-3.5 pt-2.5 border-t border-neutral-100 text-center">
+          <p className="text-[10px] text-neutral-400 leading-snug">
+            By continuing, you agree to DigiConnect&apos;s{" "}
+            <a href="/terms" className="text-[#0056D2] hover:underline">
+              Terms
             </a>{" "}
             and{" "}
-            <a href="#" className="text-[#0056D2] hover:underline">
-              Privacy Notice
+            <a href="/privacy" className="text-[#0056D2] hover:underline">
+              Privacy Policy
             </a>
-            . Having trouble logging in?{" "}
-            <a href="#" className="text-[#0056D2] hover:underline">
-              Learner help center
-            </a>
-          </p>
-
-          <p className="text-[10px] text-neutral-400">
-            This site is protected by DigiConnect Academic Authority and the DigiConnect Privacy Policy and Terms of Service apply.
+            .
           </p>
         </div>
       </div>

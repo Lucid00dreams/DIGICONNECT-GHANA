@@ -144,7 +144,7 @@ export interface LMSUser {
   name: string;
   email: string;
   avatar?: string;
-  provider: "email" | "google";
+  provider: "email" | "google" | "facebook" | "apple" | "github";
   role: "student" | "mentor" | "admin";
   createdAt: string;
   lastActive: string;

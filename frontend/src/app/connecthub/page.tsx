@@ -181,7 +181,7 @@ export default function ConnectHubPage() {
   const [lmsUsers, setLmsUsers] = useState<LMSUser[]>(() => getAllLMSUsers());
   const [selectedLmsStudent, setSelectedLmsStudent] = useState<LMSUser | null>(null);
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
-  const [studentFilter, setStudentFilter] = useState<"all" | "in-progress" | "certified" | "google" | "email">("all");
+  const [studentFilter, setStudentFilter] = useState<"all" | "in-progress" | "certified" | "google" | "facebook" | "apple" | "email">("all");
 
   // Certificate Authority & Faculty Signatures state
   const [certSettings, setCertSettings] = useState<CertificateSettings>(() => getCertificateSettings());
@@ -3560,6 +3560,12 @@ export default function ConnectHubPage() {
             if (studentFilter === "google") {
               return u.provider === "google";
             }
+            if (studentFilter === "facebook") {
+              return u.provider === "facebook";
+            }
+            if (studentFilter === "apple") {
+              return u.provider === "apple";
+            }
             if (studentFilter === "email") {
               return u.provider === "email";
             }
@@ -3570,6 +3576,8 @@ export default function ConnectHubPage() {
             (u) => u.completedLessonIds.length >= allLessons.length || u.certificateClaimed
           ).length;
           const googleUserCount = lmsUsers.filter((u) => u.provider === "google").length;
+          const facebookUserCount = lmsUsers.filter((u) => u.provider === "facebook").length;
+          const appleUserCount = lmsUsers.filter((u) => u.provider === "apple").length;
           const emailUserCount = lmsUsers.filter((u) => u.provider === "email").length;
 
           const handleExportStudentsCSV = () => {
@@ -4247,6 +4255,8 @@ export default function ConnectHubPage() {
                       },
                       { id: "certified", label: `Certified (${certifiedCount})` },
                       { id: "google", label: `Google (${googleUserCount})` },
+                      { id: "facebook", label: `Facebook (${facebookUserCount})` },
+                      { id: "apple", label: `Apple (${appleUserCount})` },
                       { id: "email", label: `Email (${emailUserCount})` },
                     ].map((tab) => (
                       <button
@@ -4331,6 +4341,20 @@ export default function ConnectHubPage() {
                                         </svg>
                                       </div>
                                     )}
+                                    {student.provider === "facebook" && (
+                                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white shadow-xs border border-neutral-200 flex items-center justify-center">
+                                        <svg className="w-2.5 h-2.5 fill-[#1877F2]" viewBox="0 0 24 24">
+                                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                    {student.provider === "apple" && (
+                                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white shadow-xs border border-neutral-200 flex items-center justify-center">
+                                        <svg className="w-2.5 h-2.5 fill-black" viewBox="0 0 24 24">
+                                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.4c.66-.82 1.11-1.96.99-3.1-.96.04-2.12.64-2.8 1.44-.59.69-1.12 1.84-.98 2.95 1.07.08 2.15-.55 2.79-1.29z" />
+                                        </svg>
+                                      </div>
+                                    )}
                                   </div>
 
                                   <div>
@@ -4339,6 +4363,14 @@ export default function ConnectHubPage() {
                                       {student.provider === "google" ? (
                                         <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-red-50 text-red-700 border border-red-200">
                                           Google
+                                        </span>
+                                      ) : student.provider === "facebook" ? (
+                                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                          Facebook
+                                        </span>
+                                      ) : student.provider === "apple" ? (
+                                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-neutral-900 text-white">
+                                          Apple
                                         </span>
                                       ) : (
                                         <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-neutral-100 text-neutral-600 border border-neutral-200">

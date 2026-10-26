@@ -1150,12 +1150,22 @@ export function signUpWithEmail(
 export function signInWithSocialProvider(
   provider: "google" | "facebook" | "apple" | "github",
   customName?: string,
-  customEmail?: string
+  customEmail?: string,
+  avatarUrl?: string,
+  providerId?: string
 ): LMSUser {
   const users = getAllLMSUsers();
   const email = (customEmail || `learner.${Date.now().toString(36)}@auth.${provider}.com`).trim().toLowerCase();
   const providerLabel = provider.charAt(0).toUpperCase() + provider.slice(1);
   const name = customName?.trim() || `${providerLabel} Learner`;
+
+  const defaultAvatar =
+    avatarUrl ||
+    (provider === "google"
+      ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
+      : provider === "facebook"
+      ? "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80"
+      : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80");
 
   const existing = users.find((u) => u.email.toLowerCase() === email);
   let activeUser: LMSUser;
@@ -1163,6 +1173,10 @@ export function signInWithSocialProvider(
   if (existing) {
     existing.lastActive = new Date().toISOString();
     existing.provider = provider;
+    if (avatarUrl) existing.avatar = avatarUrl;
+    if (customName && customName !== "Google Learner" && customName !== "Facebook Learner" && customName !== "Apple Learner") {
+      existing.name = customName;
+    }
     if (!existing.enrolledCourseIds || existing.enrolledCourseIds.length === 0) {
       existing.enrolledCourseIds = ["cybersecurity-architecture", "coding", "data-analytics"];
     }
@@ -1172,10 +1186,10 @@ export function signInWithSocialProvider(
     activeUser = existing;
   } else {
     activeUser = {
-      id: `stu-${provider[0]}-${Date.now().toString(36)}`,
+      id: providerId || `stu-${provider[0]}-${Date.now().toString(36)}`,
       name,
       email,
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      avatar: defaultAvatar,
       provider,
       role: "student",
       createdAt: new Date().toISOString(),
@@ -1191,11 +1205,40 @@ export function signInWithSocialProvider(
 
   saveLMSUsers(users);
   setActiveUser(activeUser);
+
+  // Sync to backend asynchronously if in browser
+  if (typeof window !== "undefined") {
+    syncLMSWithBackendServer().catch(() => {});
+  }
+
   return activeUser;
 }
 
-export function signInWithGoogle(customName?: string, customEmail?: string): LMSUser {
-  return signInWithSocialProvider("google", customName, customEmail);
+export function signInWithGoogle(
+  customName?: string,
+  customEmail?: string,
+  avatarUrl?: string,
+  providerId?: string
+): LMSUser {
+  return signInWithSocialProvider("google", customName, customEmail, avatarUrl, providerId);
+}
+
+export function signInWithFacebook(
+  customName?: string,
+  customEmail?: string,
+  avatarUrl?: string,
+  providerId?: string
+): LMSUser {
+  return signInWithSocialProvider("facebook", customName, customEmail, avatarUrl, providerId);
+}
+
+export function signInWithApple(
+  customName?: string,
+  customEmail?: string,
+  avatarUrl?: string,
+  providerId?: string
+): LMSUser {
+  return signInWithSocialProvider("apple", customName, customEmail, avatarUrl, providerId);
 }
 
 export function signOutLMS(): void {
