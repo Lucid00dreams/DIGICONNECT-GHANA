@@ -146,6 +146,12 @@ export function DigihubDashboard({
     window.addEventListener("focus", onVisibilityOrFocus);
     document.addEventListener("visibilitychange", onVisibilityOrFocus);
 
+    // When an enrollment happens anywhere (e.g. catalog or modal), return to learning tab so course is featured
+    const onEnrollmentUpdated = () => {
+      setActiveSection("learning");
+    };
+    window.addEventListener("digihub_enrollment_updated", onEnrollmentUpdated);
+
     // Recompute when midnight rolls over
     const now = new Date();
     const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2);
@@ -157,6 +163,7 @@ export function DigihubDashboard({
     return () => {
       window.removeEventListener("focus", onVisibilityOrFocus);
       document.removeEventListener("visibilitychange", onVisibilityOrFocus);
+      window.removeEventListener("digihub_enrollment_updated", onEnrollmentUpdated);
       clearTimeout(midnightTimer);
     };
   }, [progress]);
@@ -176,15 +183,22 @@ export function DigihubDashboard({
   // Safe progress completedLessonIds fallback
   const safeCompletedIds = Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds : [];
 
-  // Active enrolled courses
-  const enrolledCourseIds = currentUser.enrolledCourseIds || ["cybersecurity", "coding"];
+  // Active enrolled courses (strictly what the user has explicitly enrolled in)
+  const enrolledCourseIds = Array.isArray(currentUser.enrolledCourseIds)
+    ? currentUser.enrolledCourseIds
+    : [];
   const enrolledCourses = courses.filter((c) => enrolledCourseIds.includes(c.id));
-  const primaryCourse = enrolledCourses[0] || courses[0];
+  const hasEnrolledCourses = enrolledCourses.length > 0;
+
+  // Primary featured course: currentTrackId or the first enrolled course
+  const primaryCourse = hasEnrolledCourses
+    ? (enrolledCourses.find((c) => c.id === currentUser.currentTrackId) || enrolledCourses[0])
+    : null;
 
   // Primary course progress & next lesson
   const primaryProgress = primaryCourse
     ? getCourseProgress(primaryCourse.id, safeCompletedIds)
-    : { completed: 0, total: 4, percentage: 25, isCompleted: false };
+    : { completed: 0, total: 4, percentage: 0, isCompleted: false };
 
   const primaryLessons = primaryCourse?.lessons && primaryCourse.lessons.length > 0
     ? primaryCourse.lessons
@@ -205,12 +219,12 @@ export function DigihubDashboard({
     return cp.isCompleted;
   });
 
-  // Ensure dashboard grid displays at least 4 courses to match the 2x2 grid in Image 2
-  const dashboardGridCourses = [...inProgressCourses];
-  if (dashboardGridCourses.length < 4) {
-    const additional = courses.filter((c) => !dashboardGridCourses.some((dc) => dc.id === c.id));
-    dashboardGridCourses.push(...additional.slice(0, 4 - dashboardGridCourses.length));
-  }
+  const handleEnrollCourse = (courseId: string) => {
+    if (onEnrollCourse) {
+      onEnrollCourse(courseId);
+    }
+    setActiveSection("learning");
+  };
 
   // Filter courses for catalog
   const filteredCatalogCourses = courses.filter((c) => {
@@ -320,302 +334,444 @@ export function DigihubDashboard({
         {/* ─── SECTION 1: MY LEARNING ────────────────────────────────────── */}
         {activeSection === "learning" && (
           <div className="space-y-6 sm:space-y-8 tab-content-enter" key="learning">
-            {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
-            <section className="p-3.5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-3.5 sm:space-y-5 animate-fade-in-up">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                <div className="min-w-0 flex-1">
-                  <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
-                    {timeGreeting}, {firstName} 👋
-                  </span>
-                  <h1 className="text-base sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5 break-words">
-                    {primaryCourse?.title || "Web Engineering & Coding Foundations"}
-                  </h1>
-                  {nextLesson && (
-                    <p className="text-xs text-neutral-500 mt-1 flex items-center gap-1.5 truncate">
-                      <span className="font-semibold text-neutral-600 shrink-0">Up Next:</span>
-                      <span className="text-neutral-800 font-medium truncate">{nextLesson.title}</span>
-                    </p>
-                  )}
-                </div>
-
-                {/* Mobile: Wrapped CTA row so 7-day streak never gets clipped on right edge */}
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
-                  {/* Primary Resume Lesson CTA */}
-                  {nextLesson && (
-                    <Link
-                      href={`/digihub/lesson/${nextLesson.id}`}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs sm:text-sm font-bold shadow-2xs hover:shadow transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 shrink-0"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Resume Lesson</span>
-                    </Link>
-                  )}
-
-                  {/* 7-Day Study Streak Indicator (Dynamic calendar week dots) */}
-                  <div className="flex items-center gap-1.5 sm:gap-2.5 bg-neutral-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0 max-w-full">
-                    <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-600 shrink-0">
-                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-emerald-500 text-emerald-500" />
-                      <span>{Math.max(1, progress.streakDays || 1)}d</span>
+            {/* 1. If user has NOT enrolled in any course yet: Welcoming empty state & catalog jump */}
+            {!hasEnrolledCourses ? (
+              <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+                {/* Greeting Header */}
+                <section className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider block">
+                        {timeGreeting}, {firstName} 👋
+                      </span>
+                      <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight mt-0.5">
+                        Welcome to DIGIHub Academy
+                      </h1>
+                      <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                        Your personal tuition-free technical campus. Choose a track below to begin your hands-on journey.
+                      </p>
                     </div>
-                    <div className="h-3 w-px bg-neutral-200" />
-                    <div className="flex items-center gap-0.5 sm:gap-1">
-                      {weekDays.map((d, i) => (
-                        <div
-                          key={d.dateStr || i}
-                          className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold transition relative ${
-                            d.done
-                              ? "bg-emerald-500 text-white shadow-2xs"
-                              : d.isToday
-                              ? "bg-white border-1.5 border-emerald-500 text-emerald-700 font-extrabold ring-1 ring-emerald-300"
-                              : d.isPast
-                              ? "bg-neutral-200/80 text-neutral-400"
-                              : "bg-neutral-100 text-neutral-400"
-                          }`}
-                          title={`${d.fullDayName} (${d.dateStr}): ${
-                            d.done
-                              ? "Active study day completed"
-                              : d.isToday
-                              ? "Today — study now to keep your streak!"
-                              : d.isPast
-                              ? "Past study day (no activity recorded)"
-                              : "Upcoming day"
-                          }`}
-                        >
-                          {d.dayLetter}
-                          {d.isToday && !d.done && (
-                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                          )}
-                        </div>
-                      ))}
+
+                    {/* Streak Placeholder Badge */}
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 bg-neutral-50 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0 self-start sm:self-auto">
+                      <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-600 shrink-0">
+                        <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-emerald-500 text-emerald-500" />
+                        <span>Day 1</span>
+                      </div>
+                      <div className="h-3 w-px bg-neutral-200" />
+                      <span className="text-[10px] sm:text-[11px] text-neutral-500 font-medium">Ready to start</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                </section>
 
-              {/* Progress Bar & Time Remaining Badge */}
-              <div className="space-y-1.5">
-                <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <span className="font-semibold text-neutral-600 text-[11px] sm:text-xs">Curriculum Progress</span>
-                    <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
-                      ~2.5 hrs to Certificate
+                {/* Empty State Hero Card */}
+                <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50/90 via-white to-blue-50/50 border border-blue-200/80 p-6 sm:p-10 shadow-xs text-center space-y-4 sm:space-y-5">
+                  <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#0056D2] to-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/25">
+                    <Compass className="w-8 h-8 sm:w-10 sm:h-10" />
+                  </div>
+                  <div className="max-w-xl mx-auto space-y-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 text-[#0056D2] text-[11px] font-bold uppercase tracking-wider">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Get Started Today
                     </span>
+                    <h2 className="text-xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
+                      Have no courses yet?
+                    </h2>
+                    <p className="text-sm sm:text-base font-semibold text-[#0056D2]">
+                      Browse through the courses catalog to pick your track
+                    </p>
+                    <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto pt-1">
+                      Choose any industry-standard track below or explore the full catalog. Once you enroll, that course will be instantly featured here on your personal dashboard with interactive labs, lesson modules, and certificate tracking.
+                    </p>
                   </div>
-                  <span className="font-bold text-[#0056D2] text-[11px] sm:text-xs">{primaryProgress.percentage}% complete</span>
-                </div>
-                <div className="w-full h-1.5 sm:h-2 rounded-full bg-neutral-100 overflow-hidden">
-                  <div
-                    className="h-full bg-[#0056D2] rounded-full progress-animated progress-shimmer"
-                    style={{ width: `${Math.max(primaryProgress.percentage, 15)}%` }}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Clean, Minimalist Enrolled Courses (2x2 Card Grid faithfully reproducing Image 2) */}
-            <section className="space-y-3.5 sm:space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-                    My Enrolled Courses
-                  </h2>
-                  <span
-                    className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
-                    title="Track your curriculum progress and earn verified certificates."
-                  >
-                    <Info className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection("catalog")}
-                  className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1 group"
-                >
-                  <span>Explore All ({courses.length})</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
-                </button>
-              </div>
-
-              {/* 2x2 Grid of Course Cards (Image 2 sketch reproduction with Full-Card Tap Targets) */}
-              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2.5 sm:gap-4">
-                {dashboardGridCourses.map((course) => {
-                  const isEnrolled = enrolledCourseIds.includes(course.id);
-                  const isPrimaryTrack = primaryCourse?.id === course.id;
-                  const cp = getCourseProgress(course.id, safeCompletedIds);
-                  const courseLessons = course.lessons && course.lessons.length > 0
-                    ? course.lessons
-                    : (INITIAL_LESSONS.filter((l) => l.trackId === course.id) || []);
-                  const currentLesson =
-                    courseLessons.find((l) => !safeCompletedIds.includes(l.id)) ||
-                    courseLessons[0];
-                  const hoursLeft = Math.max(1, (courseLessons.length - (isEnrolled ? cp.completed : 0)) * 0.75).toFixed(1);
-
-                  const handleCardClick = () => {
-                    if (isEnrolled && currentLesson) {
-                      router.push(`/digihub/lesson/${currentLesson.id}`);
-                    } else if (onEnrollCourse) {
-                      onEnrollCourse(course.id);
-                    } else {
-                      onOpenCourseModal(course);
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={course.id}
-                      onClick={handleCardClick}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleCardClick();
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Open course: ${course.title}`}
-                      className="flex flex-col justify-between p-2.5 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-[#0056D2]/60 shadow-2xs hover:shadow-md card-lift transition-all duration-200 min-h-[195px] sm:min-h-[235px] cursor-pointer active:scale-[0.985] group select-none text-left"
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveSection("catalog")}
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs sm:text-sm shadow-md transition transform hover:-translate-y-0.5 active:scale-95"
                     >
-                      {/* Top Meta: Category + Hours left (never truncates into DIGICONNECT S...) */}
-                      <div>
-                        <div className="flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                          <span className="text-[9.5px] sm:text-[10px] font-bold text-[#0056D2] uppercase tracking-wider truncate max-w-[65%]">
-                            {course.category ? course.category.replace("-", " ") : "DigiConnect"}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[8px] sm:text-[9px] shrink-0">
-                            ~{hoursLeft} hrs
-                          </span>
-                        </div>
+                      <BookOpen className="w-4 h-4" />
+                      <span>Browse Courses Catalog</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </section>
 
-                        {/* Title (optimized font size for mobile 2-column fit) */}
-                        <h3 className="text-[12px] sm:text-base font-bold text-neutral-900 group-hover:text-[#0056D2] leading-snug line-clamp-2 min-h-[2.1rem] sm:min-h-[2.5rem] break-words transition-colors">
-                          {course.title}
-                        </h3>
+                {/* Quick Recommended Tracks to Get Started Immediately */}
+                <section className="space-y-3.5 sm:space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
+                        Recommended Tracks to Get Started
+                      </h3>
+                      <p className="text-xs text-neutral-500">
+                        Click &ldquo;Enroll&rdquo; on any track to feature it on your dashboard
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSection("catalog")}
+                      className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1 group"
+                    >
+                      <span>View All ({courses.length})</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </button>
+                  </div>
 
-                        {/* Progress */}
-                        <div className="mt-1.5 sm:mt-2.5 space-y-1">
-                          <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                            <span className="text-neutral-500 font-medium">Curriculum</span>
-                            <span className="font-bold text-[#0056D2]">
-                              {isEnrolled ? `${cp.percentage}%` : "Ready"}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {courses.slice(0, 4).map((course) => (
+                      <div
+                        key={course.id}
+                        className="p-4 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-[#0056D2]/60 transition flex flex-col justify-between text-left space-y-3"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-[9.5px] font-bold text-[#0056D2] uppercase tracking-wider truncate">
+                              {course.category || "Track"}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[8.5px] shrink-0">
+                              {course.durationWeeks} Wks
                             </span>
                           </div>
-                          <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                            <div
-                              className="h-full bg-[#0056D2] rounded-full progress-animated"
-                              style={{ width: `${isEnrolled ? Math.max(cp.percentage, 8) : 5}%` }}
-                            />
+                          <h4 className="font-bold text-neutral-900 text-sm leading-snug line-clamp-2">
+                            {course.title}
+                          </h4>
+                          <p className="text-[11px] text-neutral-500 line-clamp-2 mt-1 leading-relaxed">
+                            {course.headline || course.description}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 pt-2 border-t border-neutral-100">
+                          <div className="flex items-center justify-between text-[10px] text-neutral-400">
+                            <span>{course.lessons?.length || 4} modules</span>
+                            <span className="text-emerald-600 font-semibold">100% Free</span>
                           </div>
-                        </div>
-
-                        {/* Next lesson info */}
-                        <div className="text-[9.5px] sm:text-xs text-neutral-500 truncate mt-1.5 sm:mt-2">
-                          <span className="text-neutral-400">Next:</span>{" "}
-                          <span className="font-semibold text-neutral-800">
-                            {currentLesson?.title || "Lesson 1"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Bottom Action Buttons: Perfectly sized without '...' truncation */}
-                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-2.5 border-t border-neutral-100">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenCourseModal(course);
-                          }}
-                          className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl border border-neutral-200/90 hover:bg-neutral-50 text-neutral-700 font-semibold text-[10px] sm:text-xs transition flex items-center justify-center gap-1 shadow-2xs active:scale-95 text-center truncate"
-                          title="View course syllabus"
-                        >
-                          <BookOpen className="w-3 h-3 text-neutral-400 shrink-0 hidden min-[380px]:inline" />
-                          <span className="truncate">Syllabus</span>
-                        </button>
-
-                        {isEnrolled && currentLesson ? (
-                          isPrimaryTrack ? (
+                          <div className="grid grid-cols-2 gap-2">
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/digihub/lesson/${currentLesson.id}`);
-                              }}
-                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate active:scale-95 transition"
-                              title="Currently active track on your hero banner - tap to resume"
+                              onClick={() => onOpenCourseModal(course)}
+                              className="py-1.5 px-2 rounded-lg border border-neutral-200 text-neutral-700 hover:bg-neutral-50 font-semibold text-xs transition text-center active:scale-95"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse shrink-0" />
-                              <span className="truncate sm:hidden">Active</span>
-                              <span className="truncate hidden sm:inline">Active Track</span>
+                              Syllabus
                             </button>
-                          ) : (
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/digihub/lesson/${currentLesson.id}`);
-                              }}
-                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
-                              title="Switch to this track"
+                              onClick={() => handleEnrollCourse(course.id)}
+                              className="py-1.5 px-2 rounded-lg bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-xs transition text-center shadow-2xs active:scale-95"
                             >
-                              <span className="truncate sm:hidden">Resume</span>
-                              <span className="truncate hidden sm:inline">Switch Track</span>
-                              <ArrowRight className="w-3 h-3 shrink-0" />
+                              Enroll
                             </button>
-                          )
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (onEnrollCourse) {
-                                onEnrollCourse(course.id);
-                              } else {
-                                onOpenCourseModal(course);
-                              }
-                            }}
-                            className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white font-bold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
-                            title="Enroll in this course track"
-                          >
-                            <span className="truncate">Enroll</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* If user has any completed courses, show them cleanly */}
-              {completedCourses.length > 0 && (
-                <div className="pt-2 space-y-2">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
-                    Completed Certificates
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {completedCourses.map((c) => (
-                      <div
-                        key={c.id}
-                        className="p-3.5 sm:p-4 rounded-2xl bg-white border border-neutral-200/90 flex items-center justify-between gap-3 shadow-2xs"
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                            <span>Completed Track</span>
                           </div>
-                          <h4 className="text-xs sm:text-sm font-bold text-neutral-900 mt-0.5 truncate">{c.title}</h4>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setActiveSection("diplomas")}
-                          className="px-3 py-1.5 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
-                        >
-                          Certificate
-                        </button>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </section>
+                </section>
+              </div>
+            ) : (
+              /* 2. If user HAS enrolled in at least one course: Featured Hero & Enrolled List */
+              <>
+                {/* Greeting & Active Course Hero with 7-Day Streak & Time Remaining */}
+                <section className="p-3.5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-3.5 sm:space-y-5 animate-fade-in-up">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] sm:text-xs font-semibold text-[#0056D2] uppercase tracking-wider">
+                          {timeGreeting}, {firstName} 👋
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0056D2] border border-blue-100">
+                          Featured Track
+                        </span>
+                      </div>
+                      <h1 className="text-base sm:text-2xl font-bold text-neutral-900 tracking-tight break-words">
+                        {primaryCourse?.title}
+                      </h1>
+                      {nextLesson && (
+                        <p className="text-xs text-neutral-500 mt-1 flex items-center gap-1.5 truncate">
+                          <span className="font-semibold text-neutral-600 shrink-0">
+                            {primaryProgress.percentage === 0 ? "First Lesson:" : "Up Next:"}
+                          </span>
+                          <span className="text-neutral-800 font-medium truncate">{nextLesson.title}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Mobile: Wrapped CTA row so 7-day streak never gets clipped on right edge */}
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
+                      {/* Primary Resume / Start Lesson CTA */}
+                      {nextLesson && (
+                        <Link
+                          href={`/digihub/lesson/${nextLesson.id}`}
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0056D2] hover:bg-[#00419e] text-white text-xs sm:text-sm font-bold shadow-2xs hover:shadow transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 shrink-0"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <span>{primaryProgress.percentage === 0 ? "Start Learning" : "Resume Lesson"}</span>
+                        </Link>
+                      )}
+
+                      {/* 7-Day Study Streak Indicator (Dynamic calendar week dots) */}
+                      <div className="flex items-center gap-1.5 sm:gap-2.5 bg-neutral-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0 max-w-full">
+                        <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-600 shrink-0">
+                          <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-emerald-500 text-emerald-500" />
+                          <span>{Math.max(1, progress.streakDays || 1)}d</span>
+                        </div>
+                        <div className="h-3 w-px bg-neutral-200" />
+                        <div className="flex items-center gap-0.5 sm:gap-1">
+                          {weekDays.map((d, i) => (
+                            <div
+                              key={d.dateStr || i}
+                              className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8.5px] sm:text-[10px] font-bold transition relative ${
+                                d.done
+                                  ? "bg-emerald-500 text-white shadow-2xs"
+                                  : d.isToday
+                                  ? "bg-white border-1.5 border-emerald-500 text-emerald-700 font-extrabold ring-1 ring-emerald-300"
+                                  : d.isPast
+                                  ? "bg-neutral-200/80 text-neutral-400"
+                                  : "bg-neutral-100 text-neutral-400"
+                              }`}
+                              title={`${d.fullDayName} (${d.dateStr}): ${
+                                d.done
+                                  ? "Active study day completed"
+                                  : d.isToday
+                                  ? "Today — study now to keep your streak!"
+                                  : d.isPast
+                                  ? "Past study day (no activity recorded)"
+                                  : "Upcoming day"
+                              }`}
+                            >
+                              {d.dayLetter}
+                              {d.isToday && !d.done && (
+                                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar & Time Remaining Badge */}
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="font-semibold text-neutral-600 text-[11px] sm:text-xs">Curriculum Progress</span>
+                        <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[9px] sm:text-[10px]">
+                          {primaryProgress.percentage === 0 ? "Ready to begin" : `${primaryProgress.completed} of ${primaryProgress.total} completed`}
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#0056D2] text-[11px] sm:text-xs">{primaryProgress.percentage}% complete</span>
+                    </div>
+                    <div className="w-full h-1.5 sm:h-2 rounded-full bg-neutral-100 overflow-hidden">
+                      <div
+                        className="h-full bg-[#0056D2] rounded-full progress-animated progress-shimmer"
+                        style={{ width: `${Math.max(primaryProgress.percentage, primaryProgress.percentage > 0 ? 8 : 2)}%` }}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Clean, Minimalist Enrolled Courses (Strictly enrolled courses only!) */}
+                <section className="space-y-3.5 sm:space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
+                        My Enrolled Courses ({enrolledCourses.length})
+                      </h2>
+                      <span
+                        className="text-neutral-400 hover:text-neutral-600 transition cursor-help"
+                        title="Track your curriculum progress and earn verified certificates."
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSection("catalog")}
+                      className="text-xs font-semibold text-[#0056D2] hover:underline flex items-center gap-1 group"
+                    >
+                      <span>+ Browse More Tracks</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2.5 sm:gap-4">
+                    {enrolledCourses.map((course) => {
+                      const isPrimaryTrack = primaryCourse?.id === course.id;
+                      const cp = getCourseProgress(course.id, safeCompletedIds);
+                      const courseLessons = course.lessons && course.lessons.length > 0
+                        ? course.lessons
+                        : (INITIAL_LESSONS.filter((l) => l.trackId === course.id) || []);
+                      const currentLesson =
+                        courseLessons.find((l) => !safeCompletedIds.includes(l.id)) ||
+                        courseLessons[0];
+                      const hoursLeft = Math.max(1, (courseLessons.length - cp.completed) * 0.75).toFixed(1);
+
+                      const handleCardClick = () => {
+                        if (currentLesson) {
+                          router.push(`/digihub/lesson/${currentLesson.id}`);
+                        } else {
+                          onOpenCourseModal(course);
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={course.id}
+                          onClick={handleCardClick}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleCardClick();
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Open course: ${course.title}`}
+                          className="flex flex-col justify-between p-2.5 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 hover:border-[#0056D2]/60 shadow-2xs hover:shadow-md card-lift transition-all duration-200 min-h-[195px] sm:min-h-[235px] cursor-pointer active:scale-[0.985] group select-none text-left"
+                        >
+                          {/* Top Meta: Category + Hours left */}
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-1 sm:mb-2">
+                              <span className="text-[9.5px] sm:text-[10px] font-bold text-[#0056D2] uppercase tracking-wider truncate max-w-[65%]">
+                                {course.category ? course.category.replace("-", " ") : "DigiConnect"}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-[#0056D2] border border-blue-100 font-bold text-[8px] sm:text-[9px] shrink-0">
+                                ~{hoursLeft} hrs
+                              </span>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-[12px] sm:text-base font-bold text-neutral-900 group-hover:text-[#0056D2] leading-snug line-clamp-2 min-h-[2.1rem] sm:min-h-[2.5rem] break-words transition-colors">
+                              {course.title}
+                            </h3>
+
+                            {/* Progress */}
+                            <div className="mt-1.5 sm:mt-2.5 space-y-1">
+                              <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                                <span className="text-neutral-500 font-medium">Curriculum</span>
+                                <span className="font-bold text-[#0056D2]">
+                                  {cp.percentage}%
+                                </span>
+                              </div>
+                              <div className="w-full h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                                <div
+                                  className="h-full bg-[#0056D2] rounded-full progress-animated"
+                                  style={{ width: `${Math.max(cp.percentage, 5)}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Next lesson info */}
+                            <div className="text-[9.5px] sm:text-xs text-neutral-500 truncate mt-1.5 sm:mt-2">
+                              <span className="text-neutral-400">Next:</span>{" "}
+                              <span className="font-semibold text-neutral-800">
+                                {currentLesson?.title || "Lesson 1"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Bottom Action Buttons */}
+                          <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 mt-auto pt-2.5 border-t border-neutral-100">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenCourseModal(course);
+                              }}
+                              className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl border border-neutral-200/90 hover:bg-neutral-50 text-neutral-700 font-semibold text-[10px] sm:text-xs transition flex items-center justify-center gap-1 shadow-2xs active:scale-95 text-center truncate"
+                              title="View course syllabus"
+                            >
+                              <BookOpen className="w-3 h-3 text-neutral-400 shrink-0 hidden min-[380px]:inline" />
+                              <span className="truncate">Syllabus</span>
+                            </button>
+
+                            {isPrimaryTrack ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (currentLesson) router.push(`/digihub/lesson/${currentLesson.id}`);
+                                }}
+                                className="w-full py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0056D2] border border-blue-100 font-bold text-[10px] sm:text-xs flex items-center justify-center gap-1 text-center truncate active:scale-95 transition"
+                                title="Currently featured track on your hero banner"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#0056D2] animate-pulse shrink-0" />
+                                <span className="truncate">Active Track</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onEnrollCourse) {
+                                    onEnrollCourse(course.id);
+                                  }
+                                  if (currentLesson) router.push(`/digihub/lesson/${currentLesson.id}`);
+                                }}
+                                className="w-full py-1.5 sm:py-2 px-1 sm:px-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-[10px] sm:text-xs shadow-2xs transition flex items-center justify-center gap-1 active:scale-95 text-center truncate"
+                                title="Feature this track on your dashboard"
+                              >
+                                <span className="truncate">Feature</span>
+                                <ArrowRight className="w-3 h-3 shrink-0" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Dashed "+ Browse More Tracks" card */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveSection("catalog")}
+                      className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-neutral-200 hover:border-[#0056D2] hover:bg-blue-50/30 transition text-neutral-500 hover:text-[#0056D2] min-h-[195px] sm:min-h-[235px] group space-y-2 text-center"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-neutral-100 group-hover:bg-[#0056D2] text-neutral-500 group-hover:text-white flex items-center justify-center transition shadow-2xs">
+                        <Compass className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-xs sm:text-sm block">Browse More Tracks</span>
+                        <span className="text-[10px] sm:text-xs text-neutral-400 group-hover:text-neutral-500">
+                          Explore {Math.max(0, courses.length - enrolledCourses.length)} more free tracks in the catalog
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* If user has any completed courses, show them cleanly */}
+                  {completedCourses.length > 0 && (
+                    <div className="pt-2 space-y-2">
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">
+                        Completed Certificates
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {completedCourses.map((c) => (
+                          <div
+                            key={c.id}
+                            className="p-3.5 sm:p-4 rounded-2xl bg-white border border-neutral-200/90 flex items-center justify-between gap-3 shadow-2xs"
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] font-bold">
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>Completed Track</span>
+                              </div>
+                              <h4 className="text-xs sm:text-sm font-bold text-neutral-900 mt-0.5 truncate">{c.title}</h4>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setActiveSection("diplomas")}
+                              className="px-3 py-1.5 rounded-xl bg-[#0056D2] text-white text-xs font-bold hover:bg-[#00419e] transition shrink-0"
+                            >
+                              Certificate
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
           </div>
         )}
 
@@ -878,7 +1034,7 @@ export function DigihubDashboard({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (onEnrollCourse) onEnrollCourse(course.id);
+                                handleEnrollCourse(course.id);
                               }}
                               className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs text-center active:scale-95"
                             >

@@ -245,6 +245,7 @@ export interface LMSUser {
   currentRole?: string;
   targetSkills?: string[];
   educationLevel?: string;
+  recommendedCourseIds?: string[];
 }
 
 export interface LearnerProgress {
@@ -262,6 +263,7 @@ export interface LearnerProgress {
   currentRole?: string;
   targetSkills?: string[];
   educationLevel?: string;
+  recommendedCourseIds?: string[];
 }
 
 // ─── INITIAL LESSON DATA ───────────────────────────────────────────────
@@ -1143,9 +1145,9 @@ export function signUpWithEmail(
     createdAt: new Date().toISOString(),
     lastActive: new Date().toISOString(),
     completedLessonIds: [],
-    enrolledTracks: [track],
-    enrolledCourseIds: [track],
-    currentTrackId: track,
+    enrolledTracks: [],
+    enrolledCourseIds: [],
+    currentTrackId: "",
     certificateClaimed: false,
   };
 
@@ -1185,11 +1187,11 @@ export function signInWithSocialProvider(
     if (customName && customName !== "Google Learner" && customName !== "Facebook Learner" && customName !== "Apple Learner") {
       existing.name = customName;
     }
-    if (!existing.enrolledCourseIds || existing.enrolledCourseIds.length === 0) {
-      existing.enrolledCourseIds = ["cybersecurity-architecture", "coding", "data-analytics"];
+    if (!existing.enrolledCourseIds) {
+      existing.enrolledCourseIds = [];
     }
-    if (!existing.currentTrackId) {
-      existing.currentTrackId = "cybersecurity-architecture";
+    if (!existing.enrolledTracks) {
+      existing.enrolledTracks = [];
     }
     activeUser = existing;
   } else {
@@ -1203,9 +1205,9 @@ export function signInWithSocialProvider(
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),
       completedLessonIds: [],
-      enrolledTracks: ["cybersecurity-architecture", "coding", "data-analytics"],
-      enrolledCourseIds: ["cybersecurity-architecture", "coding", "data-analytics"],
-      currentTrackId: "cybersecurity-architecture",
+      enrolledTracks: [],
+      enrolledCourseIds: [],
+      currentTrackId: "",
       certificateClaimed: false,
     };
     users.unshift(activeUser);
@@ -1271,18 +1273,8 @@ export function completeLearnerOnboarding(
   active.lastActive = new Date().toISOString();
 
   if (recommendedCourseIds && recommendedCourseIds.length > 0) {
-    if (!active.enrolledCourseIds) active.enrolledCourseIds = [];
-    for (const cid of recommendedCourseIds) {
-      if (!active.enrolledCourseIds.includes(cid)) {
-        active.enrolledCourseIds.push(cid);
-      }
-      if (!active.enrolledTracks.includes(cid)) {
-        active.enrolledTracks.push(cid);
-      }
-    }
-    if (recommendedCourseIds[0]) {
-      active.currentTrackId = recommendedCourseIds[0];
-    }
+    active.recommendedCourseIds = recommendedCourseIds;
+    // Note: Do not auto-enroll courses here; only enroll when user clicks Enroll
   }
 
   const users = getAllLMSUsers();
@@ -1296,9 +1288,10 @@ export function completeLearnerOnboarding(
   progress.currentRole = role;
   progress.targetSkills = skills;
   progress.educationLevel = educationLevel;
+  progress.enrolledCourseIds = active.enrolledCourseIds || [];
+  progress.currentTrackId = active.currentTrackId || "";
   if (recommendedCourseIds && recommendedCourseIds.length > 0) {
-    progress.enrolledCourseIds = active.enrolledCourseIds;
-    progress.currentTrackId = active.currentTrackId;
+    progress.recommendedCourseIds = recommendedCourseIds;
   }
   saveLearnerProgress(progress);
 
@@ -1316,12 +1309,15 @@ export function getLearnerProgress(): LearnerProgress {
   const safeActiveCompleted = activeUser && Array.isArray(activeUser.completedLessonIds)
     ? activeUser.completedLessonIds
     : [];
+  const safeActiveEnrolled = activeUser && Array.isArray(activeUser.enrolledCourseIds)
+    ? activeUser.enrolledCourseIds
+    : [];
 
   if (typeof window === "undefined") {
     return {
       completedLessonIds: safeActiveCompleted,
-      currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
-      enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
+      currentTrackId: activeUser?.currentTrackId || "",
+      enrolledCourseIds: safeActiveEnrolled,
       xp: 0,
       streakDays: 1,
       lastActiveDate: new Date().toISOString().split("T")[0],
@@ -1341,8 +1337,8 @@ export function getLearnerProgress(): LearnerProgress {
       const todayStr = new Date().toISOString().split("T")[0];
       const initial: LearnerProgress = {
         completedLessonIds: safeActiveCompleted,
-        currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
-        enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
+        currentTrackId: activeUser?.currentTrackId || "",
+        enrolledCourseIds: safeActiveEnrolled,
         xp: 0,
         streakDays: 1,
         lastActiveDate: todayStr,
@@ -1369,6 +1365,10 @@ export function getLearnerProgress(): LearnerProgress {
       parsed.completedLessonIds = Array.isArray(activeUser.completedLessonIds)
         ? activeUser.completedLessonIds
         : parsed.completedLessonIds;
+      parsed.enrolledCourseIds = Array.isArray(activeUser.enrolledCourseIds)
+        ? activeUser.enrolledCourseIds
+        : [];
+      parsed.currentTrackId = activeUser.currentTrackId || parsed.currentTrackId || "";
       parsed.studentName = activeUser.name || parsed.studentName || "Learner";
       parsed.certificateClaimed = activeUser.certificateClaimed;
       parsed.onboardingCompleted = activeUser.onboardingCompleted;
@@ -1382,8 +1382,8 @@ export function getLearnerProgress(): LearnerProgress {
     const todayStr = new Date().toISOString().split("T")[0];
     return {
       completedLessonIds: safeActiveCompleted,
-      currentTrackId: activeUser ? activeUser.currentTrackId : "coding",
-      enrolledCourseIds: activeUser?.enrolledCourseIds || ["coding"],
+      currentTrackId: activeUser?.currentTrackId || "",
+      enrolledCourseIds: safeActiveEnrolled,
       xp: 0,
       streakDays: 1,
       lastActiveDate: todayStr,
@@ -1783,17 +1783,16 @@ export function getCourseById(id: string): Course | undefined {
 }
 
 export function getEnrolledCourses(user?: LMSUser | null): Course[] {
-  const targetUser = user || getActiveUser();
-  if (!targetUser) return [COURSES[0]]; // Default first course for guests
-  const enrolledIds = targetUser.enrolledCourseIds || targetUser.enrolledTracks || ["coding"];
-  const list = COURSES.filter((c) => enrolledIds.includes(c.id));
-  return list.length > 0 ? list : [COURSES[0]];
+  const targetUser = user !== undefined ? user : getActiveUser();
+  if (!targetUser) return [];
+  const enrolledIds = targetUser.enrolledCourseIds || [];
+  return COURSES.filter((c) => enrolledIds.includes(c.id));
 }
 
 export function isEnrolledInCourse(courseId: string, user?: LMSUser | null): boolean {
-  const targetUser = user || getActiveUser();
+  const targetUser = user !== undefined ? user : getActiveUser();
   if (!targetUser) return false;
-  const enrolledIds = targetUser.enrolledCourseIds || targetUser.enrolledTracks || [];
+  const enrolledIds = targetUser.enrolledCourseIds || [];
   return enrolledIds.includes(courseId);
 }
 
@@ -1817,6 +1816,9 @@ export function enrollInCourse(courseId: string, studentOrId?: string | LMSUser 
   if (!targetUser.enrolledCourseIds.includes(courseId)) {
     targetUser.enrolledCourseIds.push(courseId);
   }
+  if (!targetUser.enrolledTracks) {
+    targetUser.enrolledTracks = [];
+  }
   if (!targetUser.enrolledTracks.includes(courseId)) {
     targetUser.enrolledTracks.push(courseId);
   }
@@ -1839,6 +1841,8 @@ export function enrollInCourse(courseId: string, studentOrId?: string | LMSUser 
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("digihub_enrollment_updated"));
+    window.dispatchEvent(new Event("digihub_auth_changed"));
+    window.dispatchEvent(new Event("digihub_progress_updated"));
   }
   return true;
 }
