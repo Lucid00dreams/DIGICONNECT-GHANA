@@ -29,6 +29,7 @@ import {
   HelpCircle,
   Brain,
   MessageCircle,
+  MessageSquare,
   ChevronDown,
   SlidersHorizontal,
   Maximize2,
@@ -60,6 +61,8 @@ import { JargonBusterModal } from "@/components/digihub/JargonBusterModal";
 import { ComputerBasicsLab } from "@/components/digihub/ComputerBasicsLab";
 import { MovableAICoach } from "@/components/digihub/MovableAICoach";
 import { triggerConfetti, playSuccessChime } from "@/lib/confetti";
+import { LessonDiscussionForum } from "@/components/digihub/LessonDiscussionForum";
+import { getLessonQuestionCount } from "@/lib/lmsForumStore";
 
 // DigiConnect Brand Colors for Flashcards with Rich Saturated Themes
 export interface FlashcardBrandTheme {
@@ -283,11 +286,23 @@ export default function DIGIHubLessonPage() {
   const [currentUser, setCurrentUser] = useState<LMSUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [activePaneTab, setActivePaneTab] = useState<"content" | "flashcards" | "quiz">("content");
+  const [activePaneTab, setActivePaneTab] = useState<"content" | "flashcards" | "quiz" | "discussion">("content");
   const [mobileActiveView, setMobileActiveView] = useState<"guide" | "lab">("guide");
   const [activeTopicIndex, setActiveTopicIndex] = useState<number>(0);
   const [completionToast, setCompletionToast] = useState(false);
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
+  const [forumQuestionCount, setForumQuestionCount] = useState<number>(() => {
+    if (typeof window !== "undefined" && lessonId) {
+      return getLessonQuestionCount(lessonId);
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    if (lessonId) {
+      setForumQuestionCount(getLessonQuestionCount(lessonId));
+    }
+  }, [lessonId, activePaneTab]);
 
   // Audio narration real-time word highlight state
   const [audioProgress, setAudioProgress] = useState<AudioProgressInfo>({
@@ -842,11 +857,11 @@ export default function DIGIHubLessonPage() {
             mobileActiveView === "guide" ? "flex" : "hidden"
           } lg:flex flex-col space-y-4 lg:pr-3 shrink-0 transition-[width] duration-75`}
         >
-          {/* Sub Navigation (Guide vs Flashcards vs Quiz) */}
-          <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs">
+          {/* Sub Navigation (Guide vs Flashcards vs Quiz vs Discussion) */}
+          <div className="flex items-center gap-1 p-1 bg-white border border-neutral-200 rounded-2xl shadow-2xs overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActivePaneTab("content")}
-              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition whitespace-nowrap ${
                 activePaneTab === "content"
                   ? "bg-neutral-100 text-neutral-900 font-bold"
                   : "text-neutral-500 hover:text-neutral-900"
@@ -857,7 +872,7 @@ export default function DIGIHubLessonPage() {
 
             <button
               onClick={() => setActivePaneTab("flashcards")}
-              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap ${
                 activePaneTab === "flashcards"
                   ? "bg-neutral-100 text-neutral-900 font-bold"
                   : "text-neutral-500 hover:text-neutral-900"
@@ -869,13 +884,28 @@ export default function DIGIHubLessonPage() {
 
             <button
               onClick={() => setActivePaneTab("quiz")}
-              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap ${
                 activePaneTab === "quiz"
                   ? "bg-neutral-100 text-neutral-900 font-bold"
                   : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               <span>Quiz ({lesson.quiz?.length || 0})</span>
+            </button>
+
+            <button
+              onClick={() => setActivePaneTab("discussion")}
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activePaneTab === "discussion"
+                  ? "bg-blue-50 text-[#0056D2] font-bold border border-blue-200/60"
+                  : "text-neutral-500 hover:text-neutral-900"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-[#0056D2]" />
+              <span>Discussion Q&A</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-100 text-[#0056D2]">
+                {forumQuestionCount}
+              </span>
             </button>
           </div>
 
@@ -1502,6 +1532,15 @@ export default function DIGIHubLessonPage() {
                 }}
               />
             </div>
+          )}
+
+          {/* TAB 4: LESSON DISCUSSION FORUM / Q&A COMMUNITY */}
+          {activePaneTab === "discussion" && (
+            <LessonDiscussionForum
+              lessonId={lesson.id}
+              lessonTitle={lesson.title}
+              currentUser={currentUser}
+            />
           )}
         </div>
 
