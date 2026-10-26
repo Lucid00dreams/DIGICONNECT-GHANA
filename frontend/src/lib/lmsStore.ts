@@ -1078,13 +1078,21 @@ export function saveLMSUsers(users: LMSUser[]): void {
 export function getActiveUser(): LMSUser | null {
   if (typeof window === "undefined") return null;
   try {
+    // Purge legacy demo keys from earlier prototypes
+    localStorage.removeItem("dcg_digihub_active_user");
+    localStorage.removeItem("dcg_digihub_active_user_v2");
+
     const raw = localStorage.getItem(LMS_ACTIVE_USER_KEY);
     if (!raw) {
-      // Default to demo student James so dashboard is immediately interactive
-      localStorage.setItem(LMS_ACTIVE_USER_KEY, JSON.stringify(DEFAULT_DEMO_STUDENT));
-      return DEFAULT_DEMO_STUDENT;
+      return null;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // If user has the legacy auto-assigned demo account in cache, purge it so they see the public landing page
+    if (parsed && (parsed.id === "stu-demo-01" || parsed.email === "james.mensah@student.digiconnectghana.org")) {
+      localStorage.removeItem(LMS_ACTIVE_USER_KEY);
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }

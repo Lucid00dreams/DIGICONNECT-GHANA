@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X, AlertCircle, ArrowRight } from "lucide-react";
 import {
   signInWithEmail,
@@ -40,6 +40,42 @@ export function CourseraAuthModal({
     envKey: string;
   } | null>(null);
 
+  // Complete reset of form state
+  const resetFormState = useCallback(() => {
+    setEmail(initialEmail || "");
+    setName("");
+    setIsNewUserStep(false);
+    setErrorMessage("");
+    setIsLoading(false);
+    setSocialLoading(null);
+    setConfigNotice(null);
+  }, [initialEmail]);
+
+  // Handle closing modal and wiping all progress to restart fresh next time
+  const handleClose = useCallback(() => {
+    resetFormState();
+    onClose();
+  }, [resetFormState, onClose]);
+
+  // When modal is opened or closed, always reset to fresh state
+  useEffect(() => {
+    if (isOpen) {
+      resetFormState();
+    }
+  }, [isOpen, resetFormState]);
+
+  // Allow closing via Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleClose]);
+
   if (!isOpen) return null;
 
   const handleContinueWithEmail = (e: React.FormEvent) => {
@@ -59,7 +95,7 @@ export function CourseraAuthModal({
       const signInRes = signInWithEmail(trimmedEmail);
       if (signInRes.success && signInRes.user) {
         onAuthenticated(signInRes.user, false);
-        onClose();
+        handleClose();
         return;
       }
 
@@ -77,7 +113,7 @@ export function CourseraAuthModal({
       );
       if (signUpRes.success && signUpRes.user) {
         onAuthenticated(signUpRes.user, true);
-        onClose();
+        handleClose();
       } else {
         setErrorMessage(signUpRes.error || "Unable to create account. Please try again.");
       }
@@ -104,7 +140,7 @@ export function CourseraAuthModal({
       );
       const isNew = !user.onboardingCompleted;
       onAuthenticated(user, isNew);
-      onClose();
+      handleClose();
     } catch (err: any) {
       if (err instanceof SocialAuthConfigError) {
         setConfigNotice({
@@ -129,20 +165,30 @@ export function CourseraAuthModal({
     );
     const isNew = !user.onboardingCompleted;
     onAuthenticated(user, isNew);
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 select-none"
+      onClick={(e) => {
+        // If user clicks on empty backdrop outside the card, close and reset completely
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
       <div
-        className="relative w-full max-w-[390px] bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 my-auto border border-neutral-100 animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-[390px] bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 my-auto border border-neutral-100 animate-in zoom-in-95 duration-200 select-text"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
       >
         {/* Close Button */}
         <button
-          onClick={onClose}
+          type="button"
+          onClick={handleClose}
           className="absolute top-4 right-4 p-1.5 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
           aria-label="Close modal"
         >
@@ -155,12 +201,18 @@ export function CourseraAuthModal({
             id="auth-modal-title"
             className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight"
           >
-            {isNewUserStep ? "Create your account" : "Log in or create account"}
+            {isNewUserStep
+              ? "Complete your registration"
+              : defaultMode === "login"
+              ? "Sign In to DIGIHub"
+              : "Join DIGIHub Free"}
           </h2>
           <p className="text-xs text-neutral-500 mt-1 leading-snug">
             {isNewUserStep
-              ? "Enter your full name to appear on certificates."
-              : "Access DigiConnect courses, labs, and mentorship."}
+              ? "Enter your full name to appear on verified certificates."
+              : defaultMode === "login"
+              ? "Sign in with Google or your email to resume your learning."
+              : "Tuition-free tech tracks, browser labs, and certificates."}
           </p>
         </div>
 
@@ -256,12 +308,25 @@ export function CourseraAuthModal({
         <form onSubmit={handleContinueWithEmail} className="space-y-3">
           {isNewUserStep && (
             <div>
-              <label
-                htmlFor="user-fullname"
-                className="block text-xs font-semibold text-neutral-700 mb-1"
-              >
-                Full Name <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label
+                  htmlFor="user-fullname"
+                  className="block text-xs font-semibold text-neutral-700"
+                >
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsNewUserStep(false);
+                    setName("");
+                    setErrorMessage("");
+                  }}
+                  className="text-[11px] text-[#0056D2] hover:underline font-medium"
+                >
+                  Change email
+                </button>
+              </div>
               <input
                 id="user-fullname"
                 type="text"
