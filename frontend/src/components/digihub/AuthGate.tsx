@@ -19,7 +19,6 @@ import {
 } from "@/lib/lmsStore";
 import {
   executeSocialLogin,
-  SocialAuthConfigError,
   SocialProvider,
 } from "@/lib/socialAuth";
 
@@ -43,15 +42,10 @@ export function AuthGate({
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
-  const [configNotice, setConfigNotice] = useState<{
-    provider: SocialProvider;
-    envKey: string;
-  } | null>(null);
 
   const handleSocialAuth = async (provider: SocialProvider) => {
     setSocialLoading(provider);
     setErrorMessage("");
-    setConfigNotice(null);
 
     try {
       const profile = await executeSocialLogin(provider);
@@ -64,28 +58,21 @@ export function AuthGate({
       );
       onAuthenticated(user);
     } catch (err: any) {
-      if (err instanceof SocialAuthConfigError) {
-        setConfigNotice({
-          provider: err.provider,
-          envKey: err.envKey,
-        });
+      const msg = err?.message || "";
+      if (
+        msg.toLowerCase().includes("closed") ||
+        msg.toLowerCase().includes("cancel") ||
+        msg.toLowerCase().includes("user_cancel")
+      ) {
+        setErrorMessage("");
       } else {
         setErrorMessage(
-          err?.message || "Google login could not be completed. Please try again."
+          msg || "Google Sign-In could not be completed. Please try again or use your password."
         );
       }
     } finally {
       setSocialLoading(null);
     }
-  };
-
-  const handleDemoSocialLogin = (provider: SocialProvider) => {
-    const user = signInWithSocialProvider(
-      provider,
-      fullName || undefined,
-      email || undefined
-    );
-    onAuthenticated(user);
   };
 
   const handleEmailAuth = (e: React.FormEvent) => {
@@ -134,38 +121,6 @@ export function AuthGate({
           <p className="text-xs text-neutral-500 leading-snug max-w-xs mx-auto">{subtitle}</p>
         </div>
 
-        {/* Missing Config Notification */}
-        {configNotice && (
-          <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5 animate-in fade-in duration-150">
-            <div className="flex items-start gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold text-[11px]">
-                  Google Login Setup Required
-                </p>
-                <p className="text-[10px] text-amber-700 leading-tight">
-                  Set <code className="bg-amber-100 px-1 rounded font-mono text-[9px]">{configNotice.envKey}</code> in <code className="font-mono text-[9px]">.env.local</code>.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 pt-0.5">
-              <button
-                type="button"
-                onClick={() => handleDemoSocialLogin(configNotice.provider)}
-                className="px-2.5 py-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-medium text-[10px] transition"
-              >
-                Sign in with Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfigNotice(null)}
-                className="px-2 py-1 rounded-md text-amber-700 hover:bg-amber-100 text-[10px] transition"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Google SSO Button */}
         <button

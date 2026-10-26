@@ -35,11 +35,15 @@ export class SocialAuthConfigError extends Error {
   }
 }
 
+export const LIVE_GOOGLE_CLIENT_ID =
+  "717316057080-31gpcvorqmlrsquqh4qeanpf4g9vrv6c.apps.googleusercontent.com";
+
 /**
  * Check which social providers have valid client credentials in environment variables
  */
 export function getSocialConfig() {
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || "";
+  const googleClientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || LIVE_GOOGLE_CLIENT_ID;
   const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID?.trim() || "";
   const appleClientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID?.trim() || "";
 
@@ -48,7 +52,7 @@ export function getSocialConfig() {
 
   return {
     google: {
-      configured: isConfigured(googleClientId, "your_google"),
+      configured: true,
       clientId: googleClientId,
       envKey: "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
       name: "Google",
@@ -79,7 +83,6 @@ function loadExternalScript(src: string, scriptId: string): Promise<void> {
     if (existing) {
       if ((existing as any).__loaded) {
         resolve();
-        return;
       }
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", () =>
@@ -110,20 +113,12 @@ function loadExternalScript(src: string, scriptId: string): Promise<void> {
 export async function signInWithGoogleOAuth(): Promise<SocialAuthProfile> {
   const config = getSocialConfig().google;
 
-  if (!config.configured || !config.clientId) {
-    throw new SocialAuthConfigError(
-      "google",
-      config.envKey,
-      "Google Client ID is not configured in environment variables (NEXT_PUBLIC_GOOGLE_CLIENT_ID)."
-    );
-  }
-
   // Load Google Identity Services SDK
   await loadExternalScript("https://accounts.google.com/gsi/client", "google-gsi-client");
 
   const google = (window as any).google;
   if (!google?.accounts?.oauth2) {
-    throw new Error("Google Identity Services failed to initialize.");
+    throw new Error("Google Identity Services could not be loaded in your browser. Please try again or use email.");
   }
 
   return new Promise<SocialAuthProfile>((resolve, reject) => {

@@ -10,7 +10,6 @@ import {
 } from "@/lib/lmsStore";
 import {
   executeSocialLogin,
-  SocialAuthConfigError,
   SocialProvider,
 } from "@/lib/socialAuth";
 
@@ -35,10 +34,6 @@ export function CourseraAuthModal({
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
-  const [configNotice, setConfigNotice] = useState<{
-    provider: SocialProvider;
-    envKey: string;
-  } | null>(null);
 
   // Complete reset of form state
   const resetFormState = useCallback(() => {
@@ -48,7 +43,6 @@ export function CourseraAuthModal({
     setErrorMessage("");
     setIsLoading(false);
     setSocialLoading(null);
-    setConfigNotice(null);
   }, [initialEmail]);
 
   // Handle closing modal and wiping all progress to restart fresh next time
@@ -81,7 +75,6 @@ export function CourseraAuthModal({
   const handleContinueWithEmail = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-    setConfigNotice(null);
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !trimmedEmail.includes("@")) {
@@ -127,7 +120,6 @@ export function CourseraAuthModal({
   const handleSocialAuth = async (provider: SocialProvider) => {
     setSocialLoading(provider);
     setErrorMessage("");
-    setConfigNotice(null);
 
     try {
       const profile = await executeSocialLogin(provider);
@@ -142,30 +134,22 @@ export function CourseraAuthModal({
       onAuthenticated(user, isNew);
       handleClose();
     } catch (err: any) {
-      if (err instanceof SocialAuthConfigError) {
-        setConfigNotice({
-          provider: err.provider,
-          envKey: err.envKey,
-        });
+      const msg = err?.message || "";
+      if (
+        msg.toLowerCase().includes("closed") ||
+        msg.toLowerCase().includes("cancel") ||
+        msg.toLowerCase().includes("user_cancel")
+      ) {
+        // User voluntarily dismissed popup
+        setErrorMessage("");
       } else {
         setErrorMessage(
-          err?.message || "Google login could not be completed. Please try again."
+          msg || "Google Sign-In could not be completed. Please try again or use email."
         );
       }
     } finally {
       setSocialLoading(null);
     }
-  };
-
-  const handleDemoSocialLogin = (provider: SocialProvider) => {
-    const user = signInWithSocialProvider(
-      provider,
-      name.trim() || undefined,
-      email.trim() || undefined
-    );
-    const isNew = !user.onboardingCompleted;
-    onAuthenticated(user, isNew);
-    handleClose();
   };
 
   return (
@@ -223,38 +207,6 @@ export function CourseraAuthModal({
           </div>
         )}
 
-        {/* Missing Config Notification */}
-        {configNotice && (
-          <div className="mb-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5 animate-in fade-in duration-150">
-            <div className="flex items-start gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold text-[11px]">
-                  Google Login Setup Required
-                </p>
-                <p className="text-[10px] text-amber-700 leading-tight">
-                  Set <code className="bg-amber-100 px-1 rounded font-mono text-[9px]">{configNotice.envKey}</code> in <code className="font-mono text-[9px]">.env.local</code>.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 pt-0.5">
-              <button
-                type="button"
-                onClick={() => handleDemoSocialLogin(configNotice.provider)}
-                className="px-2.5 py-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-medium text-[10px] transition"
-              >
-                Sign in with Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfigNotice(null)}
-                className="px-2 py-1 rounded-md text-amber-700 hover:bg-amber-100 text-[10px] transition"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Google SSO Button (First for quick seamless access) */}
         {!isNewUserStep && (
