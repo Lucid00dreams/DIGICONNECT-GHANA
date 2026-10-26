@@ -56,6 +56,7 @@ import {
   saveLearnerProgress,
   getActiveUser,
   signOutLMS,
+  deleteUserAccount,
   Mentor,
   MentorshipSession,
   LearnerProgress,
@@ -371,6 +372,13 @@ export default function DIGIHubPage() {
         onEnrollCourse={handleEnroll}
         onRetakeOnboarding={() => setShowOnboarding(true)}
         onUpdateStudentName={handleUpdateStudentName}
+        onDeleteAccount={() => {
+          if (currentUser) {
+            deleteUserAccount(currentUser.id);
+            setCurrentUser(null);
+            triggerToast("Your account has been deleted permanently.");
+          }
+        }}
       />
 
       {/* Course Detail / Syllabus Modal */}

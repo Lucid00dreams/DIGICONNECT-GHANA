@@ -32,6 +32,7 @@ import {
   Shield,
   Code2,
   CheckCircle2,
+  SlidersHorizontal,
 } from "lucide-react";
 import { PCTab } from "./DigihubPCNavbar";
 
@@ -305,6 +306,24 @@ export function DigihubMenuModal({
                 <div>
                   <h5 className="text-xs font-bold text-neutral-900 leading-none">Quick Hub Drawer</h5>
                   <p className="text-[10px] text-neutral-500 mt-1">Progress & quick actions</p>
+                </div>
+              </button>
+
+              {/* Account Settings & Preferences */}
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectSection("settings");
+                  onClose();
+                }}
+                className="text-left p-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 hover:bg-neutral-100 transition group flex items-center gap-3"
+              >
+                <div className="w-8 h-8 rounded-xl bg-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
+                  <SlidersHorizontal className="w-4 h-4 stroke-[2]" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-neutral-900 leading-none">Account Settings</h5>
+                  <p className="text-[10px] text-neutral-500 mt-1">Profile, legal name &amp; privacy</p>
                 </div>
               </button>
 

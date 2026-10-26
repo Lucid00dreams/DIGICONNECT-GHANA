@@ -20,7 +20,7 @@ import Image from "next/image";
 import { LMSUser, CertificateRecord, MentorshipSession, LearnerProgress } from "@/lib/lmsStore";
 import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
-export type MobileTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
+export type MobileTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas" | "settings";
 
 interface DigihubMobileNavbarProps {
   activeSection: MobileTab;

@@ -43,7 +43,7 @@ import {
 import { DigihubMenuModal } from "./DigihubMenuModal";
 import { DigihubUserMenuDropdown } from "./DigihubUserMenuDropdown";
 
-export type PCTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas";
+export type PCTab = "learning" | "catalog" | "labs" | "mentorship" | "diplomas" | "settings";
 
 interface DigihubPCNavbarProps {
   activeSection: PCTab;

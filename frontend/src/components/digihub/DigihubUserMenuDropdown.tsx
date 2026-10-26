@@ -153,14 +153,14 @@ export function DigihubUserMenuDropdown({
           <button
             type="button"
             onClick={() => {
-              onOpenQuickHub();
+              onSelectSection("settings");
               onClose();
             }}
             className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-neutral-100/90 text-neutral-700 hover:text-neutral-900 text-[11px] font-medium flex items-center gap-2 transition active:scale-98"
             role="menuitem"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-            <span className="truncate">Settings &amp; Quick Hub</span>
+            <span className="truncate">Account Settings</span>
           </button>
 
           <button

@@ -45,6 +45,9 @@ import {
   Menu,
   Flame,
   Lock,
+  Trash2,
+  AlertTriangle,
+  ShieldAlert,
 } from "lucide-react";
 import { JargonBusterModal } from "./JargonBusterModal";
 import { ComputerBasicsLab } from "./ComputerBasicsLab";
@@ -62,6 +65,7 @@ import {
   INITIAL_LESSONS,
   getCurrentWeekDays,
   WeekDayStatus,
+  deleteUserAccount,
 } from "@/lib/lmsStore";
 
 interface DigihubDashboardProps {
@@ -78,6 +82,7 @@ interface DigihubDashboardProps {
   onEnrollCourse?: (courseId: string) => void;
   onRetakeOnboarding: () => void;
   onUpdateStudentName?: (name: string) => void;
+  onDeleteAccount?: () => void;
 }
 
 const COURSE_IMAGES: Record<string, string> = {
@@ -99,7 +104,7 @@ function getCourseImage(courseId: string): string {
   return COURSE_IMAGES[courseId] || "/images/courses/web-dev.jpg";
 }
 
-type DashboardSection = "learning" | "catalog" | "labs" | "diplomas" | "mentorship";
+type DashboardSection = "learning" | "catalog" | "labs" | "diplomas" | "mentorship" | "settings";
 
 export function DigihubDashboard({
   currentUser,
@@ -115,6 +120,7 @@ export function DigihubDashboard({
   onEnrollCourse,
   onRetakeOnboarding,
   onUpdateStudentName,
+  onDeleteAccount,
 }: DigihubDashboardProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>("learning");
@@ -130,6 +136,11 @@ export function DigihubDashboard({
   const [isMobileSectionMenuOpen, setIsMobileSectionMenuOpen] = useState(false);
   const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+
+  // Account deletion modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Dynamic 7-day study week state that automatically adapts when a calendar day changes
   const [weekDays, setWeekDays] = useState<WeekDayStatus[]>(() => getCurrentWeekDays(progress));
@@ -277,6 +288,22 @@ export function DigihubDashboard({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch {}
+  };
+
+  const handleDeleteAccount = () => {
+    if (deleteConfirmText.trim().toUpperCase() !== "DELETE") return;
+    setIsDeletingAccount(true);
+    try {
+      if (onDeleteAccount) {
+        onDeleteAccount();
+      } else {
+        deleteUserAccount(currentUser.id);
+        if (onSignOut) onSignOut();
+      }
+    } finally {
+      setIsDeletingAccount(false);
+      setIsDeleteModalOpen(false);
+    }
   };
 
   return (
@@ -1358,6 +1385,175 @@ export function DigihubDashboard({
             )}
           </div>
         )}
+
+        {/* ─── SECTION 6: SETTINGS & ACCOUNT DANGER ZONE ─────────── */}
+        {activeSection === "settings" && (
+          <div className="space-y-6 sm:space-y-8 tab-content-enter max-w-4xl mx-auto" key="settings">
+            {/* Page Header */}
+            <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-neutral-900 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <SlidersHorizontal className="w-5 h-5" />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight">
+                    Account Settings &amp; Security
+                  </h1>
+                  <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+                    Manage your personal student identity, active curriculum track, and data privacy.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveSection("learning")}
+                className="self-start sm:self-auto px-3.5 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition flex items-center gap-1.5 active:scale-95"
+              >
+                <span>← Back to Learning</span>
+              </button>
+            </div>
+
+            {/* Profile Identity Card */}
+            <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-[#0056D2]" />
+                  <h2 className="font-bold text-sm sm:text-base text-neutral-900">Scholar Profile &amp; Legal Identity</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingName(true)}
+                  className="px-3 py-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-[11px] font-semibold text-[#0056D2] flex items-center gap-1 transition"
+                >
+                  <Edit2 className="w-3 h-3" />
+                  <span>Edit Legal Name</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-100 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-400">Student Legal Name</span>
+                  <div className="font-bold text-neutral-900 text-sm">{progress.studentName || currentUser.name}</div>
+                  <span className="text-[10px] text-neutral-500">Affixed to all officially verified graduation certificates</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-100 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-400">Registered Email Address</span>
+                  <div className="font-bold text-neutral-900 text-sm truncate">{currentUser.email}</div>
+                  <div className="flex items-center gap-1.5 pt-0.5">
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100/70 text-[#0056D2] uppercase">
+                      {currentUser.provider || "verified"}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <Check className="w-2.5 h-2.5" /> Active Session
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-100 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-400">Student Identification ID</span>
+                  <div className="font-mono font-bold text-[#0056D2] text-xs">
+                    DCG-STU-{(currentUser.id || "00000000").slice(0, 12).toUpperCase()}
+                  </div>
+                  <span className="text-[10px] text-neutral-500">Verifiable in Ghana National Technical Registrar</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-100 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-neutral-400">Target Role &amp; Education</span>
+                  <div className="font-bold text-neutral-900 text-xs">
+                    {progress.currentRole || "Technology Scholar"} • {progress.educationLevel || "Tertiary Level"}
+                  </div>
+                  <span className="text-[10px] text-neutral-500">Configured via initial intake survey</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Academic Controls & Data Records */}
+            <section className="p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 border-b border-neutral-100 pb-3">
+                <BookOpen className="w-4 h-4 text-[#0056D2]" />
+                <h2 className="font-bold text-sm sm:text-base text-neutral-900">Academic Controls &amp; Data Records</h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={onRetakeOnboarding}
+                  className="p-3.5 rounded-xl border border-neutral-200 hover:border-[#0056D2] hover:bg-blue-50/20 text-left transition space-y-1 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-neutral-900 group-hover:text-[#0056D2]">Retake Onboarding Survey</span>
+                    <RotateCcw className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#0056D2] transition" />
+                  </div>
+                  <p className="text-[11px] text-neutral-500">
+                    Re-align your career goals, target skills, and AI course recommendations.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportData}
+                  className="p-3.5 rounded-xl border border-neutral-200 hover:border-[#0056D2] hover:bg-blue-50/20 text-left transition space-y-1 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-neutral-900 group-hover:text-[#0056D2]">Download Student Transcript</span>
+                    <FileCheck className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#0056D2] transition" />
+                  </div>
+                  <p className="text-[11px] text-neutral-500">
+                    Export verified JSON record of completed modules, certificates, and scores.
+                  </p>
+                </button>
+              </div>
+            </section>
+
+            {/* Danger Zone: Delete Account */}
+            <section className="p-5 sm:p-7 rounded-2xl bg-red-50/40 border border-red-200 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-red-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <h2 className="font-bold text-sm sm:text-base text-red-950">Danger Zone</h2>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
+                  Irreversible
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <h3 className="font-bold text-xs sm:text-sm text-neutral-900">Delete Account &amp; Personal Data</h3>
+                  <p className="text-xs text-neutral-600 leading-relaxed">
+                    Permanently delete your scholar account, enrolled curriculum tracks, practical lab codes, lesson quiz grades, and verified graduation certificates. Once your account is deleted, your data cannot be recovered.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white border border-red-200/80 text-[11px] text-neutral-700 space-y-1.5">
+                  <div className="font-semibold text-neutral-900">Items that will be permanently destroyed:</div>
+                  <ul className="list-disc pl-4 space-y-0.5 text-neutral-600">
+                    <li>Account profile: <strong>{currentUser.name}</strong> ({currentUser.email})</li>
+                    <li><strong>{enrolledCourses.length}</strong> active enrolled course tracks</li>
+                    <li><strong>{safeCompletedIds.length}</strong> completed laboratory code submissions</li>
+                    <li><strong>{certificates.length}</strong> verified completion certificates &amp; cryptographic serials</li>
+                  </ul>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteConfirmText("");
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-2 active:scale-95"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Account</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </main>
 
       {/* 4. POPUP QUICK DASHBOARD DRAWER (Triggered by the Three Dots "...") */}
@@ -1539,18 +1735,43 @@ export function DigihubDashboard({
               </Link>
             </div>
 
-            {/* Sign Out Action */}
-            <div className="pt-2 border-t border-neutral-100">
+            {/* Settings & Sign Out Actions */}
+            <div className="pt-2 border-t border-neutral-100 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsQuickDashboardOpen(false);
+                  setActiveSection("settings");
+                }}
+                className="w-full py-2.5 px-4 rounded-xl border border-neutral-200 bg-neutral-50/70 hover:bg-neutral-100/70 text-neutral-800 font-semibold text-xs transition flex items-center justify-center gap-2 active:scale-98"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-600" />
+                <span>Go to Account Settings</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
                   setIsQuickDashboardOpen(false);
                   onSignOut();
                 }}
-                className="w-full py-2.5 px-4 rounded-xl border border-red-200 bg-red-50/70 hover:bg-red-100/70 text-red-600 font-bold text-xs transition flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-bold text-xs transition flex items-center justify-center gap-2 active:scale-98"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 text-neutral-500" />
                 <span>Sign Out of DIGIHub</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsQuickDashboardOpen(false);
+                  setDeleteConfirmText("");
+                  setIsDeleteModalOpen(true);
+                }}
+                className="w-full py-2 px-3 text-red-600 hover:text-red-700 hover:underline text-[11px] font-semibold flex items-center justify-center gap-1.5 transition active:scale-98"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Account</span>
               </button>
             </div>
           </div>
@@ -1638,7 +1859,84 @@ export function DigihubDashboard({
           </div>
         </div>
       )}
-      {/* 8. MOVABLE AI STUDY COACH (DRAGGABLE & VIEWPORT-CLAMPED) */}
+      {/* 8. PERMANENT ACCOUNT DELETION CONFIRMATION MODAL */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-red-200 p-6 space-y-5 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider block">
+                  Irreversible Action
+                </span>
+                <h3 className="font-extrabold text-lg text-neutral-900 mt-0.5">
+                  Permanently Delete Account?
+                </h3>
+                <p className="text-xs text-neutral-500 mt-1">
+                  This will completely wipe your student profile, {enrolledCourses.length} course enrollments, {safeCompletedIds.length} completed labs, and all earned certificates.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-500 flex items-center justify-center transition shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Warning Box */}
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 space-y-1 leading-relaxed">
+              <span className="font-bold block">Warning:</span>
+              Once deleted, you cannot log back into this account or restore your certificates. To verify your intent, please confirm below.
+            </div>
+
+            {/* Type "DELETE" Confirmation */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-neutral-700">
+                To confirm deletion, type <span className="font-mono font-bold text-red-600">DELETE</span> in the box below:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                autoFocus
+                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs font-mono tracking-widest uppercase focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeletingAccount}
+                className="px-4 py-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText.trim().toUpperCase() !== "DELETE" || isDeletingAccount}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md transition flex items-center gap-2 active:scale-95"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isDeletingAccount ? "Deleting Account..." : "Permanently Delete Account"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. MOVABLE AI STUDY COACH (DRAGGABLE & VIEWPORT-CLAMPED) */}
       <MovableAICoach
         currentLessonTitle={nextLesson?.title || primaryCourse?.title}
         currentModuleTitle={primaryCourse?.title}

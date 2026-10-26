@@ -5395,6 +5395,30 @@ export default function ConnectHubPage() {
                 Save organization profile
               </button>
             </form>
+
+            {/* Danger Zone: Reset Local Session & Data */}
+            <div className="pt-6 border-t border-red-100 space-y-3">
+              <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
+                <Trash2 className="w-4 h-4" />
+                <span>Danger Zone: Reset Local Data &amp; Session</span>
+              </div>
+              <p className="text-xs text-neutral-500 leading-relaxed">
+                Clear locally cached admin session data and reset storage in this browser.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to reset all local data and sign out?")) {
+                    localStorage.clear();
+                    window.location.reload();
+                  }
+                }}
+                className="px-4 py-2 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 font-bold text-xs transition flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Reset Local Data &amp; Sign Out</span>
+              </button>
+            </div>
           </div>
         )}
       </main>

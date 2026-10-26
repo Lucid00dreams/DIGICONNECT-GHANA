@@ -1531,6 +1531,59 @@ export function adminDeleteUser(userId: string): void {
   }
 }
 
+export function deleteUserAccount(userId?: string): boolean {
+  if (typeof window === "undefined") return false;
+  const active = getActiveUser();
+  const targetId = userId || active?.id;
+  if (!targetId) return false;
+
+  // 1. Remove from all registered LMS users list
+  const users = getAllLMSUsers().filter((u) => u.id !== targetId);
+  saveLMSUsers(users);
+
+  // 2. Remove user-specific certificates
+  try {
+    const certsRaw = localStorage.getItem("dcg_digihub_certificates_v3");
+    if (certsRaw) {
+      const allCerts = JSON.parse(certsRaw);
+      if (Array.isArray(allCerts)) {
+        const filtered = allCerts.filter((c: any) => c.studentId !== targetId);
+        localStorage.setItem("dcg_digihub_certificates_v3", JSON.stringify(filtered));
+      }
+    }
+  } catch {}
+
+  // 3. Remove user-specific mentorship sessions
+  try {
+    const sessRaw = localStorage.getItem("dcg_digihub_sessions_v3");
+    if (sessRaw) {
+      const allSess = JSON.parse(sessRaw);
+      if (Array.isArray(allSess)) {
+        const filtered = allSess.filter((s: any) => s.studentId !== targetId);
+        localStorage.setItem("dcg_digihub_sessions_v3", JSON.stringify(filtered));
+      }
+    }
+  } catch {}
+
+  // 4. If current active user is deleted, clear session & progress
+  if (active && active.id === targetId) {
+    localStorage.removeItem(LMS_ACTIVE_USER_KEY);
+    localStorage.removeItem(LMS_PROGRESS_KEY);
+    localStorage.removeItem("dcg_digihub_active_user");
+    localStorage.removeItem("dcg_digihub_active_user_v2");
+    localStorage.removeItem("dcg_digihub_progress");
+  }
+
+  // 5. Dispatch event notifications
+  window.dispatchEvent(new Event("digihub_auth_changed"));
+  window.dispatchEvent(new Event("digihub_users_updated"));
+  window.dispatchEvent(new Event("digihub_progress_updated"));
+  window.dispatchEvent(new Event("digihub_certificates_updated"));
+  window.dispatchEvent(new Event("digihub_sessions_updated"));
+
+  return true;
+}
+
 export function getBookedSessions(): MentorshipSession[] {
   if (typeof window === "undefined") return INITIAL_SESSIONS;
   try {
